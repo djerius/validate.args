@@ -1,0 +1,32 @@
+2010-09-10  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+
+	Tag 1.0.0
+
+2010-09-10 17:09 -0400  djerius  <djerius@cfa.harvard.edu>  (fbd5b6ef5686 [tip])
+
+	* COPYING, INSTALL, Makefile.am, NEWS, README, configure.ac,
+	docs/Makefile.am, docs/validate.args.pod, mstbuild.cfg,
+	snippets/am_vars.mk, snippets/create_am_macros.mk,
+	snippets/inst_vars.mk, snippets/lib_lua.ac, snippets/lua_compile.mk,
+	snippets/lua_lib.mk, snippets/pod_docs.ac, snippets/pod_html.mk,
+	snippets/pod_man_init.mk, snippets/pod_manl.mk,
+	snippets/pod_ps_init.mk, snippets/pod_psl.mk, snippets/prog_pod.mk,
+	snippets/prog_pod_base.mk, snippets/substitute_config_variables.mk,
+	tests/Makefile.am, tests/constraints.lua, tests/driver.lua,
+	tests/named.lua, tests/nested.lua, tests/positional.lua,
+	tests/test1.in, tests/utils.lua, tests/vtypes.lua,
+	validate/Makefile.am, validate/args.lua: new file.
+	* COPYING, INSTALL, Makefile.am, NEWS, README, configure.ac,
+	docs/Makefile.am, docs/validate.args.pod, mstbuild.cfg,
+	snippets/am_vars.mk, snippets/create_am_macros.mk,
+	snippets/inst_vars.mk, snippets/lib_lua.ac, snippets/lua_compile.mk,
+	snippets/lua_lib.mk, snippets/pod_docs.ac, snippets/pod_html.mk,
+	snippets/pod_man_init.mk, snippets/pod_manl.mk,
+	snippets/pod_ps_init.mk, snippets/pod_psl.mk, snippets/prog_pod.mk,
+	snippets/prog_pod_base.mk, snippets/substitute_config_variables.mk,
+	tests/Makefile.am, tests/constraints.lua, tests/driver.lua,
+	tests/named.lua, tests/nested.lua, tests/positional.lua,
+	tests/test1.in, tests/utils.lua, tests/vtypes.lua,
+	validate/Makefile.am, validate/args.lua:
+	initial import
+
