@@ -1,0 +1,247 @@
+=head1 NAME
+
+validate.args - validate arguments
+
+=head1 SYNOPSIS
+
+  va = require('validate.args')
+  validate = va.validate
+  validate_opts = va.validate_opts
+
+  local a, b = validate( { a = { optional = 0 },
+                           b = { optional = 1, type = 'table' },
+                         },
+                          ...
+                        )
+  local a, b = validate_opts( options,
+                             { a = { optional = 0 },
+                               b = { optional = 1, type = 'table' },
+                             },
+                            ...
+                            )
+
+=head1 DESCRIPTION
+
+B<validate.args> validates that a function's arguments meet certain
+specifications.  Both scalar and table arguments are validated, and
+table arguments may be nested.
+
+Specification details are specified in tables, one table per argument.
+
+If a function is passed only named arguments, as in
+
+  foo{ a = 3, b = 'n' }
+
+then the specifications should be bundled into a table with the argument
+names as keys:
+
+
+  { a = { specs for a }, b = { specs for b } }
+
+If a function is passed positional arguments, as in
+
+  foo( 3, 'n' )
+
+then the specifications should be bundled as a list:
+
+  { { specs for arg 1 }, { specs for arg 2 } }
+
+
+One can in a sense I<mix> the two forms by using both tables and scalars,
+
+  foo( 3, 'n', { opta = 1, optb = 2 } )
+
+where the last table is really just the third positional argument. This
+form is useful for passing in named options alongside required positional
+arguments.
+
+=head2 Validation Specifications
+
+Validation specfications are specified as attribute-value pairs and
+take the form of tables with the attribute names as keys.  The
+following attributes are recognized:
+
+=over
+
+=item optional
+
+This takes a boolean value and indicates if the argument must be
+present.  Positional as well as named arguments may be optional; if
+they are not at the end of the list they may be specified as C<nil> in
+the function call, e.g.  By default all arguments are required.
+
+  foo( nil, 3 )
+
+=item default
+
+This provides the value for the argument if it is not specified, as
+well as indicating that the argument is optional.
+
+=item type
+
+This specifies the expected type of argument, as return by the Lua
+B<type> function.  The expected type may either be a single type or a list
+of acceptable types:
+
+  type = 'number'
+  type = { 'number', 'boolean' }
+
+=item enum
+
+This specifies a list of values which the argument may take.
+
+=item not_nil
+
+This is a boolean and indicates that the value must not be nil.
+
+=item validate
+
+This is used to specify either a function which will be
+called to validate the argument or a table of specifications which
+will be used to validate an argument which is a table.
+
+=over
+
+=item function
+
+The function is called with a single argument, the passed argument
+value.  It must return two values.  The first is a boolean indicating
+whether validation was successful.  If it was successful the second
+value is the possibly transformed argument value.  If it failed, the
+second value is an error message.
+
+For example,
+
+  validate = function( orig )
+               if type(orig) == 'number' and orig >= 3 then
+                 return true, orig / 22
+               end
+               return false, 'not a number or less then 3'
+             end
+
+
+=item table
+
+The table is a set of validation specifications.  The argument I<must> itself
+be a table.  This is how the contents of table arguments are validated.
+
+=back
+
+
+=back
+
+
+=head2 Validation Options
+
+There are a few (well, one) options which affect the validation
+process.  In most cases they can be ignored.  The standard
+validation function (B<validate>) uses the default option values
+specified below.
+
+To specify the options on a per-validation basis, use
+B<validate_opts> instead of B<validate>.
+
+=over
+
+=item check_spec
+
+By default the passed validation specification is not itself checked
+for consistency, as this may be too much of a performance hit.
+B<validate> uses the current value of B<validate.args.CHECK_SPEC> (a
+boolean which defaults to false).  Alternatively, specify the
+C<check_spec> option to B<validate_opts>.
+
+=back
+
+=head2 Functions
+
+=over
+
+=item validate( specs, ... )
+
+Validate the passed argument list against the specifications.  It
+returns a list of values.  The first value is a boolean indicating
+whether or not the validation succeeded.
+
+If validation succeeded, the remainder of the list contains the
+values of the arguments (possibly modified during the validation).
+
+If validation failed, the second value is a string indicating what
+caused the failure.
+
+
+
+=item validate_opts( opts, specs, ... )
+
+Validate the passed argument list against the specifications.  The
+validation workflow may be altered via options passed via the C<opts>
+argument.  The return arguments are the same as B<validate>.
+
+
+=back
+
+=head1 EXAMPLES
+
+=over
+
+=item * Named parameters, some optional
+
+  function foo( ... )
+    local ok, args = validate( { a = { type = 'number' },
+                       b = { default  = 22   , type = 'number' },
+                     }, ... )
+  end
+
+If called as
+
+  foo{ a = 12 }
+
+then
+
+  args.a = 12
+  args.b = 22
+
+=item * Positional parameters and optional named ones
+
+  function bar( ... )
+    local ok, arg1, arg2, opts
+                   = validate( { { type = 'string' },
+                                 { type = 'number' },
+                                 { validate = {
+                                     a = { default = true,
+                                           type = 'boolean' },
+                                     b = { default = 22,
+                                           type = 'number' },
+                                   },
+                                 }
+                               }, ... )
+  end
+
+If called as
+
+  bar( 'a', '22', { b = 33 } )
+
+then
+
+  arg1 = 'a'
+  arg2 = 22
+  opts.a = true
+  opts.b = 33
+
+
+
+=back
+
+=head1 AUTHOR
+
+
+Diab Jerius, E<lt>djerius@cfa.harvard.eduE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2010 by the Smithsonian Astrophysical Observatory
+
+This software is released under the GNU General Public License.
+You may find a copy at L<http://www.fsf.org/copyleft/gpl.html>.
+
+=cut
