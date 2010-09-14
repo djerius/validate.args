@@ -3,7 +3,7 @@
 AC_PREREQ([2.57])
 
 
-AC_INIT([validate-args],[1.0.0],[http://jeeves.cfa.harvard.edu/bugzilla/],[validate-args])
+AC_INIT([validate_args],[1.0-0],[http://jeeves.cfa.harvard.edu/bugzilla/],[validate_args], [http://cxcoptics.cfa.harvard.edu/downloads/soft/src])
 AM_INIT_AUTOMAKE([ check-news ])
 
 AC_CONFIG_SRCDIR([validate/args.lua])
@@ -39,4 +39,5 @@ AC_CONFIG_FILES([Makefile
 		 tests/Makefile
 		 ])
 AC_CONFIG_FILES([tests/test1], [chmod +x tests/test1])
+AC_CONFIG_FILES(AC_PACKAGE_NAME-AC_PACKAGE_VERSION.rockspec:rockspec.in)
 AC_OUTPUT
