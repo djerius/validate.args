@@ -1,4 +1,8 @@
 require 'lunatest'
+local va = require( 'validate.args' )
+
+va.opts{ check_spec = true,
+	 error_on_bad_spec = true }
 
 tests = { 'named',
 	  'constraints',
