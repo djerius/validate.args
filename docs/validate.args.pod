@@ -55,22 +55,27 @@ where the last table is really just the third positional argument. This
 form is useful for passing in named options alongside required positional
 arguments.
 
+Positional arguments may also be converted to named arguments (see
+L</Validation Options>)
+
 =head2 Validation Specifications
 
-Validation specfications are specified as attribute-value pairs and
-take the form of tables with the attribute names as keys.  The
-following attributes are recognized:
+Validation specifications are attribute name-value pairs stored in tables,
+with the attribute names as keys.  The following attributes are
+recognized:
 
 =over
 
 =item optional
 
-This takes a boolean value and indicates if the argument must be
-present.  Positional as well as named arguments may be optional; if
-they are not at the end of the list they may be specified as C<nil> in
-the function call, e.g.  By default all arguments are required.
+This is a boolean attribute which, if true, indicates that the argument
+need not be present.  Positional as well as named arguments may be
+optional; if they are not at the end of the list they may be specified
+as C<nil> in the function call, e.g.
 
   foo( nil, 3 )
+
+By default all arguments are required.
 
 =item default
 
@@ -79,12 +84,54 @@ well as indicating that the argument is optional.
 
 =item type
 
-This specifies the expected type of argument, as return by the Lua
-B<type> function.  The expected type may either be a single type or a list
-of acceptable types:
+This specifies the expected type of argument. It may be either a single
+type or a list of types:
 
   type = 'number'
   type = { 'number', 'boolean' }
+
+
+Types are specified as strings, with the following available:
+
+=over
+
+=item 'nil'
+
+=item 'number'
+
+=item 'string'
+
+=item 'boolean'
+
+=item 'table'
+
+=item 'function'
+
+=item 'thread'
+
+=item 'userdata'
+
+These are the built-in types as returned by the Lua B<type> function.
+
+=item 'posnum'
+
+The argument must be a number greater than zero.
+
+=item 'zposnum'
+
+The argument must be a number greater than or equal to zero.
+
+=item 'posint'
+
+The argument must be an integer greater than zero.
+
+=item 'zposint'
+
+The argument must be an integer greater than or equal to zero.
+
+=back
+
+To add additional types see the B<add_type> function.
 
 =item enum
 
@@ -127,29 +174,53 @@ be a table.  This is how the contents of table arguments are validated.
 
 =back
 
+=item name
+
+A name for a positional argument.  If specified and the C<named>
+validation option is I<true>, then the argument will be assigned this
+name in the returned argument table.
 
 =back
 
 
 =head2 Validation Options
 
-There are a few (well, one) options which affect the validation
-process.  In most cases they can be ignored.  The standard
-validation function (B<validate>) uses the default option values
-specified below.
-
-To specify the options on a per-validation basis, use
-B<validate_opts> instead of B<validate>.
+There are a few options which affect the validation process.  These
+may be set for individual validations using B<validate_opts()>, or may
+be set globally for all validations using B<opts()>.  Values set using
+B<opts> are used as defaults.
 
 =over
 
 =item check_spec
 
 By default the passed validation specification is not itself checked
-for consistency, as this may be too much of a performance hit.
-B<validate> uses the current value of B<validate.args.CHECK_SPEC> (a
-boolean which defaults to false).  Alternatively, specify the
-C<check_spec> option to B<validate_opts>.
+for consistency, as this may be too much of a performance hit.  Setting
+this to C<true> will cause the specifications to be checked.
+
+This defaults to C<false>.
+
+=item error_on_bad_spec
+
+If this is true, an invalid specification will result in a call to
+B<error()>.
+
+=item named
+
+If this is true, positional arguments are returned as a table, with
+their names given either by the C<name> attribute in the validation
+specification or by their cardinal index in the argument list.
+For example:
+
+   ok, opts = validate_opts( { named = true },
+                             { { name = a }, { }, }, 
+			     22, 3
+			      )
+
+will result in
+
+   opts.a = 22
+   opts[2] = 3
 
 =back
 
@@ -170,12 +241,34 @@ If validation failed, the second value is a string indicating what
 caused the failure.
 
 
-
 =item validate_opts( opts, specs, ... )
 
 Validate the passed argument list against the specifications.  The
 validation workflow may be altered via options passed via the C<opts>
 argument.  The return arguments are the same as B<validate>.
+
+
+=item add_type( type_name, func )
+
+Register a validation function for the named type which
+will be accepted by the B<type> validation attribute.
+
+The function will be passed the argument to validate.  It should return a
+list of values.  The first value is a boolean indicating whether or
+not the validation succeeded.
+
+Upon success it should return the (possibly modified) argument as the second value.
+
+For example, the following
+
+  add_type( 'mytype', function( arg )
+                          return 'number' eq type(arg) and  arg > 2 and arg < 3,
+			         3 * arg
+			   end
+          )
+
+adds a new type called C<mytype> which accepts only numbers between 2 and 3 (exclusive)
+and modifies the argument by multiplying it by 3.
 
 
 =back
