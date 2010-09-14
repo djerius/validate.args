@@ -1,15 +1,19 @@
 module( ..., package.seeall )
 
-validate = require('validate.args').validate
+va = require('validate.args')
 
 require 'string'
 require 'table'
 
-local success = { 
+local success = {
    ['number']   = 33.2,
    ['string']   = 'string',
    ['boolean']  = false,
-   ['table' ]   = {},
+   ['table']    = {},
+   ['posint']   = 1,
+   ['zposint']  = 0,
+   ['posnum' ]  = 1.2,
+   ['zposnum' ] = 0,
    ['function'] = function() end,
    [{ 'number', 'string'} ] = 'string',
    [{ 'number', 'string'} ] = 99,
@@ -26,9 +30,20 @@ local failure = {
    ['boolean']  = success['table'],
    ['table' ]   = success['number'],
    ['function'] = success['boolean'],
+   ['posnum']   = 'a',
+   ['zposnum']  = 'a',
+   ['posnum']   = 0,
+   ['zposnum']  = -1,
+   ['posint']   = 0,
+   ['zposint']  = -1,
+   ['posint']   = 'b',
+   ['zposint']  = 'b',
    [{ 'number', 'boolean', 'string'} ] = function() end,
+   ['badtype'] = 8,
 }
 
+
+va.add_type( 'mytype', function( arg ) return arg == 'success', 'ubet' end )
 
 function populate( success, inputs )
 
@@ -46,10 +61,12 @@ function populate( success, inputs )
 	 test_name = 'test_failure_' .. test_name
       end
 
-      _M[test_name] = 
+      _M[test_name] =
 	 function( )
 	    local template = { { type = t } }
-	    local ok, foo = validate( template, v )
+
+	    local ok, foo = va.validate_opts( { error_on_bad_spec = false},
+					     template, v )
 
 	    if ( success ) then
 	       assert_true( ok )
@@ -57,11 +74,26 @@ function populate( success, inputs )
 	    else
 	       assert_false( ok )
 	    end
-	 end 
-      
+	 end
    end
 
 end
 
 populate( true, success )
 populate( false, failure )
+
+
+function test_add_type()
+
+   local template = { { type = 'mytype' } }
+   local ok, foo = va.validate( template, 'success' )
+
+   if ( ok ) then
+      assert_true( ok )
+      assert_equal( 'ubet', foo )
+   else
+      assert_false( ok )
+   end
+
+end
+
