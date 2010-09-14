@@ -313,15 +313,51 @@ end
 
 -- -----------------------------------------------------------------------------
 
-CHECK_SPEC = false
+local Options = {
+   check_spec        = false,
+   error_on_bad_spec = false,
+   named             = false,
+}
+
+function _setopts( opts, new )
+
+   opts = opts or {}
+
+   if  opts ~= Options then
+      for k, v in pairs( Options ) do
+	 opts[k] = v
+      end
+   end
+
+   new = new or {}
+
+   for k, v in pairs( new ) do
+
+      if opts[k] == nil then
+	 error( "illegal option: " .. k )
+      end
+
+      opts[k] = v
+
+   end
+
+   return opts
+
+end
+
+function opts( ... )
+
+   _setopts( Options, ... )
+
+end
+
+
 
 -- validate arguments using the default options
 
 function validate ( ... )
 
-  local opts = { check_spec = CHECK_SPEC }
-
-  return validate_opts( opts, ... )
+  return validate_opts( nil, ... )
 
 end
 
@@ -333,6 +369,8 @@ function validate_opts( opts, tpl, ... )
   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
      return false, "validate_opts: argument #2 (tpl): expected table, got " .. type(tpl)
   end
+
+   opts = _setopts( nil, opts )
 
   -- number of arguments
   local npos = select('#', ... )
