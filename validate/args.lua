@@ -399,13 +399,15 @@ function validate_opts( opts, tpl, ... )
   local idx = 1
   for i, spec in ipairs( tpl ) do
 
+     nargs = nargs + 1
+     local name = spec.name or nargs
+
      handled_pos[i] = true;
 
      -- distinguish between a nil value and a non-existent positional arg
      if i > npos and not ( spec.optional or spec.default ) then
 	local error = string.format( 'missing argument #%d%s', i,
-				     spec.name ~= nil and ' (' .. spec.name .. ')' or ''
-				  )
+				    spec.name and ' (' .. name ..') ' or '' )
 	return false, error
      end
 
@@ -415,14 +417,13 @@ function validate_opts( opts, tpl, ... )
      -- table.insert(args, v) is a NOOP, the number of slots in args
      -- isn't increased
      if ok then
-	nargs = nargs + 1
-	args[nargs] = v
+	args[name] = v
      else
-	local error = string.format( 'argument #%d%s: %s', i,
-				     spec.name ~= nil and ' (' .. spec.name .. ')' or '',
+	local errstr = string.format( 'argument #%d%s: %s', i,
+				     spec.name and ' (' .. name .. ')' or '',
 				     tostring(v)
 				  )
-	return false, error
+	return false, errstr
      end
 
      idx = i + 1
@@ -473,8 +474,11 @@ function validate_opts( opts, tpl, ... )
 
   end
 
-  return true, unpack(args, 1, nargs )
-
+  if opts.named then
+     return true, args
+  else
+     return true, unpack(args, 1, nargs )
+  end
 end
 
 -------------------------------------------------------------------------------
