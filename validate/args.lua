@@ -118,6 +118,8 @@ local validate_spec = {
 			      return true, val
 			   end
 	     },
+   name    = { optional = true,
+	       type = 'string' },
    enum    = { optional = true,
 	       type = 'table',
 	    },
