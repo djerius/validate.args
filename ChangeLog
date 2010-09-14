@@ -1,8 +1,86 @@
-2010-09-10  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2010-09-14  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.0.0
+	1.0-0
 
-2010-09-10 17:09 -0400  djerius  <djerius@cfa.harvard.edu>  (fbd5b6ef5686 [tip])
+2010-09-14 17:32 -0400  djerius  <djerius@cfa.harvard.edu>  (d886b9487c22 [tip])
+
+	* rockspec.in: new file.
+	* configure.ac, rockspec.in:
+	add rockspec, tweak configure to make it rockspec compatible and to
+	generate rockspec
+
+2010-09-14 17:31 -0400  djerius  <djerius@cfa.harvard.edu>  (ca3ba933ea4f)
+
+	* docs/validate.args.pod:
+	update docs
+
+2010-09-14 17:31 -0400  djerius  <djerius@cfa.harvard.edu>  (8a754502998a)
+
+	* tests/vtypes.lua:
+	add tests for new types, correctly catch errors from bad specs in
+	test
+
+2010-09-14 17:30 -0400  djerius  <djerius@cfa.harvard.edu>  (66c82b82db44)
+
+	* tests/named.lua, tests/positional.lua:
+	add test for "named" validation option
+
+2010-09-14 17:29 -0400  djerius  <djerius@cfa.harvard.edu>  (ae212f40d6b3)
+
+	* tests/driver.lua:
+	turn validation spec validation on during tests
+
+2010-09-14 17:28 -0400  djerius  <djerius@cfa.harvard.edu>  (261aafe21f19)
+
+	* validate/args.lua:
+	minor cleanups
+
+2010-09-14 17:28 -0400  djerius  <djerius@cfa.harvard.edu>  (d2c0ff10ab78)
+
+	* validate/args.lua:
+	add supported for "named" validation option
+
+2010-09-14 17:27 -0400  djerius  <djerius@cfa.harvard.edu>  (b393d4a18e6b)
+
+	* validate/args.lua:
+	add support for error_on_bad_spec option
+
+2010-09-14 17:25 -0400  djerius  <djerius@cfa.harvard.edu>  (21a96338a55c)
+
+	* validate/args.lua:
+	new infrastructure for validation options
+
+2010-09-14 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (c14427f9b628)
+
+	* validate/args.lua:
+	forgot to add validation spec for "name" attribute
+
+2010-09-14 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (b85a83a91e32)
+
+	* validate/args.lua:
+	generalized types, allow user to add type & validation function, fix
+	some validation spec validation bugs.
+
+2010-09-10 17:36 -0400  djerius  <djerius@cfa.harvard.edu>  (4505a53245fa)
+
+	* mstbuild.cfg: deleted file.
+	* mstbuild.cfg, snippets/lib_lua.ac:
+	update snippet to put Lua module in ../share/lua. byte-code
+	compiled files should be in exec, so remove local hints to the
+	contrary
+
+2010-09-10 17:20 -0400  djerius  <djerius@cfa.harvard.edu>  (bc6a5e487c4b)
+
+	* configure.ac:
+	remove -lua suffix from package name
+
+2010-09-10 17:10 -0400  djerius  <djerius@cfa.harvard.edu>  (b46061c13d45)
+
+	* ChangeLog: new file.
+	* ChangeLog:
+	add ChangeLog
+
+2010-09-10 17:09 -0400  djerius  <djerius@cfa.harvard.edu>  (fbd5b6ef5686)
 
 	* COPYING, INSTALL, Makefile.am, NEWS, README, configure.ac,
 	docs/Makefile.am, docs/validate.args.pod, mstbuild.cfg,
