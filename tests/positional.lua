@@ -1,6 +1,7 @@
 module( ..., package.seeall )
 
-local validate = require( 'validate.args' ).validate
+local va = require( 'validate.args' )
+local validate, validate_opts = va.validate, va.validate_opts
 
 function test_template_is_a_table ()
 
@@ -126,5 +127,26 @@ function test_non_integer_entries ()
 
    assert_false( ok )
    assert_match( 'extra elements', err )
+
+end
+
+function test_cvs_pos_to_named ()
+
+
+   local template = { {
+			 name = 'arg2',
+			 optional = false,
+			 not_nil = true,
+		      },
+		      {
+			 type = 'string',
+		      }
+		   }
+   local ok, opts = validate_opts( { named = true }, template, 32, 'foo' )
+
+   assert_true( ok )
+   assert_equal( 32, opts.arg2 )
+   assert_equal( 'foo', opts[2] )
+
 
 end

@@ -1,6 +1,8 @@
 module( ..., package.seeall )
 
-local validate = require( 'validate.args' ).validate
+local va = require( 'validate.args' )
+local validate = va.validate
+local validate_opts = va.validate_opts
 
 require 'string'
 
@@ -38,6 +40,16 @@ function test_default__not_specified ()
 
    local template = { x = { default = 2 } }
    local ok, foo = validate( template, {} )
+
+   assert_true( ok )
+   assert_equal( 2, foo.x )
+end
+
+function test_named ()
+
+
+   local template = { x = { default = 2 } }
+   local ok, foo = validate_opts( { named = true }, template, {} )
 
    assert_true( ok )
    assert_equal( 2, foo.x )
