@@ -198,7 +198,11 @@ function check_arg( spec, arg, opts )
       local ok, err = check_table( validate_spec, spec, opts );
       opts.in_check_spec = false
       if not ok then
-	 return false, 'template error: ' .. err
+	 if opts.error_on_bad_spec then
+	    error( 'template error: ' .. err )
+	 else
+	    return false, 'template error: ' .. err
+	 end
       end
    end
 
