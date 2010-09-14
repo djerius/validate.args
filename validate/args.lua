@@ -157,7 +157,7 @@ function check_table( tspec, arg, opts )
       if ( ok ) then
 	 narg[k] = v
       else
-	 return false, string.format( "error: argument %s: %s", k, v );
+	 return false, string.format( "error: argument `%s': %s", k, v );
       end
 
    end
@@ -379,9 +379,10 @@ function validate_opts( opts, tpl, ... )
   -- number of arguments
   local npos = select('#', ... )
 
-  -- output (possibly transformed) arguments
+  -- original arguments
   local oargs = { ... }
 
+  -- output (possibly transformed) arguments
   local args = {}
   local nargs = 0
 
