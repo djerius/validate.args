@@ -26,18 +26,74 @@ module( ..., package.seeall )
 
 require 'table'
 require 'string'
+require 'math'
 
 -- -----------------------------------------------------------------------------
 -- Support for validation of input validation templates using validate.args
 -- We eat our own dog food here. Sometimes.
 
-local types = { 'nil', 'number', 'string', 'boolean', 'table',
-		'function', 'thread', 'userdata' }
-local is_valid_type = {}
+local type_check = {
 
-for _, v in pairs(types) do
-   is_valid_type[v] = true
+   posnum = function( arg )
+	       return type(arg) == 'number' and arg > 0, arg
+	    end,
+
+   zposnum = function( arg )
+	       return type(arg) == 'number' and arg >= 0, arg
+	     end,
+
+   posint = function( arg )
+	       if type(arg) ~= 'number' then
+		  return false
+	       end
+
+	       local _, x = math.modf( arg )
+	       return x == 0 and arg > 0, arg
+
+	    end,
+
+   zposint = function( arg )
+	       if type(arg) ~= 'number' then
+		  return false
+	       end
+		local _, x = math.modf( arg )
+
+	       return x == 0 and arg >= 0, arg
+
+	     end,
+}
+
+local builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
+			'function', 'thread', 'userdata' }
+
+for _, v in pairs(builtin_types) do
+   type_check[v] = function (arg)
+		      return type(arg) == v, arg
+		   end
 end
+
+function add_type( utype, func )
+
+   if ( type(utype) ~= 'string' ) then
+      error( "type must be a string" )
+   end
+
+   type_check[utype] = func
+
+end
+
+
+function check_type( etype, arg )
+
+   local chk = type_check[etype]
+   if chk == nil then
+      return false, 'validation template error: unknown type: ' .. etype
+   end
+
+   return chk(arg)
+
+end
+
 
 local validate_spec = {
    optional = { optional = true,
@@ -51,16 +107,15 @@ local validate_spec = {
 		validate = function( val )
 			      if 'table' == type(val) then
 				 for _, v in pairs( val ) do
-				    if not is_valid_type[v] then
+				    if not type_check[v] then
 				       return false, 'invalid type: ' .. tostring(v)
 				    end
 				 end
-				 return true, val
-			      else
-				 if not is_valid_type[val] then
-				    return false, 'invalid type: ' .. tostring(val)
-				 end
+			      elseif not type_check[val] then
+				 return false, 'invalid type: ' .. tostring(val)
 			      end
+
+			      return true, val
 			   end
 	     },
    enum    = { optional = true,
@@ -163,35 +218,28 @@ function check_arg( spec, arg, opts )
    -- the specification specifies a type for the argument; check it
    if spec.type ~= nil then
 
-      local arg_type = type( arg )
-      local ok = false
-
       -- if spec.type is a table, it's a list of enumerated, acceptable types
       if  'table' == type( spec.type ) then
 
 	 for _, v in pairs( spec.type ) do
-	    if v == arg_type then
-	       ok = true
+
+	    ok, narg = check_type(v, arg)
+	    if ok then
+	       arg = narg
 	       break
 	    end
+
 	 end
+
+      else
+
+	 -- just a single type
+	 ok, arg = check_type( spec.type, arg )
+
       end
 
-      -- didn't match type yet; is it a direct match?
-      ok = ok or
-	 ( type(arg) == spec.type )
-
-      -- no match; bail
       if not ok then
-
-	 local error = spec.type
-
-	 if type( spec.type ) == 'table' then
-	    error = table.concat( spec.type, ' | ' )
-	 end
-
-	 return false, string.format("incorrect type: got '%s', expected '%s'",
-				     type(arg), error )
+	 return false, "incorrect type"
       end
 
    end
