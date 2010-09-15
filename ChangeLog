@@ -1,8 +1,27 @@
 2010-09-14  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	1.0-0
+	Tag 1.0-0
 
-2010-09-14 17:32 -0400  djerius  <djerius@cfa.harvard.edu>  (d886b9487c22 [tip])
+2010-09-14 23:42 -0400  djerius  <djerius@cfa.harvard.edu>  (aed639558dd4 [tip])
+
+	* doc/Makefile.am, doc/validate.args.pod: new file.
+	* docs/Makefile.am, docs/validate.args.pod: deleted file.
+	* Makefile.am, configure.ac, doc/Makefile.am, doc/validate.args.pod,
+	docs/Makefile.am, docs/validate.args.pod, rockspec.in:
+	move documentation directory from docs to doc to get correct copying
+	of documentation by luarocks
+
+2010-09-14 23:42 -0400  djerius  <djerius@cfa.harvard.edu>  (c383c521f1d9)
+
+	* snippets/pod_docs.ac, snippets/pod_ps_init.mk, snippets/pod_psl.mk:
+	update snippets to get PDF doc output
+
+2010-09-14 17:34 -0400  djerius  <djerius@cfa.harvard.edu>  (ce88f4916a03)
+
+	* ChangeLog, NEWS:
+	update logs for release
+
+2010-09-14 17:32 -0400  djerius  <djerius@cfa.harvard.edu>  (d886b9487c22)
 
 	* rockspec.in: new file.
 	* configure.ac, rockspec.in:
