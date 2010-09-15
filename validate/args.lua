@@ -192,6 +192,11 @@ end
 
 function check_arg( spec, arg, opts )
 
+   -- keep track if this is a positional argument; remove
+   -- from options to avoid polluting nested tables
+   local positional = opts.positional
+   opts.positional = nil
+
    -- validate the spec
    if  opts.check_spec  and not opts.in_check_spec then
       opts.in_check_spec = true
@@ -209,15 +214,21 @@ function check_arg( spec, arg, opts )
    -- no argument or a nil argument is provided. make sure that's ok
    if arg == nil then
 
-      if spec.optional or spec.default ~= nil then
-
-	 return true, spec.default
-
-      elseif spec.not_nil then
+      -- positional arguments have already been checked for existence,
+      -- so if it's a nil value it has been deliberately set
+      if positional and spec.not_nil then
 
 	 return false, 'value must not be nil'
 
       end
+
+      if spec.optional or spec.default ~= nil or positional then
+
+	 return true, spec.default
+
+      end
+
+      return false, 'required but not specified'
 
    end
 
@@ -412,6 +423,7 @@ function validate_opts( opts, tpl, ... )
 	return false, error
      end
 
+     opts.positional = true
      local ok, v = check_arg( spec, oargs[i], opts )
 
      -- can't use table.insert here. if v is nil
