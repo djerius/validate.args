@@ -139,7 +139,8 @@ This specifies a list of values which the argument may take.
 
 =item not_nil
 
-This is a boolean and indicates that the value must not be nil.
+This is a boolean and indicates that the value must not be nil.  This
+only pertains to positional arguments.
 
 =item validate
 
