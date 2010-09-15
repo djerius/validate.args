@@ -1,6 +1,6 @@
 module( ..., package.seeall )
 
-local validate = require( 'validate.args' ).validate
+validate = require( 'validate.args' ).validate
 
 function test_not_table( )
 
@@ -71,6 +71,25 @@ function test_two_levels( )
    assert_equal( 'foo', foo.arg3.arg31 )
    assert_function( foo.arg3.arg32)
    assert_equal( 88.3, foo.arg3.arg32() )
+   assert_equal( 99, foo.arg3.arg33 )
+
+end
+
+function test_two_levels_defaults ()
+
+   local template = { { validate = {
+			   arg3 = { type = 'table',
+				    validate = {
+				       arg33 = { type = 'number',
+						 default = 99 }
+				    }
+				 }
+			}
+		  } }
+
+   local ok, foo = validate( template, { arg3 = {} }  )
+
+   assert_true( ok )
    assert_equal( 99, foo.arg3.arg33 )
 
 end
