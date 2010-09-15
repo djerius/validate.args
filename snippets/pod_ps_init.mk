@@ -8,10 +8,14 @@
 
 
 POD_PS			= $(PODS:%=%.ps)
+POD_PDF			= $(PODS:%=%.pdf)
 
-MAINTAINERCLEANFILES   += $(POD_PS)
+MAINTAINERCLEANFILES   += $(POD_PS) $(POD_PDF)
 
 psdir			= $(datadir)/doc/$(PACKAGE)
 dist_ps_DATA		= $(POD_PS)
 
-SUFFIXES 	       += .ps
+pdfdir			= $(datadir)/doc/$(PACKAGE)
+dist_pdf_DATA		= $(POD_PDF)
+
+SUFFIXES 	       += .ps .pdf

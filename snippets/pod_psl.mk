@@ -5,7 +5,7 @@
 #	pod_ps_init.mk
 #	pod_manl.mk
 
-SUFFIXES		+= .l.ps
+SUFFIXES		+= .l.ps .l.pdf
 
 %.l.ps: %.l
 	groff -man $< > $@
@@ -13,3 +13,8 @@ SUFFIXES		+= .l.ps
 %.ps: %.l
 	groff -man $< > $@
 
+%.l.pdf : %.l.ps
+	ps2pdf $< $@
+
+%.pdf : %.ps
+	ps2pdf $< $@
