@@ -263,7 +263,7 @@ Upon success it should return the (possibly modified) argument as the second val
 For example, the following
 
   add_type( 'mytype', function( arg )
-                          return 'number' eq type(arg) and  arg > 2 and arg < 3,
+                          return 'number' == type(arg) and  arg > 2 and arg < 3,
 			         3 * arg
 			   end
           )
