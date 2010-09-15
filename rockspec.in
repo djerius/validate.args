@@ -28,8 +28,4 @@ build = {
       ["validate.args"] = "validate/args.lua",
    },
 
-   copy_directories = {
-      "docs"
-   },
-
 }

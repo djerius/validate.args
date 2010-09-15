@@ -35,7 +35,7 @@ done
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
 		 validate/Makefile
-		 docs/Makefile
+		 doc/Makefile
 		 tests/Makefile
 		 ])
 AC_CONFIG_FILES([tests/test1], [chmod +x tests/test1])

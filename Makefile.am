@@ -2,7 +2,7 @@ include $(top_srcdir)/snippets/create_am_macros.mk
 
 SUBDIRS			=		\
 			validate	\
-			docs		\
+			doc		\
 			tests
 
 #-------------------------------------------------------------------
