@@ -31,15 +31,13 @@ function test_validate_function ()
 end
 
 
-local enum = { 'a', 3, 'c', 'd' }
-
-function test_enum ()
+function test_enum_list ()
 
    local template = { {
-			 enum = enum
+			 enum = { 'a', 3, 'c', 'd' }
 		   } }
 
-   for _, v in pairs( enum ) do
+   for _, v in pairs( template[1].enum ) do
 
       local ok, foo = validate( template, v  )
 
@@ -49,6 +47,19 @@ function test_enum ()
    end
 
    local ok, foo = validate( template, 19 )
-   assert_false( ok, 19 )
+   assert_false( ok )
+
+end
+
+function test_enum_scalar ()
+
+   local ok, foo = validate( { { enum = 19 } } , 19 )
+
+   assert_true( ok )
+   assert_equal( 19, foo )
+
+   local ok, foo = validate( { enum = 19 } , 18 )
+
+   assert_false( ok )
 
 end

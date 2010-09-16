@@ -135,7 +135,12 @@ To add additional types see the B<add_type> function.
 
 =item enum
 
-This specifies a list of values which the argument may take.
+This specifies one or more explicit values which the argument may
+take. It may be either a single value or a list of values:
+
+  enum = 33
+  enum = { 'a', 33, 'b' }
+
 
 =item not_nil
 

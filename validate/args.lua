@@ -121,7 +121,6 @@ local validate_spec = {
    name    = { optional = true,
 	       type = 'string' },
    enum    = { optional = true,
-	       type = 'table',
 	    },
    not_nil = { optional = true,
 	       type = 'boolean',
@@ -351,8 +350,10 @@ function check_arg( spec, arg, opts )
    if spec.enum ~= nil then
 
       local ok
+      local enum = type(spec.enum) == 'table'
+                            and spec.enum or { spec.enum }
 
-      for _, v in pairs( spec.enum ) do
+      for _, v in pairs( enum ) do
 
 	 if v == arg then
 	    ok = true
