@@ -9,6 +9,8 @@ tests = { 'named',
 	  'vtypes',
 	  'positional',
 	  'nested',
+	  'requires',
+	  'excludes',
        }
 
 for _, v in pairs(tests) do

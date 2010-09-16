@@ -142,6 +142,24 @@ This specifies a list of values which the argument may take.
 This is a boolean and indicates that the value must not be nil.  This
 only pertains to positional arguments.
 
+=item requires
+
+This lists the names of one or more arguments which I<must> be specified
+in addition to the current argument.  The value is either a single
+name or a list of names:
+
+  requires = 'arg3'
+  requires = { 'arg3', 'arg4' }
+
+=item excludes
+
+This lists the names of one or more arguments which I<may not> be specified
+in addition to the current argument.  The value is either a single
+name or a list of names:
+
+  excludes = 'arg3'
+  excludes = { 'arg3', 'arg4' }
+
 =item validate
 
 This is used to specify either a function which will be

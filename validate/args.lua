@@ -126,6 +126,10 @@ local validate_spec = {
    not_nil = { optional = true,
 	       type = 'boolean',
 	    },
+   requires = { optional = true,
+		type = { 'table', 'string' } },
+   excludes = { optional = true,
+		type = { 'table', 'string' } },
 }
 
 
@@ -179,6 +183,40 @@ function check_table( tspec, arg, opts )
    if has_bad then
       return false, "unexpected named argument(s): "
 	              .. table.concat( bad_args, ', ' )
+   end
+
+   -- now check for dependencies and exclusions
+   for k, spec in pairs( tspec ) do
+
+      if narg[k] ~= nil then
+
+	 if spec.excludes then
+	    local excludes = type(spec.excludes) == 'table'
+                            and spec.excludes or { spec.excludes }
+	    for _,v in pairs(excludes) do
+	       if narg[v] ~= nil then
+		  return false,
+		    string.format("can't have both arguments '%s' and '%s'",
+				  k, v )
+	       end
+	    end
+	 end
+
+	 if spec.requires then
+	    local requires = type(spec.requires) == 'table'
+	                             and spec.requires or { spec.requires }
+	    for _,v in pairs(requires) do
+	       if narg[v] == nil then
+		  return false,
+		    string.format("can't have argument '%s' without '%s'",
+				  k, v )
+	       end
+	    end
+
+	 end
+
+      end
+
    end
 
    return true, narg
