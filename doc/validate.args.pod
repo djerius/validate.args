@@ -219,10 +219,16 @@ this to C<true> will cause the specifications to be checked.
 
 This defaults to C<false>.
 
+=item error_on_invalid
+
+If true, B<validate.args()> will call the Lua B<error()> function in
+the case of invalid arguments instead of returning a status code and
+message.
+
 =item error_on_bad_spec
 
-If this is true, an invalid specification will result in a call to
-B<error()>.
+If this is true, an invalid validation specification will result in a
+call to B<error()>.
 
 =item named
 
@@ -240,6 +246,44 @@ will result in
 
    opts.a = 22
    opts[2] = 3
+
+
+=item allow_extra
+
+If this is true, then any extra arguments (either named or positional)
+which are not mentioned in the validation specification are quietly
+ignored. For example:
+
+  local ok, a, b, c = validate_opts( { allow_extra = true,
+                                       pass_through = true,
+				      },
+                                      { {}, {} },
+				     1, 2, 3)
+
+would result in
+
+  a = 1
+  b = 2
+  c = nil
+
+=item pass_through
+
+If this is true and C<allow_extra> is also true, then any extra
+arguments (either named or positional) which are not mentioned in the
+validation specification are passed through.  For example:
+
+  local ok, a, b, c = validate_opts( { allow_extra = true,
+                                       pass_through = true,
+				      },
+                                      { {}, {} },
+				     1, 2, 3)
+
+would result in
+
+  a = 1
+  b = 2
+  c = 3
+
 
 =back
 

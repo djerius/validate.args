@@ -150,3 +150,27 @@ function test_cvs_pos_to_named ()
 
 
 end
+
+function test_extra_pos_args ()
+
+   local template = { {}, {} }
+
+   local ok, a, b, c = validate_opts( { allow_extra = true }, template,
+				  1, 2, 3)
+
+   assert_true( ok )
+   assert_equal( 1, a )
+   assert_equal( 2, b )
+   assert_equal( nil, c )
+
+   local ok, a, b, c = validate_opts( { allow_extra = true,
+					pass_through = true,
+				     }, template,
+				  1, 2, 3)
+
+   assert_true( ok )
+   assert_equal( 1, a )
+   assert_equal( 2, b )
+   assert_equal( 3, c )
+
+end

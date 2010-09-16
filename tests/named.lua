@@ -75,6 +75,28 @@ function test_named ()
 end
 
 
+function test_extra_named_args ()
+
+   local template = { a = {}, b = {} }
+
+   local ok, opts = validate_opts( { allow_extra = true }, template,
+				     { a = 1, b = 2, c = 3 })
+
+   assert_true( ok )
+   assert_equal( 1, opts.a )
+   assert_equal( 2, opts.b )
+   assert_equal( nil, opts.c )
+
+   local ok, opts = validate_opts( { allow_extra = true,
+				     pass_through = true
+				  }, template,
+				  { a = 1, b = 2, c = 3 })
+
+   assert_true( ok )
+   assert_equal( 1, opts.a )
+   assert_equal( 2, opts.b )
+   assert_equal( 3, opts.c )
 
 
-lunatest.run()
+end
+

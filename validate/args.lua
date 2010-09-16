@@ -174,8 +174,16 @@ function check_table( tspec, arg, opts )
    for k in pairs( arg ) do
 
       if not handled[k] then
-	 table.insert( bad_args, k )
-	 has_bad = true
+
+	 if opts.allow_extra then
+	    if opts.pass_through then
+	       narg[k] = arg[k]
+	    end
+	 else
+	    table.insert( bad_args, k )
+	    has_bad = true
+	 end
+
       end
 
    end
@@ -369,7 +377,10 @@ end
 local Options = {
    check_spec        = false,
    error_on_bad_spec = false,
+   error_on_invalid  = false,
    named             = false,
+   allow_extra       = false,
+   pass_through      = false,
 }
 
 function _setopts( opts, new )
@@ -418,12 +429,19 @@ end
 -- validate arguments using specific options
 function validate_opts( opts, tpl, ... )
 
+   opts = _setopts( nil, opts )
+
+   local rfunc
+   if opts.error_on_invalid then
+      rfunc = function( _, errstr ) error( errstr ) end
+   else
+      rfunc = function( ... ) return ... end
+   end
+
   -- do our own simple validation
   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
-     return false, "validate_opts: argument #2 (tpl): expected table, got " .. type(tpl)
+     return rfunc( false, "validate_opts: argument #2 (tpl): expected table, got " .. type(tpl) )
   end
-
-   opts = _setopts( nil, opts )
 
   -- number of arguments
   local npos = select('#', ... )
@@ -456,9 +474,9 @@ function validate_opts( opts, tpl, ... )
 
      -- distinguish between a nil value and a non-existent positional arg
      if i > npos and not ( spec.optional or spec.default ) then
-	local error = string.format( 'missing argument #%d%s', i,
+	local errstr = string.format( 'missing argument #%d%s', i,
 				    spec.name and ' (' .. name ..') ' or '' )
-	return false, error
+	return rfunc( false, errstr )
      end
 
      opts.positional = true
@@ -474,7 +492,7 @@ function validate_opts( opts, tpl, ... )
 				     spec.name and ' (' .. name .. ')' or '',
 				     tostring(v)
 				  )
-	return false, errstr
+	return rfunc( false, errstr )
      end
 
      idx = i + 1
@@ -516,19 +534,39 @@ function validate_opts( opts, tpl, ... )
      end
 
      if has_bad then
-	return false, "extra elements in template: " .. table.concat( badkeys, ', ' )
+	return rfunc( false, "extra elements in template: " .. table.concat( badkeys, ', ' ) )
      end
 
+
+     -- extra arguments
      if npos >= idx then
-	return false, "too many positional arguments"
+
+	if not opts.allow_extra then
+
+	   -- don't want them
+	   return rfunc( false, "too many positional arguments" )
+
+
+	elseif opts.pass_through then
+
+	   -- want them
+	   for i = idx, npos, 1 do
+	      args[i] = oargs[i]
+	   end
+
+	   nargs = npos
+
+	end
+
+
      end
 
   end
 
   if opts.named then
-     return true, args
+     return rfunc( true, args )
   else
-     return true, unpack(args, 1, nargs )
+     return rfunc( true, unpack(args, 1, nargs ) )
   end
 end
 
