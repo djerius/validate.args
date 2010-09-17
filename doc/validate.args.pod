@@ -156,6 +156,8 @@ name or a list of names:
   requires = 'arg3'
   requires = { 'arg3', 'arg4' }
 
+See also L</Argument Groups>
+
 =item excludes
 
 This lists the names of one or more arguments which I<may not> be specified
@@ -164,6 +166,8 @@ name or a list of names:
 
   excludes = 'arg3'
   excludes = { 'arg3', 'arg4' }
+
+See also L</Argument Groups>
 
 =item validate
 
@@ -194,7 +198,19 @@ For example,
 =item table
 
 The table is a set of validation specifications.  The argument I<must> itself
-be a table.  This is how the contents of table arguments are validated.
+be a table.  This is how nested tables of arguments are validated. For example,
+the following validation specificaton:
+
+  { arg1 = { validate =
+              { arg2 = { validate =
+                           { arg3 = { type = 'string' } } } } } }
+
+will correctly validate the equivalent of
+
+     arg1 = {}
+     arg1.arg2 = {}
+     arg1.arg2.arg3 = 'foo'
+
 
 =back
 
@@ -206,6 +222,66 @@ name in the returned argument table.
 
 =back
 
+=head2 Groups of Arguments
+
+Some operations on groups of arguments are possible for named
+arguments.  These are specified as special "arguments" in the
+validation specification.  In order to accomodate multiple groups,
+these "arguments" take as values a I<list of lists>, not a simple list:
+
+  ['%one_of'] = { { 'a', 'b', 'c' } }
+
+B<not>
+
+  ['%one_of'] = { 'a', 'b', 'c' }
+
+This allows specifying multiple groups:
+
+  ['%one_of'] = { { 'a', 'b', 'c' } , { 'd', 'e', 'f' } }
+
+=over
+
+=item %one_of
+
+This ensures that exactly one argument in a group is specified.  For
+example, say that the caller must provide exactly one of the arguments
+C<arg1>, C<arg2>, or C<arg3>.  Exclusivity is obtained via
+
+  arg1 = { optional = true, excludes = { 'arg2', 'arg3' } },
+  arg2 = { optional = true, excludes = { 'arg1', 'arg3' } },
+  arg3 = { optional = true, excludes = { 'arg1', 'arg2' } }
+
+But that doesn't force the user to specify any.  This addition will:
+
+  ['%one_of'] = {{ 'arg1', 'arg2', 'arg3' }}
+
+Note that specifying the C<excludes> attribute is redundant with C<%one_of>,
+so the above could be rewritten as
+
+  arg1 = { optional = true },
+  arg2 = { optional = true },
+  arg3 = { optional = true }
+  ['%one_of'] = {{ 'arg1', 'arg2', 'arg3' }}
+
+
+=item %oneplus_of
+
+This ensures that at least one argument in a group is specified. More
+may be specified.  As a complicated example:
+
+  sigma   = { optional = true, excludes = { 'sigma_x', 'sigma_y' } },
+  sigma_x = { optional = true, requires = { 'sigma_y' } },
+  sigma_y = { optional = true, requires = { 'sigma_x' } },
+  ['%oneplus_of'] = { { 'sigma_x', 'sigma_y', 'sigma' } },
+
+ensures that only one of the two following situations occurs:
+
+  sigma
+  sigma_x sigma_y
+
+
+
+=back
 
 =head2 Validation Options
 
@@ -226,14 +302,13 @@ This defaults to C<false>.
 
 =item error_on_invalid
 
-If true, B<validate.args()> will call the Lua B<error()> function in
-the case of invalid arguments instead of returning a status code and
-message.
+If true, the Lua B<error()> function will be called the case of
+invalid arguments instead of returning a status code and message.
 
 =item error_on_bad_spec
 
 If this is true, an invalid validation specification will result in a
-call to B<error()>.
+call to the Lua B<error()> function.
 
 =item named
 
@@ -349,7 +424,8 @@ and modifies the argument by multiplying it by 3.
 
   function foo( ... )
     local ok, args = validate( { a = { type = 'number' },
-                       b = { default  = 22   , type = 'number' },
+                                 b = { default  = 22,
+				       type = 'number' },
                      }, ... )
   end
 

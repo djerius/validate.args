@@ -1,6 +1,8 @@
 module( ..., package.seeall )
 
-validate = require( 'validate.args' ).validate
+va = require( 'validate.args' )
+validate = va.validate
+validate_opts = va.validate_opts
 
 function test_not_table( )
 
@@ -14,7 +16,7 @@ function test_not_table( )
    local ok, foo = validate( template, 3 )
 
    assert_false( ok )
-   assert_match('validate constraint is a table but argument is not' , foo )
+   assert_match('incorrect type' , foo )
 
 end
 
@@ -91,5 +93,27 @@ function test_two_levels_defaults ()
 
    assert_true( ok )
    assert_equal( 99, foo.arg3.arg33 )
+
+end
+
+function test_invalid_spec ()
+
+   local template = { { validate = {
+			   arg3 = { type = 'table',
+				    validate = {
+				       arg33 = { snarf = 3,
+						 default = 99 }
+				    }
+				 }
+			}
+		  } }
+
+   local ok, foo = validate_opts( {
+				    error_on_bad_spec = false },
+				 template, { arg3 = {} }  )
+
+   assert_false( ok )
+
+   assert_match( 'snarf', foo )
 
 end

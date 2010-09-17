@@ -32,7 +32,31 @@ require 'math'
 -- Support for validation of input validation templates using validate.args
 -- We eat our own dog food here. Sometimes.
 
-local type_check = {
+type_check = {}
+
+function add_type( utype, func )
+
+   if ( type(utype) ~= 'string' ) then
+      error( "type must be a string" )
+   end
+
+   type_check[utype] = func
+
+end
+
+
+builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
+		  'function', 'thread', 'userdata' }
+
+for _, v in pairs(builtin_types) do
+   add_type(
+	    v,
+	    function (arg) return type(arg) == v, arg end
+	 )
+end
+
+
+other_types = {
 
    posnum = function( arg )
 	       return type(arg) == 'number' and arg > 0, arg
@@ -63,23 +87,8 @@ local type_check = {
 	     end,
 }
 
-local builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
-			'function', 'thread', 'userdata' }
-
-for _, v in pairs(builtin_types) do
-   type_check[v] = function (arg)
-		      return type(arg) == v, arg
-		   end
-end
-
-function add_type( utype, func )
-
-   if ( type(utype) ~= 'string' ) then
-      error( "type must be a string" )
-   end
-
-   type_check[utype] = func
-
+for k, v in pairs(other_types) do
+   add_type( k, v )
 end
 
 
@@ -94,6 +103,32 @@ function check_type( etype, arg )
 
 end
 
+valid_special = { ['%oneplus_of'] = true,
+		  ['%one_of'] = true }
+
+function check_special( special, arg )
+
+   if valid_special[special] then
+
+      local ok = true
+
+      -- must be a list of lists
+      ok = type(arg) == 'table'
+
+      for _, v in pairs( arg ) do
+
+	 ok = ok and type(v) == 'table'
+      end
+
+      return ok, ": must be list of lists"
+
+   else
+      return false, ": unknown validation special"
+
+   end
+
+end
+
 
 local validate_spec = {
    optional = { optional = true,
@@ -105,14 +140,11 @@ local validate_spec = {
    default  = { optional = true },
    type     = { optional = true,
 		validate = function( val )
-			      if 'table' == type(val) then
-				 for _, v in pairs( val ) do
-				    if not type_check[v] then
-				       return false, 'invalid type: ' .. tostring(v)
-				    end
+			      local val = type(val) == 'table' and val or { val }
+			      for _, v in pairs( val ) do
+				 if not type_check[v] then
+				    return false, 'unkown type: ' .. tostring(v)
 				 end
-			      elseif not type_check[val] then
-				 return false, 'invalid type: ' .. tostring(val)
 			      end
 
 			      return true, val
@@ -130,7 +162,6 @@ local validate_spec = {
    excludes = { optional = true,
 		type = { 'table', 'string' } },
 }
-
 
 -- -----------------------------------------------------------------------------
 -- Internal routine to validate a table against a table specification
@@ -150,20 +181,68 @@ function check_table( tspec, arg, opts )
    -- check for unexpected arguments
    local handled = {}
 
-   -- iterate through template
+   -- iterate through specifications
    for k, spec in pairs( tspec ) do
+
+      local ok, v
 
       handled[k] = true;
 
-      local ok, v = check_arg( spec, arg[k], opts )
+      -- if we're checking the validation spec, must treat an actual "validate"
+      -- attribute very carefully, as it creates nested validation specifications
+      if opts.in_check_spec and k == 'validate' then
 
-      if ( ok ) then
+	 ok = true
+	 v = arg[k]
+
+	 if type(arg[k]) == 'table' then
+
+	    v = {}
+
+	    -- we descend into it carefully... as we don't want to parse the
+	    -- keys in the table as they are argument names
+	    for k, spec in pairs( arg[k] ) do
+
+	       local ok, v_s
+
+	       if k:sub(1,1) == '%' then
+		  ok, v_s = check_special( k, spec )
+	       else
+		  ok, v_s = check_table( validate_spec, spec, opts )
+	       end
+
+	       if ok then
+		  v[k] = v_s
+	       else
+		  return false, string.format( ".validate.%s%s", k, v_s );
+	       end
+
+	    end
+
+	 elseif arg[k] and type(arg[k]) ~= 'function' then
+	    return false, "validate : wrong type (got " .. type(arg[k]) .. " )"
+
+	 end
+
+      elseif k:sub(1,1) ~= '%' then
+	 -- spec keys which start with % are special -- they're not argument names
+
+	 ok, v = check_arg( spec, arg[k], opts )
+
+      else
+
+	 ok = true
+
+      end
+
+      if ok then
 	 narg[k] = v
       else
-	 return false, string.format( "error: argument `%s': %s", k, v );
+	 return false, string.format( ".%s%s", tostring(k), tostring(v) );
       end
 
    end
+
 
    -- now check for keys in args that we haven't
    -- handled
@@ -188,14 +267,14 @@ function check_table( tspec, arg, opts )
    end
 
    if has_bad then
-      return false, "unexpected named argument(s): "
-	              .. table.concat( bad_args, ', ' )
+
+      return false, '.' .. table.concat( bad_args, ', ' ) .. ": unexpected named argument(s)"
    end
 
    -- now check for dependencies and exclusions
    for k, spec in pairs( tspec ) do
 
-      if narg[k] ~= nil then
+      if narg[k] ~= nil and k.sub( 1, 1 ) ~= '%' then
 
 	 if spec.excludes then
 	    local excludes = type(spec.excludes) == 'table'
@@ -203,7 +282,7 @@ function check_table( tspec, arg, opts )
 	    for _,v in pairs(excludes) do
 	       if narg[v] ~= nil then
 		  return false,
-		    string.format("can't have both arguments '%s' and '%s'",
+		    string.format(": can't have both arguments '%s' and '%s'",
 				  k, v )
 	       end
 	    end
@@ -215,7 +294,7 @@ function check_table( tspec, arg, opts )
 	    for _,v in pairs(requires) do
 	       if narg[v] == nil then
 		  return false,
-		    string.format("can't have argument '%s' without '%s'",
+		    string.format(": can't have argument '%s' without '%s'",
 				  k, v )
 	       end
 	    end
@@ -226,8 +305,56 @@ function check_table( tspec, arg, opts )
 
    end
 
+   -- check for 'any of' requirements
+   if tspec['%oneplus_of'] then
+
+      -- iterate over each group
+      for _,group in pairs( tspec['%oneplus_of'] ) do
+
+	 local ok = false
+
+	 for _,v in pairs( group ) do
+
+	    if narg[v] ~= nil then
+	       ok = true
+	       break
+	    end
+	 end
+
+	 if not ok then
+	    return false, ": must specify at least one of " .. table.concat( group, ', ' )
+	 end
+
+      end
+
+   end
+
+   -- check for 'one of' requirements
+   if tspec['%one_of'] then
+
+      -- iterate over each group
+      for _,group in pairs( tspec['%one_of'] ) do
+
+	 local count = 0
+
+	 for _,v in pairs( group ) do
+
+	    if narg[v] ~= nil then
+	       count = count + 1
+	    end
+	 end
+
+	 if count ~= 1 then
+	    return false, ": must specify exactly one of " .. table.concat( group, ', ' )
+	 end
+
+      end
+
+   end
+
    return true, narg
 end
+
 
 -- -----------------------------------------------------------------------------
 
@@ -249,9 +376,9 @@ function check_arg( spec, arg, opts )
       opts.in_check_spec = false
       if not ok then
 	 if opts.error_on_bad_spec then
-	    error( 'template error: ' .. err )
+	    error( 'validation spec error: ' .. err )
 	 else
-	    return false, 'template error: ' .. err
+	    return false, '(validation spec)' .. err
 	 end
       end
    end
@@ -263,7 +390,7 @@ function check_arg( spec, arg, opts )
       -- so if it's a nil value it has been deliberately set
       if positional and spec.not_nil then
 
-	 return false, 'value must not be nil'
+	 return false, ': must not be nil'
 
       end
 
@@ -273,35 +400,28 @@ function check_arg( spec, arg, opts )
 
       end
 
-      return false, 'required but not specified'
+      return false, ': required but not specified'
 
    end
 
    -- the specification specifies a type for the argument; check it
    if spec.type ~= nil then
 
-      -- if spec.type is a table, it's a list of enumerated, acceptable types
-      if  'table' == type( spec.type ) then
+      -- if spec.type may be a table or a scalar
+      local utype = type(spec.type ) == 'table' and spec.type or { spec.type }
 
-	 for _, v in pairs( spec.type ) do
+      for _, v in pairs( utype ) do
 
-	    ok, narg = check_type(v, arg)
-	    if ok then
-	       arg = narg
-	       break
-	    end
-
+	 ok, narg = check_type(v, arg)
+	 if ok then
+	    arg = narg
+	    break
 	 end
-
-      else
-
-	 -- just a single type
-	 ok, arg = check_type( spec.type, arg )
 
       end
 
       if not ok then
-	 return false, "incorrect type"
+	 return false, ": value is not of required type"
       end
 
    end
@@ -318,7 +438,7 @@ function check_arg( spec, arg, opts )
 	 -- also be a table
 
 	 if type(arg) ~= 'table' then
-	    return false, 'validate constraint is a table but argument is not'
+	    return false, ': incorrect type; must be a table'
 	 end
 
 	 -- descend into the table and see what happens. note that
@@ -331,17 +451,17 @@ function check_arg( spec, arg, opts )
 
       elseif type(spec.validate) == 'function' then
 
-	 -- a functional validation.  not that arg may be
+	 -- a functional validation.  note that arg may be
 	 -- transformed
 
 	 ok, arg = spec.validate( arg )
 
 	 if not ok then
-	    return false, arg
+	    return false, ': ' .. arg
 	 end
 
       else
-	 return false, "template validate argument is not a function"
+	 return false, ": validation specification error: incorrect type for 'validate' "
       end
 
    end
@@ -362,7 +482,7 @@ function check_arg( spec, arg, opts )
       end
 
       if not ok then
-	 return false, 'not one of the enumerated values'
+	 return false, ': value is not in approved list'
       end
 
 
@@ -434,14 +554,18 @@ function validate_opts( opts, tpl, ... )
 
    local rfunc
    if opts.error_on_invalid then
-      rfunc = function( _, errstr ) error( errstr ) end
+      rfunc = function( ok , errstr )
+		 error( errstr ) end
    else
-      rfunc = function( ... ) return ... end
+      rfunc = function( ... )
+--		 ok, msg = ...
+--		 if not ok then print( "\nERROR = " .. msg .. "\n" ) end
+		 return ... end
    end
 
   -- do our own simple validation
   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
-     return rfunc( false, "validate_opts: argument #2 (tpl): expected table, got " .. type(tpl) )
+     return rfunc( false, "argument #2 (tpl): expected table, got " .. type(tpl) )
   end
 
   -- number of arguments
@@ -475,8 +599,7 @@ function validate_opts( opts, tpl, ... )
 
      -- distinguish between a nil value and a non-existent positional arg
      if i > npos and not ( spec.optional or spec.default ) then
-	local errstr = string.format( 'missing argument #%d%s', i,
-				    spec.name and ' (' .. name ..') ' or '' )
+	local errstr = string.format( 'arg#%d: missing', i )
 	return rfunc( false, errstr )
      end
 
@@ -489,10 +612,7 @@ function validate_opts( opts, tpl, ... )
      if ok then
 	args[name] = v
      else
-	local errstr = string.format( 'argument #%d%s: %s', i,
-				     spec.name and ' (' .. name .. ')' or '',
-				     tostring(v)
-				  )
+	local errstr = string.format( 'arg#%d%s', i, v )
 	return rfunc( false, errstr )
      end
 
@@ -507,17 +627,17 @@ function validate_opts( opts, tpl, ... )
   if idx == 1 then
 
      if npos > 1 then
-	return false, "too many positional arguments"
+	return rfunc( false, "too many positional arguments" )
      end
 
      local arg = oargs[1]
 
      if type(arg) == 'nil' or type(arg) ~= 'table' then
-	return false, "validate: argument #2: expected table, got " .. type(arg)
+	return rfunc( false, "arg#2: expected table, got " .. type(arg) )
      end
 
-     return check_arg( { type = 'table',
-			 validate = tpl }, arg, opts )
+     return rfunc( check_arg( { type = 'table',
+				validate = tpl }, arg, opts ) )
 
   else
 
@@ -535,7 +655,7 @@ function validate_opts( opts, tpl, ... )
      end
 
      if has_bad then
-	return rfunc( false, "extra elements in template: " .. table.concat( badkeys, ', ' ) )
+	return rfunc( false, "extra elements in validation spec: " .. table.concat( badkeys, ', ' ) )
      end
 
 

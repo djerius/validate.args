@@ -78,7 +78,7 @@ function test_multiple__required__not_specified ()
    local ok, err = validate( template, nil )
 
    assert_false( ok )
-   assert_match( 'argument #2', err )
+   assert_match( 'arg#2: missing', err )
 
 end
 
@@ -88,7 +88,7 @@ function test_multiple__required__not_specified__with_name ()
    local ok, err = validate( template, nil )
 
    assert_false( ok )
-   assert_match( 'argument #2 %(arg2%)', err )
+   assert_match( 'arg#2: missing', err )
 
 end
 
@@ -105,7 +105,7 @@ function test_required__not_nil__specified_as_nil ()
    local ok, err = validate( template, nil )
 
    assert_false( ok )
-   assert_match( 'argument #1.*not be nil', err )
+   assert_match( 'arg#1.*not be nil', err )
 
 end
 

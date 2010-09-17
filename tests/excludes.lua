@@ -4,13 +4,10 @@ validate = require( 'validate.args' ).validate
 
 function test_exclude_scalar( )
 
-   local template = { {
-			 validate = {
-			    arg1 = { optional = true,
-				     excludes = 'arg2' },
-			    arg2 = { optional = true },
-			 }
-		   } }
+   local template = {
+      arg1 = { optional = true, excludes = 'arg2' },
+      arg2 = { optional = true },
+   }
 
    local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
@@ -28,13 +25,10 @@ end
 
 function test_exclude_list( )
 
-   local template = { {
-			 validate = {
-			    arg1 = { optional = true,
-				     excludes = { 'arg2'  } },
-			    arg2 = { optional = true },
-			 }
-		   } }
+   local template = {
+      arg1 = { optional = true, excludes = { 'arg2'  } },
+      arg2 = { optional = true },
+   }
 
    local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
@@ -53,14 +47,10 @@ end
 
 function test_exclude_both( )
 
-   local template = { {
-			 validate = {
-			    arg1 = { optional = true,
-				     excludes = 'arg2' },
-			    arg2 = { optional = true,
-				     excludes = 'arg1' },
-			 }
-		   } }
+   local template = {
+      arg1 = { optional = true, excludes = 'arg2' },
+      arg2 = { optional = true, excludes = 'arg1' },
+   }
 
    local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
@@ -79,14 +69,11 @@ end
 
 function test_exclude_multiple( )
 
-   local template = { {
-			 validate = {
-			    arg1 = { optional = true,
-				     excludes = { 'arg2', 'arg3' } },
-			    arg2 = { optional = true, },
-			    arg3 = { optional = true, },
-			 }
-		   } }
+   local template = {
+      arg1 = { optional = true, excludes = { 'arg2', 'arg3' } },
+      arg2 = { optional = true, },
+      arg3 = { optional = true, },
+   }
 
    local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
    assert_false( ok )

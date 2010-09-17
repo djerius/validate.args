@@ -11,6 +11,7 @@ tests = { 'named',
 	  'nested',
 	  'requires',
 	  'excludes',
+	  'special'
        }
 
 for _, v in pairs(tests) do

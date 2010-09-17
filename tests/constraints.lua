@@ -7,7 +7,7 @@ local validate = require( 'validate.args' ).validate
 
 function test_validate_function ()
 
-   local template = { { 
+   local template = { {
 			 validate = function( val )
 				       if val then
 					  return val, val
