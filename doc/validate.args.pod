@@ -280,8 +280,8 @@ ensures that only one of the two following situations occurs:
 
 There are a few options which affect the validation process.  These
 may be set for individual validations using B<validate_opts()>, or may
-be set globally for all validations using B<opts()>.  Values set using
-B<opts> are used as defaults.
+be set globally for validations done via B<validate()> using
+B<opts()>. 
 
 =over
 
@@ -295,17 +295,21 @@ This defaults to C<false>.
 
 =item error_on_invalid
 
-If true, the Lua B<error()> function will be called the case of
+If C<true>, the Lua B<error()> function will be called the case of
 invalid arguments instead of returning a status code and message.
+
+This defaults to C<false>.
 
 =item error_on_bad_spec
 
-If this is true, an invalid validation specification will result in a
+If this is C<true>, an invalid validation specification will result in a
 call to the Lua B<error()> function.
+
+This defaults to C<false>.
 
 =item named
 
-If this is true, positional arguments are returned as a table, with
+If this is C<true>, positional arguments are returned as a table, with
 their names given either by the C<name> attribute in the validation
 specification or by their cardinal index in the argument list.
 For example:
@@ -321,9 +325,11 @@ will result in
    opts[2] = 3
 
 
+This defaults to C<false>.
+
 =item allow_extra
 
-If this is true, then any extra arguments (either named or positional)
+If this is C<true>, then any extra arguments (either named or positional)
 which are not mentioned in the validation specification are quietly
 ignored. For example:
 
@@ -339,9 +345,11 @@ would result in
   b = 2
   c = nil
 
+This defaults to C<false>.
+
 =item pass_through
 
-If this is true and C<allow_extra> is also true, then any extra
+If this is C<true> and C<allow_extra> is also C<true>, then any extra
 arguments (either named or positional) which are not mentioned in the
 validation specification are passed through.  For example:
 
@@ -357,6 +365,17 @@ would result in
   b = 2
   c = 3
 
+This defaults to C<false>.
+
+=item baseOptions
+
+This option is useful only for the validation functions which take an
+options table (such as validate_opts()). If C<true>, any options which
+are not specified in the options table will be set from the global
+options table as modified by the B<opts()> function.  Normally they
+are set from the default options values.
+
+This defaults to C<false>.
 
 =back
 
@@ -382,6 +401,22 @@ caused the failure.
 Validate the passed argument list against the specifications.  The
 validation workflow may be altered via options passed via the C<opts>
 argument.  The return arguments are the same as B<validate>.
+
+Those options which are not set in C<opts> are set to the default
+values.  If instead they should be set to the values which were
+specified by the B<opts()> function, set the special option
+C<baseOptions> to C<true>.
+
+=item validate_tbl( opts, specs, tble )
+
+Validate the contents of the passed table against the specifications.
+The validation workflow may be altered via options passed via the
+C<opts> argument.  The return arguments are the same as B<validate>.
+
+Those options which are not set in C<opts> are set to the default
+values.  If instead they should be set to the values which were
+specified by the B<opts()> function, set the special option
+C<baseOptions> to C<true>.
 
 
 =item add_type( type_name, func )

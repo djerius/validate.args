@@ -65,7 +65,8 @@ function populate( success, inputs )
 	 function( )
 	    local template = { { type = t } }
 
-	    local ok, foo = va.validate_opts( { error_on_bad_spec = false},
+	    local ok, foo = va.validate_opts( { baseOptions = true,
+						error_on_bad_spec = false},
 					     template, v )
 
 	    if ( success ) then

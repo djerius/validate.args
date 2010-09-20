@@ -109,7 +109,9 @@ function test_invalid_spec ()
 		  } }
 
    local ok, foo = validate_opts( {
-				    error_on_bad_spec = false },
+				    baseOptions = true,
+				    error_on_bad_spec = false
+				 },
 				 template, { arg3 = {} }  )
 
    assert_false( ok )

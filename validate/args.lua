@@ -498,23 +498,18 @@ end
 
 
 -- -----------------------------------------------------------------------------
+-- module scoped validation options.
 
-local Options = {
-   check_spec        = false,
-   error_on_bad_spec = false,
-   error_on_invalid  = false,
-   named             = false,
-   allow_extra       = false,
-   pass_through      = false,
-   debug             = false,
-}
 
-function _setopts( opts, new )
+-- The underlying option setter.  This uses a base options table
+-- unless the options table to be changed is the same as the base
+-- options table
+function _setopts( opts, base, new )
 
    opts = opts or {}
 
-   if  opts ~= Options then
-      for k, v in pairs( Options ) do
+   if  opts ~= base then
+      for k, v in pairs( base ) do
 	 opts[k] = v
       end
    end
@@ -523,7 +518,7 @@ function _setopts( opts, new )
 
    for k, v in pairs( new ) do
 
-      if opts[k] == nil then
+      if DefaultOptions[k] == nil then
 	 error( "illegal option: " .. k )
       end
 
@@ -535,11 +530,34 @@ function _setopts( opts, new )
 
 end
 
+-- Public interface to set options seen by validate()
 function opts( ... )
 
-   _setopts( Options, ... )
+   _setopts( Options, Options, ... )
 
 end
+
+
+-- These are the immutable default.  This also serves as check against
+-- illegal options
+DefaultOptions = {
+   check_spec        = false,
+   error_on_bad_spec = false,
+   error_on_invalid  = false,
+   named             = false,
+   allow_extra       = false,
+   pass_through      = false,
+   debug             = false,
+
+   -- used only by validate functions which pass options, to indicate
+   -- their options are based on Options, not DefaultOptions.  This
+   -- is a placeholder so it's not flagged as an illegal option
+   baseOptions       = false,
+}
+
+-- These are the options seen by validate().  They are mutable by opts().
+Options = _setopts( nil, DefaultOptions )
+
 
 function g_rfunc( error_on_invalid )
 
@@ -561,13 +579,13 @@ end
 
 function validate ( ... )
 
-  return validate_opts( nil, ... )
+  return validate_opts( Options, ... )
 
 end
 
 function validate_tbl( opts, tpl, arg )
 
-   opts = _setopts( nil, opts )
+   opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
 
    local rfunc = g_rfunc( opts.error_on_invalid )
 
@@ -579,7 +597,7 @@ end
 -- validate arguments using specific options
 function validate_opts( opts, tpl, ... )
 
-   opts = _setopts( nil, opts )
+   opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
 
    local rfunc = g_rfunc( opts.error_on_invalid )
 

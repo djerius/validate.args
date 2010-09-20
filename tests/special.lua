@@ -12,7 +12,8 @@ function test_invalid_oneplus_of( )
 		   }
 
 
-   local ok, foo = validate_opts( { error_on_bad_spec = false},
+   local ok, foo = validate_opts( { baseOptions = true,
+				    error_on_bad_spec = false },
 				 template, { arg1 = 1 } )
    assert_false( ok, 'bad spec' )
 end
@@ -25,7 +26,8 @@ function test_unknown_special( )
 		   }
 
 
-   local ok, foo = validate_opts( { error_on_bad_spec = false},
+   local ok, foo = validate_opts( { baseOptions = true,
+				    error_on_bad_spec = false},
 				 template, { arg1 = 1 } )
    assert_false( ok, 'bad spec' )
 end
