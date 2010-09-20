@@ -2,7 +2,9 @@ require 'lunatest'
 local va = require( 'validate.args' )
 
 va.opts{ check_spec = true,
-	 error_on_bad_spec = true }
+	 error_on_bad_spec = true,
+	 -- debug = true
+      }
 
 tests = { 'named',
 	  'constraints',

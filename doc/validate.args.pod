@@ -60,6 +60,11 @@ L</Validation Options>)
 
 =head2 Validation Specifications
 
+Multiple validation constraints may be specified for each argument and
+are tested in random order.  The caller may provide constraints checks
+which modify the passed arguments; these must not expect a particular
+sequence of checks.
+
 Validation specifications are attribute name-value pairs stored in tables,
 with the attribute names as keys.  The following attributes are
 recognized:
@@ -196,8 +201,8 @@ validation specifications.  The argument I<must> itself be a table.
 This is how nested tables of arguments are validated. For example, the
 following validation specificaton:
 
-  { arg1 = { validate =
-              { arg2 = { validate =
+  { arg1 = { vtable =
+              { arg2 = { vtable =
                            { arg3 = { type = 'string' } } } } } }
 
 will correctly validate the equivalent of
@@ -205,6 +210,34 @@ will correctly validate the equivalent of
      arg1 = {}
      arg1.arg2 = {}
      arg1.arg2.arg3 = 'foo'
+
+
+It is possible to choose which specification table to use based upon
+the value of the argument.  To do this, specify a function, rather
+than a table.  The function is called as C<func(arg)>. It must return
+two values.  The first is a boolean indicating success or failure.  Upon
+success, the second argument must be a table of validation specifications.
+Upon error, the second argument should be an error message.
+
+For example, to choose the validation table based upon the first
+positional argument in a table:
+
+  specs = { gaussian = { {}, sigma = { type = 'number' } },
+            uniform  = { {},  },
+	    powerlaw = { {}, alpha = { type = 'number' } },
+	  }
+
+and later in the validation specification:
+
+
+  { idist = { vtable = function (arg)
+                          local vtable = specs[arg[1]]
+			  if vtable then
+			    return true, vtable
+                          else
+			    return false, "unknown idist: " .. tostring(arg)
+			  end
+                       end } }
 
 
 =item name
@@ -281,7 +314,7 @@ ensures that only one of the two following situations occurs:
 There are a few options which affect the validation process.  These
 may be set for individual validations using B<validate_opts()>, or may
 be set globally for validations done via B<validate()> using
-B<opts()>. 
+B<opts()>.
 
 =over
 
@@ -315,7 +348,7 @@ specification or by their cardinal index in the argument list.
 For example:
 
    ok, opts = validate_opts( { named = true },
-                             { { name = a }, { }, }, 
+                             { { name = a }, { }, },
 			     22, 3
 			      )
 
@@ -472,7 +505,7 @@ then
     local ok, arg1, arg2, opts
                    = validate( { { type = 'string' },
                                  { type = 'number' },
-                                 { validate = {
+                                 { vtable = {
                                      a = { default = true,
                                            type = 'boolean' },
                                      b = { default = 22,

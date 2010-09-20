@@ -127,7 +127,7 @@ local validate_spec = {
 	     type = 'function'
 	  },
    vtable = { optional = true,
-		type = 'table'
+	      type = { 'table', 'function' },
 	   },
    default  = { optional = true },
    type     = { optional = true,
@@ -187,26 +187,33 @@ function check_table( tspec, arg, opts )
 	 ok = true
 	 v = arg[k]
 
-	 if type(arg[k]) == 'table' then
+	 if type(arg[k]) == 'table' or type(arg[k]) == 'function' then
 
-	    v = {}
+	    -- spec may be a function which returns an actual table
+	    -- but we can't check it as it requires access to the actual
+	    -- data being validated. which isn't available, but should be
+	    if type(arg[k]) == 'table' then
 
-	    -- we descend into it carefully... as we don't want to parse the
-	    -- keys in the table as they are argument names
-	    for k, spec in pairs( arg[k] ) do
+	       v = {}
 
-	       local ok, v_s
+	       -- we descend into it carefully... as we don't want to parse the
+	       -- keys in the table as they are argument names
+	       for k, spec in pairs( arg[k] ) do
 
-	       if k:sub(1,1) == '%' then
-		  ok, v_s = check_special( k, spec )
-	       else
-		  ok, v_s = check_table( validate_spec, spec, opts )
-	       end
+		  local ok, v_s
 
-	       if ok then
-		  v[k] = v_s
-	       else
-		  return false, string.format( ".vtable.%s%s", k, v_s );
+		  if k:sub(1,1) == '%' then
+		     ok, v_s = check_special( k, spec )
+		  else
+		     ok, v_s = check_table( validate_spec, spec, opts )
+		  end
+
+		  if ok then
+		     v[k] = v_s
+		  else
+		     return false, string.format( ".vtable.%s%s", k, v_s );
+		  end
+
 	       end
 
 	    end
@@ -356,11 +363,6 @@ end
 
 function check_arg( spec, arg, opts )
 
-   if opts.debug  then
-      print( require('json').encode( arg ) )
-      print( require('json').encode( spec ) )
-   end
-
    -- keep track if this is a positional argument; remove
    -- from options to avoid polluting nested tables
    local positional = opts.positional
@@ -452,16 +454,31 @@ function check_arg( spec, arg, opts )
 
       local ok
 
-      -- if spec.validate is a table, the argument to be checked must
-      -- also be a table
+      -- the argument to be checked must also be a table
 
       if type(arg) ~= 'table' then
 	 return false, ': incorrect type; must be a table'
       end
 
+      -- spec.vtable may be a function which returns an actual table
+      local vtable = spec.vtable
+
+      if type(vtable) == 'function' then
+
+	 ok, vtable = vtable(arg)
+	 if not ok then
+	    return ok, vtable
+	 end
+
+	 if type(vtable) ~= 'table' then
+	    return false, '(validation spec).vtable: expected table from vtable function, got ' .. type(vtable)
+	 end
+
+      end
+
       -- descend into the table and see what happens. note that
       -- arg may be transformed
-      ok, arg = check_table( spec.vtable, arg, opts )
+      ok, arg = check_table( vtable, arg, opts )
 
       if not ok then
 	 return false, arg
@@ -559,9 +576,9 @@ DefaultOptions = {
 Options = _setopts( nil, DefaultOptions )
 
 
-function g_rfunc( error_on_invalid )
+function g_rfunc( opts )
 
-   if error_on_invalid then
+   if opts.error_on_invalid then
       return function( ... )
 		 if ( select( 1, ... ) ) then
 		    return ...
@@ -569,6 +586,15 @@ function g_rfunc( error_on_invalid )
 		    error( select( 2, ... ) )
 		 end
 	      end
+   elseif opts.debug then
+      return function( ... )
+		if ( select( 1, ... ) ) then
+		   return ...
+		else
+		   print( "ERROR: " .. select( 2, ... ) )
+		   return ...
+		end
+	     end
    else
       return function( ... )  return ... end
    end
@@ -587,7 +613,7 @@ function validate_tbl( opts, tpl, arg )
 
    opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
 
-   local rfunc = g_rfunc( opts.error_on_invalid )
+   local rfunc = g_rfunc( opts )
 
    return rfunc( check_arg( { type = 'table',
 				vtable = tpl }, arg, opts ) )
@@ -599,7 +625,7 @@ function validate_opts( opts, tpl, ... )
 
    opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
 
-   local rfunc = g_rfunc( opts.error_on_invalid )
+   local rfunc = g_rfunc( opts )
 
   -- do our own simple validation
   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
