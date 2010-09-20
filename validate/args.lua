@@ -611,7 +611,7 @@ end
 
 function validate_tbl( opts, tpl, arg )
 
-   opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
+   opts = _setopts( nil, (opts and opts.baseOptions and Options) or DefaultOptions, opts )
 
    local rfunc = g_rfunc( opts )
 
@@ -623,7 +623,7 @@ end
 -- validate arguments using specific options
 function validate_opts( opts, tpl, ... )
 
-   opts = _setopts( nil, opts.baseOptions and Options or DefaultOptions, opts )
+   opts = _setopts( nil, (opts and opts.baseOptions and Options) or DefaultOptions, opts )
 
    local rfunc = g_rfunc( opts )
 
