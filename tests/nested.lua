@@ -177,6 +177,9 @@ function test_vtable_func_example ()
    local ok, foo = validate( template, { idist = { 'gaussian', sigma = 3 } } )
    assert_true( ok, 'gaussian' )
 
+   local ok, foo = validate( template, { idist = { 'gaussian', sigmax = 3 } } )
+   assert_false( ok, 'bad gaussian' )
+
    local ok, foo = validate( template, { idist = { 'uniform' } } )
    assert_true( ok, 'uniform' )
 
