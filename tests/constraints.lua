@@ -8,13 +8,13 @@ local validate = require( 'validate.args' ).validate
 function test_validate_function ()
 
    local template = { {
-			 validate = function( val )
-				       if val then
-					  return val, val
-				       else
-					  return val, 'bad value'
-				       end
+			 vfunc = function( val )
+				    if val then
+				       return val, val
+				    else
+				       return val, 'bad value'
 				    end
+				 end
 		   }}
 
    local ok, foo = validate( template, true )

@@ -7,7 +7,7 @@ validate_opts = va.validate_opts
 function test_not_table( )
 
    local template = { { 
-			 validate = {
+			 vtable = {
 			    arg1 = { enum = { 'a', 'b' } },
 			    arg2 = { type = 'number' },
 			 }
@@ -23,7 +23,7 @@ end
 function test_one_level( )
 
    local template = { { 
-			 validate = {
+			 vtable = {
 			    arg1 = { enum = { 'a', 'b' } },
 			    arg2 = { type = 'number' },
 			 }
@@ -44,11 +44,11 @@ end
 function test_two_levels( )
 
    local template = { { 
-			 validate = {
+			 vtable = {
 			    arg1 = { enum = { 'a', 'b' } },
 			    arg2 = { type = 'number' },
 			    arg3 = { type = 'table',
-				     validate = {
+				     vtable = {
 					arg31 = { type = 'string' },
 					arg32 = { type = 'function' },
 					arg33 = { type = 'number',
@@ -79,9 +79,9 @@ end
 
 function test_two_levels_defaults ()
 
-   local template = { { validate = {
+   local template = { { vtable = {
 			   arg3 = { type = 'table',
-				    validate = {
+				    vtable = {
 				       arg33 = { type = 'number',
 						 default = 99 }
 				    }
@@ -98,9 +98,9 @@ end
 
 function test_invalid_spec ()
 
-   local template = { { validate = {
+   local template = { { vtable = {
 			   arg3 = { type = 'table',
-				    validate = {
+				    vtable = {
 				       arg33 = { snarf = 3,
 						 default = 99 }
 				    }

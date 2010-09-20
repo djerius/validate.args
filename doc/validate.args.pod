@@ -169,17 +169,10 @@ name or a list of names:
 
 See also L</Argument Groups>
 
-=item validate
+=item vfunc
 
-This is used to specify either a function which will be
-called to validate the argument or a table of specifications which
-will be used to validate an argument which is a table.
-
-=over
-
-=item function
-
-The function is called with a single argument, the passed argument
+This specifies a function which is called to validate the argument.
+It is called with a single argument, the passed argument
 value.  It must return two values.  The first is a boolean indicating
 whether validation was successful.  If it was successful the second
 value is the possibly transformed argument value.  If it failed, the
@@ -187,19 +180,21 @@ second value is an error message.
 
 For example,
 
-  validate = function( orig )
-               if type(orig) == 'number' and orig >= 3 then
-                 return true, orig / 22
-               end
-               return false, 'not a number or less then 3'
-             end
+  vfunc = function( orig )
+            if type(orig) == 'number' and orig >= 3 then
+              return true, orig / 22
+            end
+              return false, 'not a number or less then 3'
+          end
 
 
-=item table
+=item vtable
 
-The table is a set of validation specifications.  The argument I<must> itself
-be a table.  This is how nested tables of arguments are validated. For example,
-the following validation specificaton:
+This specifies a table of specifications which will be used to
+validate an argument which is a table.  The table is a set of
+validation specifications.  The argument I<must> itself be a table.
+This is how nested tables of arguments are validated. For example, the
+following validation specificaton:
 
   { arg1 = { validate =
               { arg2 = { validate =
@@ -211,8 +206,6 @@ will correctly validate the equivalent of
      arg1.arg2 = {}
      arg1.arg2.arg3 = 'foo'
 
-
-=back
 
 =item name
 
