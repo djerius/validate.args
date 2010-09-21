@@ -153,6 +153,10 @@ local validate_spec = {
 		type = { 'table', 'string' } },
    excludes = { optional = true,
 		type = { 'table', 'string' } },
+
+   one_of = { optional = true,
+	      type = 'table' },
+
 }
 
 
@@ -320,8 +324,7 @@ function check_table( tspec, arg, opts )
    -- now check for dependencies and exclusions
    for k, spec in pairs( ctspec ) do
 
-      if narg[k] ~= nil and ( type(k) == 'number'
-			  or k.sub( 1, 1 ) ~= '%' ) then
+      if narg[k] ~= nil and ( type(k) == 'number' or k.sub( 1, 1 ) ~= '%' ) then
 
 	 if spec.excludes then
 	    local excludes = type(spec.excludes) == 'table' and spec.excludes or { spec.excludes }
@@ -342,6 +345,22 @@ function check_table( tspec, arg, opts )
 		  string.format(": can't have argument '%s' without '%s'",
 				k, v )
 	       end
+	    end
+	 end
+
+	 if spec.one_of then
+
+	    local count = 0
+
+	    for _,v in pairs(spec.one_of) do
+
+	       if narg[v] ~= nil then
+		  count = count + 1
+	       end
+	    end
+
+	    if count ~= 1 then
+	       return false, ": must specify exactly one of " .. table.concat( spec.one_of, ', ' )
 	    end
 
 	 end

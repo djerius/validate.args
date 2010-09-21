@@ -179,6 +179,16 @@ name or a list of names:
 
 See also L</Argument Groups>
 
+=item one_of
+
+This provides a list of names of other arguments of which exactly
+one I<must> be specified in addition to the current argument:
+
+  one_of = { 'arg3', 'arg4' }
+
+See also L</Argument Groups>
+
+
 =item vfunc
 
 This specifies a function which is called to validate the argument.
