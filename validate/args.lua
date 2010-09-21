@@ -613,7 +613,7 @@ function g_rfunc( opts )
 		 if ( select( 1, ... ) ) then
 		    return ...
 		 else
-		    error( select( 2, ... ) )
+		    error( select( 2, ... ), 4 )
 		 end
 	      end
    elseif opts.debug then
