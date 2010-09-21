@@ -1,4 +1,5 @@
 require 'lunatest'
+require 'strict'
 local va = require( 'validate.args' )
 
 va.opts{ check_spec = true,
@@ -13,7 +14,8 @@ tests = { 'named',
 	  'nested',
 	  'requires',
 	  'excludes',
-	  'special'
+	  'special',
+	  'mutate'
        }
 
 for _, v in pairs(tests) do

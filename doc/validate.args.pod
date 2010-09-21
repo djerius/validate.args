@@ -36,7 +36,7 @@ then the specifications should be bundled into a table with the argument
 names as keys:
 
 
-  { a = { specs for a }, b = { specs for b } }
+  { a = specs_for_a , b = specs_for_b }
 
 If a function is passed positional arguments, as in
 
@@ -44,7 +44,7 @@ If a function is passed positional arguments, as in
 
 then the specifications should be bundled as a list:
 
-  { { specs for arg 1 }, { specs for arg 2 } }
+  { specs_for_arg_1 , specs_for_arg_2 }
 
 
 One can in a sense I<mix> the two forms by using both tables and scalars,
@@ -60,14 +60,19 @@ L</Validation Options>)
 
 =head2 Validation Specifications
 
-Multiple validation constraints may be specified for each argument and
-are tested in random order.  The caller may provide constraints checks
-which modify the passed arguments; these must not expect a particular
-sequence of checks.
+A validation specification is a set of constraints which an argument
+must meet.  The specification takes the form of a table, where each
+key-value pair represents a type of constraint and its
+parameters.  Most typically these tables are what is passed in the
+list of specifications described above; see however, L</Mutating
+Validation Specifications>.
 
-Validation specifications are attribute name-value pairs stored in tables,
-with the attribute names as keys.  The following attributes are
-recognized:
+Multiple constraints may be specified for each argument. They are
+applied in random order.  The caller may provide constraints
+which modify the passed arguments; these must not expect a particular
+sequence of operation.
+
+The following constraint types are recognized:
 
 =over
 
@@ -247,6 +252,18 @@ validation option is I<true>, then the argument will be assigned this
 name in the returned argument table.
 
 =back
+
+=head2 Mutating Validation Specifications
+
+The validation specifications are usually passed as tables.  It is
+sometimes necessary to be able to construct validations on the fly
+(much as does the C<vtable> constraint).  In such cases the validation
+specification should be specified as a I<function> which takes a
+single option - the argument - and returns two values.  The first
+value is a boolean indicating success or failure.  In the case of
+success the second value is a table containing the actual validation
+specification.  In the case of failure it is a message to be returned
+to the caller.
 
 =head2 Groups of Arguments
 

@@ -203,8 +203,19 @@ function check_table( tspec, arg, opts )
 		  local ok, v_s
 
 		  if k:sub(1,1) == '%' then
+
 		     ok, v_s = check_special( k, spec )
+
+		  elseif type(spec) == 'function' then
+		     -- spec may be a function which returns a real
+		     -- validation, but we can't validate that here;
+		     -- wait until it's actually put in play
+
+		     ok = true
+		     v_s = spec
+
 		  else
+
 		     ok, v_s = check_table( validate_spec, spec, opts )
 		  end
 
@@ -363,10 +374,29 @@ end
 
 function check_arg( spec, arg, opts )
 
+   local ok
+
    -- keep track if this is a positional argument; remove
    -- from options to avoid polluting nested tables
    local positional = opts.positional
    opts.positional = nil
+
+   -- the specification may be a function, in which case it
+   -- will return the real validation specification
+   if type(spec) == 'function' then
+
+      ok, spec = spec( arg )
+
+      if ok and type(spec) ~= 'table' then
+	 ok = false
+	 spec = '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
+      end
+
+      if not ok then
+	 return ok, spec
+      end
+   end
+
 
    -- validate the spec
    if  opts.check_spec  and not opts.in_check_spec then
@@ -415,7 +445,7 @@ function check_arg( spec, arg, opts )
 
 	 local chk = type_check[v]
 	 if chk == nil then
-	    return false, '(template).type: unknown type: ' .. v
+	    return false, '(template).type: unknown type: ' .. tostring(v)
 	 end
 
 	 ok, narg = chk(arg)
@@ -623,6 +653,8 @@ end
 -- validate arguments using specific options
 function validate_opts( opts, tpl, ... )
 
+   local ok
+
    opts = _setopts( nil, (opts and opts.baseOptions and Options) or DefaultOptions, opts )
 
    local rfunc = g_rfunc( opts )
@@ -654,6 +686,33 @@ function validate_opts( opts, tpl, ... )
   local handled_pos = {}
   local idx = 1
   for i, spec in ipairs( tpl ) do
+
+     -- the specification may be a function, in which case it
+     -- will return the real validation specification.  have to handle
+     -- it early for positional arguments as we need to know if a name
+     -- was assigned to the argument.
+     if type(spec) == 'function' then
+
+	ok, spec = spec( arg )
+
+	if ok and type(spec) ~= 'table' then
+	   ok = false
+	   spec = '(validation spec function): did not return a table'
+	end
+
+	if not ok then
+	   local errstr = string.format( 'arg#%d(validation spec): %s',
+					i, spec )
+	   return rfunc( false, errstr )
+	end
+
+     elseif type(spec) ~= 'table' then
+
+	return rfunc( false,
+		     "arg#2(validation spec): expected table or function, got "
+			.. type(arg) )
+     end
+
 
      nargs = nargs + 1
      local name = spec.name or nargs
@@ -695,8 +754,9 @@ function validate_opts( opts, tpl, ... )
 
      local arg = oargs[1]
 
-     if type(arg) == 'nil' or type(arg) ~= 'table' then
-	return rfunc( false, "arg#2: expected table, got " .. type(arg) )
+     if type(arg) == 'nil' or (type(arg) ~= 'table' and type(arg) ~= 'function')  then
+	return rfunc( false, "arg#2: expected table or function, got "
+		     .. type(arg) )
      end
 
      return rfunc( check_arg( { type = 'table',
