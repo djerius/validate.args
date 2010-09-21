@@ -155,6 +155,30 @@ local validate_spec = {
 		type = { 'table', 'string' } },
 }
 
+
+-- the specification may be a function, in which case it
+-- will return the real validation specification
+function resolve_spec( spec, arg )
+
+
+   local ok = true
+
+   if type(spec) == 'function' then
+
+      ok, spec = spec( arg )
+
+      if ok and type(spec) ~= 'table' then
+	 ok = false
+	 spec = '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
+      end
+
+   end
+
+   return ok, spec
+
+end
+
+
 -- -----------------------------------------------------------------------------
 -- Internal routine to validate a table against a table specification
 --
@@ -165,6 +189,11 @@ local validate_spec = {
 -- Then check the table to ensure that there are no unwanted keys
 
 function check_table( tspec, arg, opts )
+
+   -- cached copy of tspec; elements of tspec may be
+   -- transformed by resolve_spec() so need to keep them
+   -- around
+   local ctspec = {}
 
    -- (possibly) transformed arguments
    local narg = {}
@@ -177,6 +206,8 @@ function check_table( tspec, arg, opts )
    for k, spec in pairs( tspec ) do
 
       local ok, v
+
+      ctspec[k] = spec
 
       handled[k] = true;
 
@@ -237,7 +268,12 @@ function check_table( tspec, arg, opts )
       elseif type(k) == 'number' or k:sub(1,1) ~= '%' then
 	 -- spec keys which start with % are special -- they're not argument names
 
-	 ok, v = check_arg( spec, arg[k], opts )
+	 ok, v = resolve_spec( spec, arg[k] )
+
+	 if ok then
+	    ctspec[k] = v
+	    ok, v = check_arg( ctspec[k], arg[k], opts )
+	 end
 
       else
 
@@ -282,30 +318,29 @@ function check_table( tspec, arg, opts )
    end
 
    -- now check for dependencies and exclusions
-   for k, spec in pairs( tspec ) do
+   for k, spec in pairs( ctspec ) do
 
-      if narg[k] ~= nil and ( type(k) == 'number' or k.sub( 1, 1 ) ~= '%' ) then
+      if narg[k] ~= nil and ( type(k) == 'number'
+			  or k.sub( 1, 1 ) ~= '%' ) then
 
 	 if spec.excludes then
-	    local excludes = type(spec.excludes) == 'table'
-                            and spec.excludes or { spec.excludes }
+	    local excludes = type(spec.excludes) == 'table' and spec.excludes or { spec.excludes }
 	    for _,v in pairs(excludes) do
 	       if narg[v] ~= nil then
 		  return false,
-		    string.format(": can't have both arguments '%s' and '%s'",
-				  k, v )
+		  string.format(": can't have both arguments '%s' and '%s'",
+				k, v )
 	       end
 	    end
 	 end
 
 	 if spec.requires then
-	    local requires = type(spec.requires) == 'table'
-	                             and spec.requires or { spec.requires }
+	    local requires = type(spec.requires) == 'table' and spec.requires or { spec.requires }
 	    for _,v in pairs(requires) do
 	       if narg[v] == nil then
 		  return false,
-		    string.format(": can't have argument '%s' without '%s'",
-				  k, v )
+		  string.format(": can't have argument '%s' without '%s'",
+				k, v )
 	       end
 	    end
 
@@ -380,22 +415,6 @@ function check_arg( spec, arg, opts )
    -- from options to avoid polluting nested tables
    local positional = opts.positional
    opts.positional = nil
-
-   -- the specification may be a function, in which case it
-   -- will return the real validation specification
-   if type(spec) == 'function' then
-
-      ok, spec = spec( arg )
-
-      if ok and type(spec) ~= 'table' then
-	 ok = false
-	 spec = '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
-      end
-
-      if not ok then
-	 return ok, spec
-      end
-   end
 
 
    -- validate the spec
@@ -691,20 +710,14 @@ function validate_opts( opts, tpl, ... )
      -- will return the real validation specification.  have to handle
      -- it early for positional arguments as we need to know if a name
      -- was assigned to the argument.
-     if type(spec) == 'function' then
 
-	ok, spec = spec( arg )
+     local ok, spec = resolve_spec( spec, oargs[i] )
 
-	if ok and type(spec) ~= 'table' then
-	   ok = false
-	   spec = '(validation spec function): did not return a table'
-	end
+     if not ok then
 
-	if not ok then
-	   local errstr = string.format( 'arg#%d(validation spec): %s',
-					i, spec )
-	   return rfunc( false, errstr )
-	end
+	local errstr = string.format( 'arg#%d(validation spec): %s',
+				     i, spec )
+	return rfunc( false, errstr )
 
      elseif type(spec) ~= 'table' then
 
