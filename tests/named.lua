@@ -122,3 +122,16 @@ function test_one_of( )
    assert_match( 'exactly one of', foo )
 
 end
+
+function test_bad_argname()
+
+   foo = function () return end
+   local template = {  [foo] = { default = 3 } }
+
+   local ok, foo = validate_opts( { baseOptions = true,
+				    error_on_bad_spec = false },
+				    template, { } )
+   assert_false( ok )
+   assert_match( "invalid argument name", foo )
+
+end

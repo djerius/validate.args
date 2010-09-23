@@ -237,7 +237,13 @@ function check_table( tspec, arg, opts )
 
 		  local ok, v_s
 
-		  if k:sub(1,1) == '%' then
+		  if type(k) ~= 'string' and type(k) ~= 'number' then
+		     ok = false
+		     v_s = ': invalid argument name'
+
+		  -- make sure we don't mistake a positional index for
+		  -- a string
+		  elseif type(k) ~= 'number' and k:sub(1,1) == '%' then
 
 		     ok, v_s = check_special( k, spec )
 
@@ -257,7 +263,7 @@ function check_table( tspec, arg, opts )
 		  if ok then
 		     v[k] = v_s
 		  else
-		     return false, string.format( ".vtable.%s%s", k, v_s );
+		     return false, string.format( ".vtable.%s%s", tostring(k), v_s );
 		  end
 
 	       end
