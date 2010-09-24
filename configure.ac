@@ -3,7 +3,7 @@
 AC_PREREQ([2.57])
 
 
-AC_INIT([validate_args],[1.0-0],[http://jeeves.cfa.harvard.edu/bugzilla/],[validate_args], [http://cxcoptics.cfa.harvard.edu/downloads/soft/src])
+AC_INIT([validate-args],[1.0-0],[http://jeeves.cfa.harvard.edu/bugzilla/],[validate-args], [http://cxcoptics.cfa.harvard.edu/downloads/soft/src])
 AM_INIT_AUTOMAKE([ check-news ])
 
 AC_CONFIG_SRCDIR([validate/args.lua])

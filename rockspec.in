@@ -1,4 +1,4 @@
-package = 'validate_args'
+package = 'validate-args'
 version = '@VERSION@'
 source = {
   url = "@PACKAGE_URL@/@PACKAGE_TARNAME@-@PACKAGE_VERSION@.tar.gz"
