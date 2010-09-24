@@ -1,8 +1,189 @@
-2010-09-14  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2010-09-24  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.0-0
+	* Tag 1.0-0
 
-2010-09-14 23:42 -0400  djerius  <djerius@cfa.harvard.edu>  (aed639558dd4 [tip])
+2010-09-24 16:40 -0400  djerius  <djerius@cfa.harvard.edu>  (226133cc0f90 [tip])
+
+	* configure.ac, rockspec.in:
+	rename to validate-args
+
+2010-09-23 11:08 -0400  djerius  <djerius@cfa.harvard.edu>  (f42413bdd1e1)
+
+	* tests/named.lua, validate/args.lua:
+	catch invalid argument names in validation spec; fix place where
+	positional index was misused as string
+
+2010-09-21 15:36 -0400  djerius  <djerius@cfa.harvard.edu>  (0c01a539f89c)
+
+	* doc/validate.args.pod, tests/named.lua, validate/args.lua:
+	added one_of attribute
+
+2010-09-21 14:35 -0400  djerius  <djerius@cfa.harvard.edu>  (9f2d6e74f4ca)
+
+	* tests/mutate.lua: new file.
+	* tests/mutate.lua:
+	forgot mutate tests
+
+2010-09-21 14:34 -0400  djerius  <djerius@cfa.harvard.edu>  (90d117b04c24)
+
+	* validate/args.lua:
+	mutating validation functions must be resolved before check_arg is
+	called.
+
+	check_table needs to keep track of the resolved validation specs to
+	do further checks after calling check_arg, so those must be called
+	*before* check_arg is invoked.
+
+2010-09-21 14:29 -0400  djerius  <djerius@cfa.harvard.edu>  (49ffe5daceb2)
+
+	* validate/args.lua:
+	ensure that errors are reported at the correct stack level
+
+2010-09-21 13:20 -0400  djerius  <djerius@cfa.harvard.edu>  (b2688b00c730)
+
+	* doc/validate.args.pod, tests/driver.lua, validate/args.lua:
+	add support for mutating valildation function
+
+2010-09-20 12:14 -0400  djerius  <djerius@cfa.harvard.edu>  (6ff809f74ad3)
+
+	* validate/args.lua:
+	allow opts argument to validate{_opts,_tbl} to be nil
+
+2010-09-20 11:50 -0400  djerius  <djerius@cfa.harvard.edu>  (d26a79efbd9b)
+
+	* tests/nested.lua:
+	one more tested for vtable functions
+
+2010-09-20 11:49 -0400  djerius  <djerius@cfa.harvard.edu>  (2d96961d4ac9)
+
+	* doc/validate.args.pod, tests/driver.lua, tests/nested.lua,
+	validate/args.lua:
+	vtable now can be a function returning a vtable based on the value
+	of arg
+
+	* minor documentation fixes
+
+	* g_rfunc now has access to all of the opts, implemented internal
+	debug error string output
+
+2010-09-20 10:50 -0400  djerius  <djerius@cfa.harvard.edu>  (b96420ac51dd)
+
+	* doc/validate.args.pod, tests/named.lua, tests/nested.lua,
+	tests/positional.lua, tests/special.lua, tests/vtypes.lua,
+	validate/args.lua:
+	per validation opts now based on DefaultOptions, not opts() changed
+	Options
+
+	* Options passed to validate_opts() and kin should not based on the
+	mutable global Options (at least not by default). New option
+	baseOptions turns on old behavior
+
+	* added docs for validate_tbl
+
+2010-09-20 10:01 -0400  djerius  <djerius@cfa.harvard.edu>  (8da1778d411c)
+
+	* doc/validate.args.pod, tests/constraints.lua, tests/nested.lua,
+	validate/args.lua:
+	split validate into vfunc and vtable; handle integer keys; new:
+	validate_tbl
+
+	* in preparation for dynamic validation spec tables, split the
+	validate attribute into vfunc and vtable.
+
+	* new entry into module, validate_tbl(), which works on tables
+	rather than on (...) . There is sufficient bizareness in the (...)
+	handling that it popped up some unseen behaviors elsewhere. It
+	turns out that most of the code in validate_opts() is to deal with
+	positional arguments in (...). This seems odd.
+
+
+	* it is perfectly legal to have tables with integer keys (e.g.
+	positional elements in tables). the vtable code couldn't handle
+	these
+
+2010-09-17 14:15 -0400  djerius  <djerius@cfa.harvard.edu>  (e403b087788e)
+
+	* tests/special.lua: new file.
+	* doc/validate.args.pod, tests/constraints.lua, tests/driver.lua,
+	tests/excludes.lua, tests/nested.lua, tests/positional.lua,
+	tests/requires.lua, tests/special.lua, validate/args.lua:
+	added group operations, fixed validation of nested validation specs
+
+	* now can make "group" based decisions; new syntax uses a pseudo-
+	argument (%one_of and %oneplus_of). somewhat clunky, but no point
+	in writing a generic decision mechanism just yet
+
+	* validation of nested validation specs was not being done (at
+	all?). fixed
+
+	* error output was made more uniform and legible
+
+	* lots of tests had nested templates where they weren't needed (cut
+	& paste error probably)
+
+	* updated docs
+
+	* Lua-fied some Fortran like code
+
+2010-09-16 14:01 -0400  djerius  <djerius@cfa.harvard.edu>  (c2a5e48778d8)
+
+	* doc/validate.args.pod, tests/constraints.lua, validate/args.lua:
+	enum can now take either a scalar or a list
+
+2010-09-16 13:30 -0400  djerius  <djerius@cfa.harvard.edu>  (d267e1a99e0b)
+
+	* doc/validate.args.pod, tests/named.lua, tests/positional.lua,
+	validate/args.lua:
+	add support for error_on_invalid, allow_extra, and pass_through
+	options
+
+2010-09-15 23:10 -0400  djerius  <djerius@cfa.harvard.edu>  (1e25e9cb6418)
+
+	* tests/excludes.lua, tests/requires.lua: new file.
+	* doc/validate.args.pod, tests/driver.lua, tests/excludes.lua,
+	tests/requires.lua, validate/args.lua:
+	add ability to require or exclude other options
+
+2010-09-15 14:54 -0400  djerius  <djerius@cfa.harvard.edu>  (5c2906b0863a)
+
+	* rockspec.in:
+	add tests to installed files to provide some examples
+
+2010-09-15 14:54 -0400  djerius  <djerius@cfa.harvard.edu>  (fa7519ff0676)
+
+	* validate/args.lua:
+	correctly handle required but not specified named arguments
+
+	named arguments which weren't specified were flagged as erroneous,
+	but by mere chance, not design. That has been fixed.
+
+2010-09-15 14:52 -0400  djerius  <djerius@cfa.harvard.edu>  (ff241542bad8)
+
+	* tests/named.lua:
+	add test for required but not specified named parameter
+
+2010-09-15 14:38 -0400  djerius  <djerius@cfa.harvard.edu>  (325d8ccbe114)
+
+	* tests/nested.lua:
+	add test for nested default value w/ no defaults in parent table
+
+2010-09-15 14:35 -0400  djerius  <djerius@cfa.harvard.edu>  (bd351852475d)
+
+	* doc/validate.args.pod:
+	remove Perl-ism from example code
+
+2010-09-15 14:35 -0400  djerius  <djerius@cfa.harvard.edu>  (b63b724d39bd)
+
+	* doc/validate.args.pod:
+	not_nil only make sense for positional arguments; update docs to say
+	that
+
+2010-09-14 23:43 -0400  djerius  <djerius@cfa.harvard.edu>  (f63e95269bbc)
+
+	* ChangeLog:
+	update log for release
+
+2010-09-14 23:42 -0400  djerius  <djerius@cfa.harvard.edu>  (aed639558dd4)
 
 	* doc/Makefile.am, doc/validate.args.pod: new file.
 	* docs/Makefile.am, docs/validate.args.pod: deleted file.
