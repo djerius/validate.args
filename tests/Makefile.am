@@ -13,12 +13,15 @@ BUILT_SOURCES           +=
 # extra files to add to the distribution
 EXTRA_DIST              +=		\
 			constraints.lua	\
+			driver.lua	\
+			excludes.lua	\
+			mutate.lua	\
 			named.lua	\
 			nested.lua	\
 			positional.lua	\
-			driver.lua	\
+			requires.lua	\
+			special.lua	\
 			vtypes.lua
-
 
 # Any files make built
 CLEANFILES              +=
