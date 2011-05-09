@@ -88,7 +88,7 @@ function test_multiple__required__not_specified__with_name ()
    local ok, err = validate( template, nil )
 
    assert_false( ok )
-   assert_match( 'arg#2: missing', err )
+   assert_match( 'arg#2%(arg2%): missing', err )
 
 end
 

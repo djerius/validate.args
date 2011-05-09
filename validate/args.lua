@@ -755,11 +755,19 @@ function validate_opts( opts, tpl, ... )
      nargs = nargs + 1
      local name = spec.name or nargs
 
+     local argname = ''
+     if spec.name then
+	argname = string.format( 'arg#%d(%s)', i, spec.name )
+     else
+	argname = string.format( 'arg#%d', i )
+     end
+
+
      handled_pos[i] = true;
 
      -- distinguish between a nil value and a non-existent positional arg
      if i > npos and not ( spec.optional or spec.default ) then
-	local errstr = string.format( 'arg#%d: missing', i )
+	local errstr = string.format( '%s: missing', argname )
 	return rfunc( false, errstr )
      end
 
@@ -772,7 +780,7 @@ function validate_opts( opts, tpl, ... )
      if ok then
 	args[name] = v
      else
-	local errstr = string.format( 'arg#%d%s', i, v )
+	local errstr = string.format( '%s%s', argname, v )
 	return rfunc( false, errstr )
      end
 
