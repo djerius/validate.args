@@ -2,8 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.57])
 
-
-AC_INIT([validate-args],[1.0-0],[http://jeeves.cfa.harvard.edu/bugzilla/],[validate-args], [http://cxcoptics.cfa.harvard.edu/downloads/soft/src])
+AC_INIT([validate-args],[1.0.1],[https://bitbucket.org/djerius/validate.args/issues],[validate-args], [https://bitbucket.org/djerius/validate.args])
 AM_INIT_AUTOMAKE([ check-news ])
 
 AC_SUBST( ROCKSPEC_VERSION, 1 )

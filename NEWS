@@ -1,3 +1,13 @@
-1.0-0 :
+1.0.1 :
+
+[ENHANCEMENTS]
+
+* default value may now be a function which returns the value
+
+[OTHER]
+
+* documentation improvements
+
+1.0.0 :
 
 * initial public release

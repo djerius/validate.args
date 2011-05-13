@@ -1,8 +1,62 @@
-2010-09-24  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-05-13  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	* Tag 1.0-0
+	Tag 1.0.1
 
-2010-09-24 16:40 -0400  djerius  <djerius@cfa.harvard.edu>  (226133cc0f90 [tip])
+2011-05-13 12:10 -0400  djerius  <djerius@cfa.harvard.edu>  (9e150d814cc2 [tip])
+
+	* mstbuild.cfg: new file.
+	* mstbuild.cfg:
+	mstbuild config options
+
+2011-05-13 12:05 -0400  djerius  <djerius@cfa.harvard.edu>  (3d7116b1d7e7)
+
+	* doc/validate.args.pod:
+	add docs for default function; rewrite docs to improve usability
+
+2011-05-13 12:03 -0400  djerius  <djerius@cfa.harvard.edu>  (ef89f854c170)
+
+	* Makefile.am, configure.ac, rockspec.in:
+	improve generation of rockspec; fix version infor
+
+2011-05-13 11:59 -0400  djerius  <djerius@cfa.harvard.edu>  (6be32ca7b8e6)
+
+	* tests/deffunc.lua: new file.
+	* tests/Makefile.am, tests/deffunc.lua, tests/driver.lua,
+	validate/args.lua:
+	let default value be a function return the default value
+
+2011-05-09 15:53 -0400  djerius  <djerius@cfa.harvard.edu>  (a36f54a10b56)
+
+	* tests/positional.lua, validate/args.lua:
+	add name of positional parameter to error messages if provided
+
+2010-10-15 10:53 -0400  djerius  <djerius@cfa.harvard.edu>  (ea850a46d4c8)
+
+	* .hgtags:
+	Added tag 1.0-0 for changeset ae283df8d6f5
+
+2010-10-15 10:53 -0400  djerius  <djerius@cfa.harvard.edu>  (ae283df8d6f5 [1.0-0])
+
+	* tests/Makefile.am:
+	add missing test files to distribution
+
+2010-10-15 10:53 -0400  djerius  <djerius@cfa.harvard.edu>  (6051627bd028)
+
+	* .hgtags:
+	remove premature tag
+
+2010-09-24 16:40 -0400  djerius  <djerius@cfa.harvard.edu>  (25fd3c9f7944)
+
+	* .hgtags: new file.
+	* .hgtags:
+	Added tag 1.0-0 for changeset fe011b6dd7fc
+
+2010-09-24 16:40 -0400  djerius  <djerius@cfa.harvard.edu>  (fe011b6dd7fc)
+
+	* ChangeLog:
+	update log for release
+
+2010-09-24 16:40 -0400  djerius  <djerius@cfa.harvard.edu>  (226133cc0f90)
 
 	* configure.ac, rockspec.in:
 	rename to validate-args
