@@ -5,72 +5,93 @@ validate.args - validate arguments
 =head1 SYNOPSIS
 
   va = require('validate.args')
-  validate = va.validate
-  validate_opts = va.validate_opts
 
-  local a, b = validate( { a = { optional = 0 },
-                           b = { optional = 1, type = 'table' },
-                         },
-                          ...
-                        )
-  local a, b = validate_opts( options,
-                             { a = { optional = 0 },
-                               b = { optional = 1, type = 'table' },
-                             },
-                            ...
-                            )
+  -- foo( a, b )
+  func foo( ... )
+    local spec = { <specifications> }
+    local ok, a, b = va.validate( spec, ... )
+  end
+
+  --- goo( c, d )
+  func goo( ... )
+    local spec = { <specifications> }
+    local ok, c, d = va.validate( options, spec, ... )
+  end
 
 =head1 DESCRIPTION
 
 B<validate.args> validates that a function's arguments meet certain
 specifications.  Both scalar and table arguments are validated, and
-table arguments may be nested.
+validation of nested tables is supported.  B<validate.args> provides
+two main validation functions, C<validate()> and C<validate_opts()>.
+They differ in that C<validate()> uses global settings for options
+which control the validation process while C<validat_opts()>
+allows setting those options for a specific validation.
 
-Specification details are specified in tables, one table per argument.
+Positional, named, and mixed positional and named arguments are
+supported.  Positional arguments may be converted to named arguments
+for uniformity of access (see L</Validation Options>).  Each argument
+has a validation specification which provides the validation
+constraints.
 
-If a function is passed only named arguments, as in
+=over
 
-  foo{ a = 3, b = 'n' }
-
-then the specifications should be bundled into a table with the argument
-names as keys:
-
-
-  { a = specs_for_a , b = specs_for_b }
-
-If a function is passed positional arguments, as in
+=item Positional arguments
 
   foo( 3, 'n' )
 
-then the specifications should be bundled as a list:
+Positional arguments are not explicitly named when passed to the
+function.  Their validation specifications are passed as a list,
+one element per argument:
 
-  { specs_for_arg_1 , specs_for_arg_2 }
+  { { pos1 specification },
+    { pos2 specification }
+  }
 
 
-One can in a sense I<mix> the two forms by using both tables and scalars,
+=item Named arguments
 
-  foo( 3, 'n', { opta = 1, optb = 2 } )
+  goo{ a = 3, b = 'n' }
 
-where the last table is really just the third positional argument. This
-form is useful for passing in named options alongside required positional
-arguments.
+Named arguments are passed as a single table to the function (notice
+the use of the C<{}> syntactic sugar in the function invocation).  Their validation
+specifications are passed as a table:
 
-Positional arguments may also be converted to named arguments (see
-L</Validation Options>)
+ { arg1_name = { arg1 specification },
+   arg2_name = { arg2 specification }
+ }
+
+=item "mixed" mode
+
+  bar( 3, 'n', { c = 22 } )
+
+Here a nested table is used to hold the named arguments. The table is
+simply another positional argument, so the validation specifications
+are passed as a list, one per argument:
+
+  { { pos1 specification },
+    { pos2 specification },
+    { table specification }
+  }
+
+The validation specification for the table specifies the constraints
+on the named arguments, typically using the C<vtable> constraint.
+
+=back
 
 =head2 Validation Specifications
 
 A validation specification is a set of constraints which an argument
-must meet.  The specification takes the form of a table, where each
+must meet.  In most cases the specification is encoded in a table, where each
 key-value pair represents a type of constraint and its
-parameters.  Most typically these tables are what is passed in the
-list of specifications described above; see however, L</Mutating
+parameters.   The specification may also be specified by a function; see L</Mutating
 Validation Specifications>.
 
-Multiple constraints may be specified for each argument. They are
-applied in random order.  The caller may provide constraints
-which modify the passed arguments; these must not expect a particular
-sequence of operation.
+Multiple constraints may be specified for each argument. There are no
+guarantees as to the order in which the constraints are applied.
+
+The caller may provide constraints which modify the passed arguments;
+these must not expect a particular sequence of operation.
 
 The following constraint types are recognized:
 
@@ -85,12 +106,27 @@ as C<nil> in the function call, e.g.
 
   foo( nil, 3 )
 
-By default all arguments are required.
+It defaults to C<false>.  All arguments are required by default.
 
 =item default
 
-This provides the value for the argument if it is not specified, as
-well as indicating that the argument is optional.
+This provides a value for the argument if it is not specified, as
+well as indicating that the argument is optional.  This may be a function,
+which will be called if a default value is required.  The function
+should return two values:
+
+=over
+
+=item 1
+
+a boolean indicating success or failure;
+
+=item 2
+
+the default value upon success, an error message upon failure
+
+=back
+
 
 =item type
 
@@ -101,7 +137,7 @@ type or a list of types:
   type = { 'number', 'boolean' }
 
 
-Types are specified as strings, with the following available:
+Types are specified as strings, with the following types available:
 
 =over
 
@@ -193,10 +229,19 @@ See also L</Argument Groups>
 
 This specifies a function which is called to validate the argument.
 It is called with a single argument, the passed argument
-value.  It must return two values.  The first is a boolean indicating
-whether validation was successful.  If it was successful the second
-value is the possibly transformed argument value.  If it failed, the
-second value is an error message.
+value. It must return two values:
+
+=over
+
+=item 1
+
+a boolean indicating success or failure;
+
+=item 2
+
+the (possibly modified) argument value upon success, an error message upon failure
+
+=back
 
 For example,
 
@@ -210,85 +255,99 @@ For example,
 
 =item vtable
 
-This specifies a table of specifications which will be used to
-validate an argument which is a table.  The table is a set of
-validation specifications.  The argument I<must> itself be a table.
-This is how nested tables of arguments are validated. For example, the
-following validation specificaton:
+This is used to validate the contents of an argument which is a table.
+It's value may be either:
 
-  { arg1 = { vtable =
-              { arg2 = { vtable =
-                           { arg3 = { type = 'string' } } } } } }
+=over
 
-will correctly validate the equivalent of
+=item a table of specifications
 
-     arg1 = {}
-     arg1.arg2 = {}
-     arg1.arg2.arg3 = 'foo'
+There should be one element in the specification table for each element
+in the argument table. For example, to validate a call such as
 
+  foo( 'hello', { nv1 = 3, nv2 = 2 } )
 
-It is possible to choose which specification table to use based upon
-the value of the argument.  To do this, specify a function, rather
-than a table.  The function is called as C<func(arg)>. It must return
-two values.  The first is a boolean indicating success or failure.  Upon
-success, the second argument must be a table of validation specifications.
-Upon error, the second argument should be an error message.
+Use
 
-For example, to choose the validation table based upon the first
-positional argument in a table:
+  spec = { { type = 'string' },
+           { vtable = { nv1 = { type = 'posint' },
+                        nv2 = { type = 'int' },
+                      }
+           }
+         }
+  ok, pos, tbl = validate( spec, ... )
 
-  specs = { gaussian = { {}, sigma = { type = 'number' } },
-            uniform  = { {},  },
-	    powerlaw = { {}, alpha = { type = 'number' } },
-	  }
+which will return
 
-and later in the validation specification:
+   pos = 'hello'
+   tbl = { nv1 = 3, nv2 = 2 }
+
+ in the above invocation.
 
 
-  { idist = { vtable = function (arg)
-                          local vtable = specs[arg[1]]
-			  if vtable then
-			    return true, vtable
-                          else
-			    return false, "unknown idist: " .. tostring(arg)
-			  end
-                       end } }
+=item a function
 
+The function should take a single parameter - the passed argument
+I<value> - and must return two values:
+
+=over
+
+=item 1
+
+a boolean indicating success or failure;
+
+=item 2
+
+Upon success, a table of validation specifcations. Upon failure, an error message.
+See L</Examples> for an example of this in use.
+
+=back
+
+=back
 
 =item name
 
 A name for a positional argument.  If specified and the C<named>
 validation option is I<true>, then the argument will be assigned this
-name in the returned argument table.
+name in the returned argument table.  See L</Validation Options> for
+more information.
 
 =back
 
 =head2 Mutating Validation Specifications
 
-The validation specifications are usually passed as tables.  It is
-sometimes necessary to be able to construct validations on the fly
-(much as does the C<vtable> constraint).  In such cases the validation
-specification should be specified as a I<function> which takes a
-single option - the argument - and returns two values.  The first
-value is a boolean indicating success or failure.  In the case of
-success the second value is a table containing the actual validation
-specification.  In the case of failure it is a message to be returned
-to the caller.
+A validation specification is usually (as documented above) a table of
+constraints.  In the case where the entire validation table must be
+created on the fly the validation specification may be a I<function>.
+The function should take a single parameter - the passed argument
+I<value> - and must return two values:
+
+=over
+
+=item 1
+
+a boolean indicating success or failure;
+
+=item 2
+
+Upon success, a table of validation specifcations. Upon failure, an error message.
+
+=back
 
 =head2 Groups of Arguments
 
 Some operations on groups of arguments are possible for named
 arguments.  These are specified as special "arguments" in the
 validation specification.  In order to accomodate multiple groups,
-these "arguments" take as values a I<list of lists>, not a simple list:
+these "arguments" take as values a I<list of lists>,
 
   ['%one_of'] = { { 'a', 'b', 'c' } }
 
-B<not>
+B<not> a simple list:
 
   ['%one_of'] = { 'a', 'b', 'c' }
 
-This allows specifying multiple groups:
+in ordeThis allows specifying multiple groups:
 
   ['%one_of'] = { { 'a', 'b', 'c' } , { 'd', 'e', 'f' } }
 
@@ -501,6 +560,11 @@ For example, the following
 adds a new type called C<mytype> which accepts only numbers between 2 and 3 (exclusive)
 and modifies the argument by multiplying it by 3.
 
+=item opts( I<table of options> )
+
+Set the default values for the passed options.  See L</Validation
+Options> for the available options.
+
 
 =back
 
@@ -554,11 +618,51 @@ then
   opts.b = 33
 
 
+=item * vtable functions
+
+In this example a function (C<foo()>) takes a named parameter, C<idist>, which
+describes a random number distribution and its parameters:
+
+  foo( idist = { 'gaussian', sigma = 33 } );
+  foo( idist = { 'powerlaw', alpha = 1.5 } );
+
+C<idist> is a table with the name of the distribution as the first
+positional value and its parameters as subsequent named parameters.
+Each random number distribution has different parameters, so a simple
+specification cannot be written which would cover all possible cases.
+This is where using a vtable function makes it easy.
+
+First, create a table containing validation specifications for each
+of the distributions.  The distribution names are the keys:
+
+  specs = { gaussian = { {}, sigma = { type = 'number' } },
+            uniform  = { {},  },
+	    powerlaw = { {}, alpha = { type = 'number' } },
+	  }
+
+The specifications are used to validate the entire contents of idist,
+so the name of the distribution must be validated as well (hence the
+C<{}> as the first element in the specification table).  Later, in the
+full validation specification for C<foo()>, C<idist> is validated
+using a vtable function which selects the correct validation
+specification based upon the value of the first positional element
+(the name of the function):
+
+  { idist = { vtable = function (arg)
+                          local vtable = specs[arg[1]]
+			  if vtable then
+			    return true, vtable
+                          else
+			    return false, "unknown idist: " .. tostring(arg)
+			  end
+                       end } }
+
+
+
 
 =back
 
 =head1 AUTHOR
-
 
 Diab Jerius, E<lt>djerius@cfa.harvard.eduE<gt>
 
