@@ -12,7 +12,8 @@ SUBDIRS			=		\
 BUILT_SOURCES           +=
 
 # extra files to add to the distribution
-EXTRA_DIST              +=
+EXTRA_DIST              += \
+			$(ROCKSPEC_FILE_NAME)
 
 # Any files make built
 CLEANFILES              +=
