@@ -9,6 +9,7 @@ va.opts{ check_spec = true,
 
 tests = { 'named',
 	  'constraints',
+	  'deffunc',
 	  'vtypes',
 	  'positional',
 	  'nested',

@@ -13,6 +13,7 @@ BUILT_SOURCES           +=
 # extra files to add to the distribution
 EXTRA_DIST              +=		\
 			constraints.lua	\
+			deffunc.lua	\
 			driver.lua	\
 			excludes.lua	\
 			mutate.lua	\

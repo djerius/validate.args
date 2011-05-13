@@ -202,7 +202,7 @@ function check_table( tspec, arg, opts )
    -- (possibly) transformed arguments
    local narg = {}
 
-   -- this is used to cache the args we've dealt with so we can
+   -- this is used to track the args we've dealt with so we can
    -- check for unexpected arguments
    local handled = {}
 
@@ -469,7 +469,24 @@ function check_arg( spec, arg, opts )
 
       if spec.optional or spec.default ~= nil or positional then
 
-	 return true, spec.default
+	 if type(spec.default) == 'function' then
+
+	    local ok, v = spec.default()
+
+	    -- need to put a spacer in front of the possible error
+	    -- message.  v may be legitimately be nil so can't use
+	    -- short cut operators
+	    if ok then
+	       return ok, v
+	    else
+	       return ok, ': ' .. v
+	    end
+
+	 else
+
+	    return true, spec.default
+
+	 end
 
       end
 
@@ -773,7 +790,6 @@ function validate_opts( opts, tpl, ... )
 
      opts.positional = true
      local ok, v = check_arg( spec, oargs[i], opts )
-
      -- can't use table.insert here. if v is nil
      -- table.insert(args, v) is a NOOP, the number of slots in args
      -- isn't increased
