@@ -256,7 +256,7 @@ For example,
 =item vtable
 
 This is used to validate the contents of an argument which is a table.
-It's value may be either:
+Its value may be either:
 
 =over
 
