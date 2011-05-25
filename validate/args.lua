@@ -542,7 +542,7 @@ function check_arg( spec, arg, opts )
 	    arg = narg
 	    break
 	 elseif narg ~= nil then
-	    table.insert( errors, string.format( "value (%s) did not match type (%s): %s", tostring(arg), v, narg ) )
+	    table.insert( errors, string.format( "value (%s) did not match type (%s): %s", tostring(arg), v, tostring(narg) ) )
 	 end
 
       end
