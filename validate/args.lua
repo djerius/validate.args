@@ -24,6 +24,7 @@
 
 module( ..., package.seeall )
 
+require 'io'
 require 'table'
 require 'string'
 require 'math'
@@ -682,7 +683,7 @@ function g_rfunc( opts )
 		if ( select( 1, ... ) ) then
 		   return ...
 		else
-		   print( "ERROR: " .. select( 2, ... ) )
+		   io.stderr:write( "ERROR: " .. select( 2, ... ) .. "\n" )
 		   return ...
 		end
 	     end
