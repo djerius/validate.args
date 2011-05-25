@@ -543,22 +543,33 @@ C<baseOptions> to C<true>.
 Register a validation function for the named type which
 will be accepted by the B<type> validation attribute.
 
-The function will be passed the argument to validate.  It should return a
-list of values.  The first value is a boolean indicating whether or
-not the validation succeeded.
+The function will be passed the argument to validate.  It should
+return two values:
 
-Upon success it should return the (possibly modified) argument as the second value.
+=over
 
+=item 1
+
+a boolean indicating success or failure;
+
+=item 2
+
+the (possibly modified) argument upon success, an error message upon failure
+
+=back
 For example, the following
 
   add_type( 'mytype', function( arg )
-                          return 'number' == type(arg) and  arg > 2 and arg < 3,
-			         3 * arg
-			   end
+  	    	          if 'number' == type(arg) then
+			    return true, 3 * arg
+			  else
+                            return false, 'not a number between 2 & 3'
+			  end
+		      end
           )
 
-adds a new type called C<mytype> which accepts only numbers between 2 and 3 (exclusive)
-and modifies the argument by multiplying it by 3.
+adds a new type called C<mytype> which accepts only numbers between 2
+and 3 (exclusive) and modifies the argument by multiplying it by 3.
 
 =item opts( I<table of options> )
 

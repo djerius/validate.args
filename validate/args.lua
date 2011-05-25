@@ -52,7 +52,13 @@ builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
 for _, v in pairs(builtin_types) do
    add_type(
 	    v,
-	    function (arg) return type(arg) == v, arg end
+                  function (arg)
+		     if type(arg) == v then
+			return true, arg
+		     else
+			return false
+		     end
+		  end
 	 )
 end
 
@@ -60,11 +66,19 @@ end
 other_types = {
 
    posnum = function( arg )
-	       return type(arg) == 'number' and arg > 0, arg
+		     if type(arg) == 'number' and arg > 0 then
+			return true, arg
+		     else
+			return false
+		     end
 	    end,
 
    zposnum = function( arg )
-	       return type(arg) == 'number' and arg >= 0, arg
+		     if type(arg) == 'number' and arg >= 0 then
+			return true, arg
+		     else
+			return false
+		     end
 	     end,
 
    posint = function( arg )
@@ -73,7 +87,12 @@ other_types = {
 	       end
 
 	       local _, x = math.modf( arg )
-	       return x == 0 and arg > 0, arg
+
+	       if x == 0 and arg > 0 then
+		  return true, arg
+	       else
+		  return false
+	       end
 
 	    end,
 
@@ -83,7 +102,11 @@ other_types = {
 	       end
 		local _, x = math.modf( arg )
 
-	       return x == 0 and arg >= 0, arg
+	       if x == 0 and arg >= 0 then
+		  return true, arg
+	       else
+		  return false
+	       end
 
 	     end,
 }
@@ -498,6 +521,7 @@ function check_arg( spec, arg, opts )
    -- the specification specifies a type for the argument; check it
    if spec.type ~= nil then
 
+      local errors = {}
       local ok, narg
 
       -- if spec.type may be a table or a scalar
@@ -512,15 +536,19 @@ function check_arg( spec, arg, opts )
 
 	 ok, narg = chk(arg)
 
+	 -- as we may be testing against more than one acceptable type, we can't just return a single error
+	 -- store the error messages returned (if any) and output them only if there were no matches
 	 if ok then
 	    arg = narg
 	    break
+	 elseif narg ~= nil then
+	    table.insert( errors, string.format( "value (%s) did not match type (%s): %s", tostring(arg), v, narg ) )
 	 end
 
       end
 
       if not ok then
-	 return false, string.format( ": value (%s) is not of required type", tostring( arg ) )
+	 return false, string.format( ": value (%s) is not of required type: %s", tostring( arg ), table.concat( errors, "\n" ) )
       end
 
    end
