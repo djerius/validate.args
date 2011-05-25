@@ -1,8 +1,38 @@
-2011-05-13  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-05-25  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.0.1
+	Tag 1.1.0
 
-2011-05-13 12:10 -0400  djerius  <djerius@cfa.harvard.edu>  (9e150d814cc2 [tip])
+2011-05-25 17:19 -0400  djerius  <djerius@cfa.harvard.edu>  (df8350044bd1 [tip])
+
+	* validate/args.lua:
+	try to minimize pain from API change in type check functions
+
+2011-05-25 17:17 -0400  djerius  <djerius@cfa.harvard.edu>  (03e00a24ba42)
+
+	* doc/validate.args.pod, validate/args.lua:
+	type functions may now also return an error message upon failure.
+
+2011-05-25 17:17 -0400  djerius  <djerius@cfa.harvard.edu>  (4d02b3a2e5ba)
+
+	* validate/args.lua:
+	output debug statements to stderr
+
+2011-05-13 13:13 -0400  djerius  <djerius@cfa.harvard.edu>  (43bed5bc5a1b)
+
+	* doc/validate.args.pod:
+	fix gross typo
+
+2011-05-13 12:11 -0400  djerius  <djerius@cfa.harvard.edu>  (bb570ae43476)
+
+	* .hgtags:
+	Added tag 1.0.1 for changeset a4d794abf427
+
+2011-05-13 12:11 -0400  djerius  <djerius@cfa.harvard.edu>  (a4d794abf427 [1.0.1])
+
+	* ChangeLog, NEWS, README, configure.ac:
+	update logs and version for release
+
+2011-05-13 12:10 -0400  djerius  <djerius@cfa.harvard.edu>  (9e150d814cc2)
 
 	* mstbuild.cfg: new file.
 	* mstbuild.cfg:

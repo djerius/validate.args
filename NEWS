@@ -1,3 +1,12 @@
+1.1.0 :
+
+[API CHANGE]
+
+* type check functions may now return an error message upon
+  failure. older code which simply returns the passed argument
+  as the second return value will see that argument output in the
+  error message.  See the updated docs for more information.
+
 1.0.1 :
 
 [ENHANCEMENTS]
