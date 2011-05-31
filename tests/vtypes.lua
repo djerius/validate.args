@@ -2,6 +2,8 @@ module( ..., package.seeall )
 
 va = require('validate.args')
 
+setup = _G.setup
+
 require 'string'
 require 'table'
 
@@ -43,8 +45,6 @@ local failure = {
 }
 
 
-va.add_type( 'mytype', function( arg ) return arg == 'success', 'ubet' end )
-
 function populate( success, inputs )
 
 
@@ -65,15 +65,14 @@ function populate( success, inputs )
 	 function( )
 	    local template = { { type = t } }
 
-	    local ok, foo = va.validate_opts( { baseOptions = true,
-						error_on_bad_spec = false},
-					     template, v )
+	    local ok, foo = va.validate_opts( { error_on_bad_spec = false},
+					      template, v )
 
 	    if ( success ) then
-	       assert_true( ok )
-	       assert_equal( v, foo )
+	       assert_true( ok, foo )
+	       assert_equal( v, foo, foo )
 	    else
-	       assert_false( ok )
+	       assert_false( ok, test_name )
 	    end
 	 end
    end
@@ -86,14 +85,16 @@ populate( false, failure )
 
 function test_add_type()
 
+   va.add_type( 'mytype', function( arg ) return arg == 'success', 'ubet' end )
+
    local template = { { type = 'mytype' } }
    local ok, foo = va.validate( template, 'success' )
 
    if ( ok ) then
-      assert_true( ok )
+      assert_true( ok, 'validate' )
       assert_equal( 'ubet', foo )
    else
-      assert_false( ok )
+      assert_false( ok, 'validate' )
    end
 
 end

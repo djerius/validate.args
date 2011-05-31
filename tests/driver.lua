@@ -2,22 +2,27 @@ require 'lunatest'
 require 'strict'
 local va = require( 'validate.args' )
 
-va.opts{ check_spec = true,
-	 error_on_bad_spec = true,
-	 -- debug = true
-      }
+function setup() 
 
-tests = { 'named',
-	  'constraints',
-	  'deffunc',
-	  'vtypes',
-	  'positional',
-	  'nested',
-	  'requires',
-	  'excludes',
-	  'special',
-	  'mutate'
-       }
+   va.reset()
+   va.opts{ check_spec = true,
+	    error_on_bad_spec = true,
+	 }
+end
+
+tests = {
+   'named',
+   'constraints',
+   'deffunc',
+   'vtypes',
+   'positional',
+   'nested',
+   'requires',
+   'excludes',
+   'special',
+   'mutate',
+   'object'
+}
 
 for _, v in pairs(tests) do
    lunatest.suite( v )

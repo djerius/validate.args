@@ -4,6 +4,8 @@ va = require( 'validate.args' )
 validate = va.validate
 validate_opts = va.validate_opts
 
+setup = _G.setup
+
 function test_not_table( )
 
    local template = { {
@@ -15,7 +17,7 @@ function test_not_table( )
 
    local ok, foo = validate( template, 3 )
 
-   assert_false( ok )
+   assert_false( ok, 'validate' )
    assert_match('incorrect type' , foo )
 
 end
@@ -35,7 +37,7 @@ function test_one_level( )
 			     }
 			  )
 
-   assert_true( ok )
+   assert_true( ok, 'validate' )
    assert_equal( 'a', foo.arg1 )
    assert_equal( 3, foo.arg2 )
 
@@ -67,7 +69,7 @@ function test_two_levels( )
 			     }
 			  )
 
-   assert_true( ok )
+   assert_true( ok, 'validate' )
    assert_equal( 'a', foo.arg1 )
    assert_equal( 3, foo.arg2 )
    assert_equal( 'foo', foo.arg3.arg31 )
@@ -91,7 +93,7 @@ function test_two_levels_defaults ()
 
    local ok, foo = validate( template, { arg3 = {} }  )
 
-   assert_true( ok )
+   assert_true( ok, 'validate' )
    assert_equal( 99, foo.arg3.arg33 )
 
 end
@@ -109,12 +111,11 @@ function test_invalid_spec ()
 		  } }
 
    local ok, foo = validate_opts( {
-				    baseOptions = true,
 				    error_on_bad_spec = false
 				 },
 				 template, { arg3 = {} }  )
 
-   assert_false( ok )
+   assert_false( ok, 'validate' )
 
    assert_match( 'snarf', foo )
 
@@ -212,7 +213,6 @@ function test_bad_vtable_func ()
 
 
    local ok, foo = validate_opts( {
-				    baseOptions = true,
 				    error_on_bad_spec = false
 				 },
 				 template, { a = 1, b = 2 } )

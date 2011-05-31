@@ -4,6 +4,8 @@ va = require( 'validate.args' )
 validate = va.validate
 validate_opts = va.validate_opts
 
+setup = _G.setup
+
 function test_table_mutation( )
 
    local template =  {

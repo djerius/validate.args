@@ -3,6 +3,8 @@ module( ..., package.seeall )
 local va = require( 'validate.args' )
 local validate, validate_opts = va.validate, va.validate_opts
 
+setup = _G.setup
+
 function test_template_is_a_table ()
 
    local ok, err = validate( 'x', 'x' )
@@ -142,8 +144,7 @@ function test_cvs_pos_to_named ()
 			 type = 'string',
 		      }
 		   }
-   local ok, opts = validate_opts( { baseOptions = true,
-				     named = true }, template, 32, 'foo' )
+   local ok, opts = validate_opts( { named = true }, template, 32, 'foo' )
 
    assert_true( ok )
    assert_equal( 32, opts.arg2 )
@@ -156,8 +157,7 @@ function test_extra_pos_args ()
 
    local template = { {}, {} }
 
-   local ok, a, b, c = validate_opts( { baseOptions = true,
-					allow_extra = true }, template,
+   local ok, a, b, c = validate_opts( { allow_extra = true }, template,
 				  1, 2, 3)
 
    assert_true( ok )
@@ -165,8 +165,7 @@ function test_extra_pos_args ()
    assert_equal( 2, b )
    assert_equal( nil, c )
 
-   local ok, a, b, c = validate_opts( { baseOptions = true,
-					allow_extra = true,
+   local ok, a, b, c = validate_opts( { allow_extra = true,
 					pass_through = true,
 				     }, template,
 				  1, 2, 3)

@@ -6,6 +6,8 @@ local validate_opts = va.validate_opts
 
 require 'string'
 
+setup = _G.setup
+
 function test_optional__but_specified ()
 
    local template = { x = { optional = true }}
@@ -68,8 +70,7 @@ function test_named ()
 
 
    local template = { x = { default = 2 } }
-   local ok, foo = validate_opts( { baseOptions = true,
-				    named = true }, template, {} )
+   local ok, foo = validate_opts( { named = true }, template, {} )
 
    assert_true( ok )
    assert_equal( 2, foo.x )
@@ -80,8 +81,7 @@ function test_extra_named_args ()
 
    local template = { a = {}, b = {} }
 
-   local ok, opts = validate_opts( { baseOptions = true,
-				     allow_extra = true }, template,
+   local ok, opts = validate_opts( { allow_extra = true }, template,
 				     { a = 1, b = 2, c = 3 })
 
    assert_true( ok )
@@ -89,8 +89,7 @@ function test_extra_named_args ()
    assert_equal( 2, opts.b )
    assert_equal( nil, opts.c )
 
-   local ok, opts = validate_opts( { baseOptions = true,
-				     allow_extra = true,
+   local ok, opts = validate_opts( { allow_extra = true,
 				     pass_through = true
 				  }, template,
 				  { a = 1, b = 2, c = 3 })
@@ -128,8 +127,7 @@ function test_bad_argname()
    foo = function () return end
    local template = {  [foo] = { default = 3 } }
 
-   local ok, foo = validate_opts( { baseOptions = true,
-				    error_on_bad_spec = false },
+   local ok, foo = validate_opts( { error_on_bad_spec = false },
 				    template, { } )
    assert_false( ok )
    assert_match( "invalid argument name", foo )

@@ -6,27 +6,47 @@ validate.args - validate arguments
 
   va = require('validate.args')
 
+  -- set some options which will affect
+  -- all procedural calls
+  va.opts{ options }
+
+  -- Procedural interface
+
   -- foo( a, b )
   func foo( ... )
     local spec = { <specifications> }
     local ok, a, b = va.validate( spec, ... )
   end
 
-  --- goo( c, d )
+  -- goo( c, d )
   func goo( ... )
     local spec = { <specifications> }
     local ok, c, d = va.validate( options, spec, ... )
   end
 
+  -- Object based interface
+  func foo( ... )
+    local spec = { <specifications> }
+    local vo = va:new()
+    vo:setopts{ ... }
+    local ok, a, b = vo:validate( spec, ... )
+  end
+
+
+
 =head1 DESCRIPTION
 
 B<validate.args> validates that a function's arguments meet certain
 specifications.  Both scalar and table arguments are validated, and
-validation of nested tables is supported.  B<validate.args> provides
-two main validation functions, C<validate()> and C<validate_opts()>.
-They differ in that C<validate()> uses global settings for options
-which control the validation process while C<validat_opts()>
-allows setting those options for a specific validation.
+validation of nested tables is supported.
+
+B<validate.args> provides both procedural and object-oriented
+interfaces.  The significant difference between the interfaces is that
+the procedural interface may be influenced by global settings while
+the object-oriented interface keeps those settings local to each
+object.  Objects may be themselves cloned, allowing for nested
+hierarchies of validation specifications.  Changes to parent objects
+do not affect child objects, and vice-versa.
 
 Positional, named, and mixed positional and named arguments are
 supported.  Positional arguments may be converted to named arguments
@@ -498,47 +518,73 @@ This defaults to C<false>.
 
 =back
 
-=head2 Functions
+=head2 Object oriented interface
+
+=head3 Constructors
+
+There are two available constructors: a constructor based upon class defaults
+and one based upon an object:
 
 =over
 
-=item validate( specs, ... )
+=item Class constructor
 
-Validate the passed argument list against the specifications.  It
-returns a list of values.  The first value is a boolean indicating
-whether or not the validation succeeded.
+  va = require( 'validate.args' )
+  vobj = va:new( args )
 
-If validation succeeded, the remainder of the list contains the
-values of the arguments (possibly modified during the validation).
+This constructs a new validation object based upon the class defaults.  It
+takes a table of named arguments:
 
-If validation failed, the second value is a string indicating what
-caused the failure.
+=over
+
+=item use_current_options
+
+If true, the values of the object's validation options are taken from
+the current option values set by the C<objs()> function.  If false
+(the default), the options have the default values specified above.
+
+=item use_current_types
+
+If true, the validation types are taken from
+the current values set by the C<add_type()> function.  If false
+(the default), the options have the default values specified above.
+
+=back
+
+=item Object constructor
+
+  -- create and specialize an object
+  va = require( 'validate.args' )
+  vobj = va:new( args )
+  vobj:add_type( ... )
+  vobj.opts.xxx = yyy
+
+  -- now create an independent copy of it
+  nobj = vobj:new()
+
+This creates an independent copy of the C<vobj> object, including all
+of its options and types.  This is useful for nested specialization of
+types and options.
+
+=over
 
 
-=item validate_opts( opts, specs, ... )
+=head3 Methods
 
-Validate the passed argument list against the specifications.  The
-validation workflow may be altered via options passed via the C<opts>
-argument.  The return arguments are the same as B<validate>.
+=item setopts
 
-Those options which are not set in C<opts> are set to the default
-values.  If instead they should be set to the values which were
-specified by the B<opts()> function, set the special option
-C<baseOptions> to C<true>.
+  vobj:setopts{ opt1 = val1, opt2 = val2 }
+  -- or
+  vobj.opts.opt1 = val1
+  vobj.opts.opt2 = val2
 
-=item validate_tbl( opts, specs, tble )
+Set the specified validation options.  These hold for this object
+only. An error will be thrown if the specified options are not
+recognized.
 
-Validate the contents of the passed table against the specifications.
-The validation workflow may be altered via options passed via the
-C<opts> argument.  The return arguments are the same as B<validate>.
+=item add_type
 
-Those options which are not set in C<opts> are set to the default
-values.  If instead they should be set to the values which were
-specified by the B<opts()> function, set the special option
-C<baseOptions> to C<true>.
-
-
-=item add_type( type_name, func )
+   vobj:add_type( type_name, func )
 
 Register a validation function for the named type which
 will be accepted by the B<type> validation attribute.
@@ -557,9 +603,10 @@ a boolean indicating success or failure;
 the (possibly modified) argument upon success, an error message upon failure
 
 =back
+
 For example, the following
 
-  add_type( 'mytype', function( arg )
+  vobj:add_type( 'mytype', function( arg )
   	    	          if 'number' == type(arg) then
 			    return true, 3 * arg
 			  else
@@ -571,9 +618,77 @@ For example, the following
 adds a new type called C<mytype> which accepts only numbers between 2
 and 3 (exclusive) and modifies the argument by multiplying it by 3.
 
+=item validate
+
+  vobj:validate( specs ... )
+
+Validate the passed argument list against the specifications.  It
+returns a list of values.  The first value is a boolean indicating
+whether or not the validation succeeded.
+
+If validation succeeded, the remainder of the list contains the
+values of the arguments (possibly modified during the validation).
+
+If validation failed, the second value is a string indicating what
+caused the failure.
+
+=item validate_tbl
+
+  vobj:validate_tbl( specs, tble )
+
+Validate the contents of the passed table against the
+specifications. The return values are the same as for B<validate>.
+
+
+=back
+
+
+=head2 Procedural interface
+
+=over
+
+=item validate( specs, ... )
+
+  validate( specs, ... )
+
+Validate the passed argument list against the specifications using the
+current global settings for the validation options.  See the
+documentation for the C<validate()> method for more details.
+
+=item validate_opts
+
+  validate_opts( opts, specs, ... )
+
+Validate the passed argument list against the specifications using the
+current global settings for the validation options.  Temporary values
+for validations options may be specified with the C<opts> argument. The
+return values are the same as B<validate>.
+
+=item validate_tbl
+
+  validate_tbl( opts, specs, tble )
+
+Validate the contents of the passed table against the specifications
+using the current global settings for the validation
+options. Temporary values for validations options may be specified
+with the C<opts> argument. The validation workflow may be altered via
+options passed via the C<opts> argument.  The return values are the
+same as B<validate>.
+
+=item add_type
+
+  add_type( type_name, func )
+
+Globally register a validation function for the named type which
+will be accepted by the B<type> validation attribute.  See the
+C<add_type()> method for more details on the arguments.
+
+The function will be passed the argument to validate.  It should
+return two values:
+
 =item opts( I<table of options> )
 
-Set the default values for the passed options.  See L</Validation
+Globally set the values for the passed options.  See L</Validation
 Options> for the available options.
 
 

@@ -29,56 +29,138 @@ require 'table'
 require 'string'
 require 'math'
 
--- -----------------------------------------------------------------------------
--- Support for validation of input validation templates using validate.args
--- We eat our own dog food here. Sometimes.
+-- iterate over non meta keys
+local function next_notmeta( table, index )
 
-type_check = {}
+   local k, v = next( table, index )
 
-function add_type( utype, func )
-
-   if ( type(utype) ~= 'string' ) then
-      error( "type must be a string" )
+   while k do
+      if not k:find( '^__' ) then
+	 return k, v
+      end
+      k, v = next( table, k )
    end
 
-   type_check[utype] = func
+   return k, v
+
+end
+
+local function nmpairs( table )
+   return next_notmeta, table, nil
+end
+
+
+-- generic Base object
+
+local Base = {}
+
+function Base:_dump ( message )
+
+   if message then
+      io.stderr:write( message )
+   end
+   for k,v in nmpairs( self ) do
+      io.stderr:write( k .. " = " .. tostring( v ) .. "\n" )
+   end
+end
+
+-- create child object
+---   1. make *shallow* copy of non-function data
+---   2. call datum:new() if datum is a table and has a new() method
+function Base:new( attr )
+
+   local obj = {}
+
+   -- copy data from parent.  if a datum is an object, call its constructor
+   -- so far, all objects stored in children of Base are themselves children
+   -- of Base, so this is safe.
+   -- does a shallow copy! tables are copied by reference
+   for k, v in nmpairs( self ) do
+      if ( type(v) == 'table' and type(v.new) == 'function' ) then
+	 obj[k] = v:new()
+      elseif type(v) ~= 'function' then
+	 obj[k] = v
+      end
+   end
+
+   for k, v in nmpairs( attr or {} ) do
+	 obj[k] = v
+   end
+
+   setmetatable( obj, self )
+
+   self.__index = self
+
+   -- inherit __newindex by crawling up the index chain. kinda magical
+   self.__newindex = self.__newindex
+
+   return obj
 
 end
 
 
-builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
-		  'function', 'thread', 'userdata' }
+--------------------------------------------------------------------
+-- configuration options class. doesn't allow creation of new option fields
 
-for _, v in pairs(builtin_types) do
-   add_type(
-	    v,
-                  function (arg)
-		     if type(arg) == v then
-			return true, arg
-		     else
-			return false
+local Options = Base:new{
+      check_spec        = false,
+      error_on_bad_spec = false,
+      error_on_invalid  = false,
+      named             = false,
+      allow_extra       = false,
+      pass_through      = false,
+      debug             = false,
+}
+
+-- prevent creation of new fields
+Options.__newindex = function( t, k, v )
+			if rawget( Options, k ) == nil or k == 'new' then
+			   error( 'unknown option: ' .. k, 2 )
+			end
+			rawset( t, k, v )
+			return v
 		     end
-		  end
-	 )
+
+function Options:set( opts )
+
+   for k, v in pairs( opts or {} ) do
+      self[k] = v
+   end
+
 end
 
+function Options:dump( )
 
-other_types = {
+   local io = require('io')
 
+   for k in pairs( Options ) do
+      if k ~= 'new' and not k:find( '^_') then
+	 io.stderr:write( "option " .. k .. " = " .. tostring( self[k] ) .. "\n" )
+      end
+   end
+
+end
+
+--------------------------------------------------------------------
+-- Type validator class. Just manages a list of validators.
+
+local TypeCheckValidators = Base:new{
+
+   -- various validation functions
    posnum = function( arg )
-		     if type(arg) == 'number' and arg > 0 then
-			return true, arg
-		     else
-			return false
-		     end
+	       if type(arg) == 'number' and arg > 0 then
+		  return true, arg
+	       else
+		  return false
+	       end
 	    end,
 
    zposnum = function( arg )
-		     if type(arg) == 'number' and arg >= 0 then
-			return true, arg
-		     else
-			return false
-		     end
+		if type(arg) == 'number' and arg >= 0 then
+		   return true, arg
+		else
+		   return false
+		end
 	     end,
 
    posint = function( arg )
@@ -97,29 +179,99 @@ other_types = {
 	    end,
 
    zposint = function( arg )
-	       if type(arg) ~= 'number' then
-		  return false
-	       end
+		if type(arg) ~= 'number' then
+		   return false
+		end
 		local _, x = math.modf( arg )
 
-	       if x == 0 and arg >= 0 then
-		  return true, arg
-	       else
-		  return false
-	       end
+		if x == 0 and arg >= 0 then
+		   return true, arg
+		else
+		   return false
+		end
 
 	     end,
 }
 
-for k, v in pairs(other_types) do
-   add_type( k, v )
+-- validators for built-in types
+
+local builtin_types = { 'nil', 'number', 'string', 'boolean', 'table',
+			'function', 'thread', 'userdata' }
+
+for _, v in pairs(builtin_types) do
+   TypeCheckValidators[v] = function (arg)
+			       if type(arg) == v then
+				  return true, arg
+			       else
+				  return false
+			       end
+			    end
+end
+
+--------------------------------------------------------------------
+-- Type Validation class. Encapsulates the validators and provides
+-- an interface to them.
+
+local TypeCheck = Base:new{
+
+   _validator = TypeCheckValidators:new(),
+
+}
+
+-- Add a validator
+function TypeCheck:add( vtype, validator )
+
+   if ( type(vtype) ~= 'string' ) then
+      error( "validator type must be a string", 3 )
+   end
+
+   if ( type(validator) ~= 'function' ) then
+      error( "validator must be a function", 3 )
+   end
+
+
+   self._validator[vtype] = validator
+
+end
+
+-- return a validator
+function TypeCheck:validator( vtype )
+
+   return self._validator[vtype]
+
 end
 
 
-valid_special = { ['%oneplus_of'] = true,
-		  ['%one_of'] = true }
+--------------------------------------------------------------------
+-- prototype for the validation object.  this is NOT directly exposed
 
-function check_special( special, arg )
+local Validate = Base:new{
+   state = {},
+   opts = Options:new(),
+   types = TypeCheck:new(),
+}
+
+function Validate:setopts( ... )
+
+   self.opts:set( ... )
+
+   return self.opts
+
+end
+
+function Validate:add_type( ... )
+
+   self.types:add( ... )
+
+end
+
+---------------------------------------------------------
+-- specials
+
+local valid_special = { ['%oneplus_of'] = true,
+			['%one_of'] = true }
+
+local function check_special( special, arg )
 
    if valid_special[special] then
 
@@ -143,6 +295,11 @@ function check_special( special, arg )
 end
 
 
+-- -----------------------------------------------------------------------------
+-- Support for validation of input validation templates using validate.args
+-- We eat our own dog food here. Sometimes.
+
+
 local validate_spec = {
    optional = { optional = true,
 		type = 'boolean'
@@ -150,16 +307,19 @@ local validate_spec = {
    vfunc = { optional = true,
 	     type = 'function'
 	  },
+   vmeth = { optional = true,
+	     type = 'function'
+	  },
    vtable = { optional = true,
 	      type = { 'table', 'function' },
 	   },
    default  = { optional = true },
    type     = { optional = true,
-		vfunc = function( val )
+		vmeth = function( self, val )
 			   local val = type(val) == 'table' and val or { val }
 			   for _, v in pairs( val ) do
-			      if not type_check[v] then
-				 return false, 'unkown type: ' .. tostring(v)
+			      if not self.types:validator(v) then
+				 return false, 'unknown type: ' .. tostring(v)
 			      end
 			   end
 
@@ -186,7 +346,7 @@ local validate_spec = {
 
 -- the specification may be a function, in which case it
 -- will return the real validation specification
-function resolve_spec( spec, arg )
+local function resolve_spec( spec, arg )
 
 
    local ok = true
@@ -208,7 +368,7 @@ end
 
 
 -- -----------------------------------------------------------------------------
--- Internal routine to validate a table against a table specification
+-- Validate a table against a table specification
 --
 -- First iterate through the specification validating against the table
 -- entries using check_args. note that if a table entry is itself
@@ -216,7 +376,9 @@ end
 --
 -- Then check the table to ensure that there are no unwanted keys
 
-function check_table( tspec, arg, opts )
+function Validate:check_table( tspec, arg )
+
+   local opts = self.opts
 
    -- cached copy of tspec; elements of tspec may be
    -- transformed by resolve_spec() so need to keep them
@@ -241,7 +403,7 @@ function check_table( tspec, arg, opts )
 
       -- if we're checking the validation spec, must treat an actual "vtable"
       -- attribute very carefully, as it creates nested validation specifications
-      if opts.in_check_spec and k == 'vtable' then
+      if self.state.in_check_spec and k == 'vtable' then
 
 	 ok = true
 	 v = arg[k]
@@ -281,7 +443,7 @@ function check_table( tspec, arg, opts )
 
 		  else
 
-		     ok, v_s = check_table( validate_spec, spec, opts )
+		     ok, v_s = self:check_table( validate_spec, spec )
 		  end
 
 		  if ok then
@@ -306,7 +468,7 @@ function check_table( tspec, arg, opts )
 
 	 if ok then
 	    ctspec[k] = v
-	    ok, v = check_arg( ctspec[k], arg[k], opts )
+	    ok, v = self:check_arg( ctspec[k], arg[k] )
 	 end
 
       else
@@ -354,7 +516,7 @@ function check_table( tspec, arg, opts )
    -- now check for dependencies and exclusions
    for k, spec in pairs( ctspec ) do
 
-      if narg[k] ~= nil and ( type(k) == 'number' or k.sub( 1, 1 ) ~= '%' ) then
+      if narg[k] ~= nil and ( type(k) == 'number' or k:sub( 1, 1 ) ~= '%' ) then
 
 	 if spec.excludes then
 	    local excludes = type(spec.excludes) == 'table' and spec.excludes or { spec.excludes }
@@ -452,25 +614,24 @@ end
 
 -- -----------------------------------------------------------------------------
 
--- Internal routine to validate an arbirtrary argument against a
--- validation specification.  if opts.check_spec is true, the validation
--- specification is first validated.
+-- Validate an arbirtrary argument against a validation specification.
 
-function check_arg( spec, arg, opts )
+function Validate:check_arg( spec, arg )
 
    local ok
+   local opts = self.opts
 
    -- keep track if this is a positional argument; remove
    -- from options to avoid polluting nested tables
-   local positional = opts.positional
-   opts.positional = nil
+   local positional = self.state.positional
+   self.state.positional = nil
 
 
-   -- validate the spec
-   if  opts.check_spec  and not opts.in_check_spec then
-      opts.in_check_spec = true
-      local ok, err = check_table( validate_spec, spec, opts );
-      opts.in_check_spec = false
+   -- validate the spec if requested
+   if  opts.check_spec  and not self.state.in_check_spec then
+      self.state.in_check_spec = true
+      local ok, err = self:check_table( validate_spec, spec );
+      self.state.in_check_spec = false
       if not ok then
 	 if opts.error_on_bad_spec then
 	    error( 'validation spec error: ' .. err )
@@ -529,7 +690,7 @@ function check_arg( spec, arg, opts )
 
       for _, v in pairs( utype ) do
 
-	 local chk = type_check[v]
+	 local chk = self.types:validator(v)
 	 if chk == nil then
 	    return false, '(template).type: unknown type: ' .. tostring(v)
 	 end
@@ -569,6 +730,22 @@ function check_arg( spec, arg, opts )
 
    end
 
+   if spec.vmeth then
+
+      local ok
+
+      -- a functional validation.  note that arg may be
+      -- transformed
+
+      ok, arg = spec.vmeth( self, arg )
+
+      if not ok then
+	 return false, ': ' .. arg
+      end
+
+   end
+
+
    -- was there special validation required?
    if spec.vtable ~= nil then
 
@@ -598,7 +775,7 @@ function check_arg( spec, arg, opts )
 
       -- descend into the table and see what happens. note that
       -- arg may be transformed
-      ok, arg = check_table( vtable, arg, opts )
+      ok, arg = self:check_table( vtable, arg )
 
       if not ok then
 	 return false, arg
@@ -633,72 +810,9 @@ function check_arg( spec, arg, opts )
 
 end
 
+function Validate:g_rfunc(  )
 
--- -----------------------------------------------------------------------------
--- module scoped validation options.
-
-
--- The underlying option setter.  This uses a base options table
--- unless the options table to be changed is the same as the base
--- options table
-function _setopts( opts, base, new )
-
-   opts = opts or {}
-
-   if  opts ~= base then
-      for k, v in pairs( base ) do
-	 opts[k] = v
-      end
-   end
-
-   new = new or {}
-
-   for k, v in pairs( new ) do
-
-      if DefaultOptions[k] == nil then
-	 error( "illegal option: " .. k )
-      end
-
-      opts[k] = v
-
-   end
-
-   return opts
-
-end
-
--- Public interface to set options seen by validate()
-function opts( ... )
-
-   _setopts( Options, Options, ... )
-
-end
-
-
--- These are the immutable default.  This also serves as check against
--- illegal options
-DefaultOptions = {
-   check_spec        = false,
-   error_on_bad_spec = false,
-   error_on_invalid  = false,
-   named             = false,
-   allow_extra       = false,
-   pass_through      = false,
-   debug             = false,
-
-   -- used only by validate functions which pass options, to indicate
-   -- their options are based on Options, not DefaultOptions.  This
-   -- is a placeholder so it's not flagged as an illegal option
-   baseOptions       = false,
-}
-
--- These are the options seen by validate().  They are mutable by opts().
-Options = _setopts( nil, DefaultOptions )
-
-
-function g_rfunc( opts )
-
-   if opts.error_on_invalid then
+   if self.opts.error_on_invalid then
       return function( ... )
 		 if ( select( 1, ... ) ) then
 		    return ...
@@ -706,7 +820,7 @@ function g_rfunc( opts )
 		    error( select( 2, ... ), 4 )
 		 end
 	      end
-   elseif opts.debug then
+   elseif self.opts.debug then
       return function( ... )
 		if ( select( 1, ... ) ) then
 		   return ...
@@ -721,33 +835,22 @@ function g_rfunc( opts )
 
 end
 
--- validate arguments using the default options
+function Validate:validate_tbl( tpl, arg )
 
-function validate ( ... )
+   local rfunc = self:g_rfunc()
 
-  return validate_opts( Options, ... )
-
-end
-
-function validate_tbl( opts, tpl, arg )
-
-   opts = _setopts( nil, (opts and opts.baseOptions and Options) or DefaultOptions, opts )
-
-   local rfunc = g_rfunc( opts )
-
-   return rfunc( check_arg( { type = 'table',
-				vtable = tpl }, arg, opts ) )
+   return rfunc( self:check_arg( { type = 'table',
+				   vtable = tpl }, arg ) )
 
 end
 
--- validate arguments using specific options
-function validate_opts( opts, tpl, ... )
+function Validate:validate( tpl, ... )
 
    local ok
 
-   opts = _setopts( nil, (opts and opts.baseOptions and Options) or DefaultOptions, opts )
+   local opts = self.opts
 
-   local rfunc = g_rfunc( opts )
+   local rfunc = self:g_rfunc()
 
   -- do our own simple validation
   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
@@ -817,8 +920,8 @@ function validate_opts( opts, tpl, ... )
 	return rfunc( false, errstr )
      end
 
-     opts.positional = true
-     local ok, v = check_arg( spec, oargs[i], opts )
+     self.state.positional = true
+     local ok, v = self:check_arg( spec, oargs[i] )
      -- can't use table.insert here. if v is nil
      -- table.insert(args, v) is a NOOP, the number of slots in args
      -- isn't increased
@@ -843,15 +946,14 @@ function validate_opts( opts, tpl, ... )
 	return rfunc( false, "too many positional arguments" )
      end
 
-     local arg = oargs[1]
+     local arg = oargs[1] or {}
 
-     if type(arg) == 'nil' or (type(arg) ~= 'table' and type(arg) ~= 'function')  then
-	return rfunc( false, "arg#2: expected table or function, got "
-		     .. type(arg) )
+     if type(arg) ~= 'table'  then
+	return rfunc( false, "arg#2: expected table , got " .. type(arg) )
      end
 
-     return rfunc( check_arg( { type = 'table',
-				vtable = tpl }, arg, opts ) )
+     return rfunc( self:check_arg( { type = 'table',
+				vtable = tpl }, arg ) )
 
   else
 
@@ -906,3 +1008,94 @@ function validate_opts( opts, tpl, ... )
 end
 
 -------------------------------------------------------------------------------
+
+-- forward declaration of default object to ensure that it's seen by
+-- the class constructor; it's properly defined after the definition
+-- of the constructor
+
+local defobj = {}
+
+
+--------------------------------------------------------------------
+-- public Class constructor
+
+-- takes these named options.
+--  use_current_options: if true, uses current (rather than default) options
+--  use_current_types:   if true, uses current (rather than default) types
+--  use_current:         if true, uses current options and types
+
+function new( self, args )
+
+   local ok, args = Validate:validate( { use_current_options = { type = 'boolean', optional = true },
+					 use_current_types   = { type = 'boolean', optional = true },
+					 use_current         = { type = 'boolean', optional = true ,
+								 excludes = { 'use_current_options',
+									      'use_current_types' },
+							      },
+				      },  args )
+
+   if not ok then
+      error( _NAME .. ":new(): " .. args, 2 )
+   end
+
+   if args.use_current then
+      args.use_current_options = true
+      args.use_current_types = true
+   end
+
+   local obj = Validate:new()
+
+   obj.opts  = args.use_current_options and defobj.opts:new()  or obj.opts
+   obj.types = args.use_current_types   and defobj.types:new() or obj.types
+
+   return obj
+
+end
+
+-- set up for the procedural interface using a default object
+
+defobj = Validate:new()
+
+function reset( )
+   defobj = Validate:new()
+end
+
+function add_type( ... )
+   return defobj:add_type( ... )
+end
+
+function validate( ... )
+   return defobj:validate( ... )
+end
+
+-- these wrappers set options; make sure they don't leak into
+-- the default object by cloning the default object.
+function validate_tbl( ... )
+
+   -- backwards compatibility
+   if select('#', ...) == 3 then
+
+      local opts, tpl, arg = ...
+
+      local obj = defobj:new()
+      obj:setopts( opts )
+
+      return obj:validate_tbl( tpl, arg )
+
+   else
+
+      return defobj:validate_tbl( ... )
+
+   end
+
+end
+
+function validate_opts( opts, ... )
+   local obj = defobj:new();
+   obj:setopts( opts )
+   return obj:validate( ... )
+end
+
+function opts( ... )
+   return defobj:setopts( ... )
+end

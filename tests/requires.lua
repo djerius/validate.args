@@ -2,6 +2,8 @@ module( ..., package.seeall )
 
 validate = require( 'validate.args' ).validate
 
+setup = _G.setup
+
 function test_req_scalar( )
 
    local template = {
