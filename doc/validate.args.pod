@@ -522,15 +522,16 @@ and one based upon an object:
   va = require( 'validate.args' )
   vobj = va:new( args )
 
-This constructs a new validation object based upon the class defaults.  It
-takes a table of named arguments:
+This constructs a new validation object based upon either the class
+defaults or the current defaults (as set by the B<opts()> and
+B<add_type()> functions).  It takes a table of named arguments:
 
 =over
 
 =item use_current_options
 
 If true, the values of the object's validation options are taken from
-the current option values set by the C<objs()> function.  If false
+the current option values set by the C<opts()> function.  If false
 (the default), the options have the default values specified above.
 
 =item use_current_types
@@ -538,6 +539,11 @@ the current option values set by the C<objs()> function.  If false
 If true, the validation types are taken from
 the current values set by the C<add_type()> function.  If false
 (the default), the options have the default values specified above.
+
+=item use_current
+
+This is equivalent to specifying both C<use_current_types> and
+C<use_current_options> to the same value.
 
 =back
 
@@ -556,10 +562,12 @@ This creates an independent copy of the C<vobj> object, including all
 of its options and types.  This is useful for nested specialization of
 types and options.
 
-=over
 
+=back
 
 =head3 Methods
+
+=over
 
 =item setopts
 
