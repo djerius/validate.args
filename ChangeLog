@@ -1,8 +1,39 @@
-2011-05-25  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-05-31  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.1.0
+	Tag 1.2.0
 
-2011-05-25 17:19 -0400  djerius  <djerius@cfa.harvard.edu>  (df8350044bd1 [tip])
+2011-05-31 16:52 -0400  djerius  <djerius@cfa.harvard.edu>  (3ad61d10b269 [tip])
+
+	* doc/validate.args.pod:
+	oops. forgot to remove docs for baseOptions
+
+2011-05-31 16:46 -0400  djerius  <djerius@cfa.harvard.edu>  (f3aa62af635a)
+
+	* tests/object.lua: new file.
+	* doc/validate.args.pod, tests/deffunc.lua, tests/driver.lua,
+	tests/mutate.lua, tests/named.lua, tests/nested.lua,
+	tests/object.lua, tests/positional.lua, tests/requires.lua,
+	tests/special.lua, tests/vtypes.lua, validate/args.lua:
+	internals are now object-based, with old API built on top of it
+
+	* internals are now object based. see docs
+
+	* API has slightly changed: validate_opts now always tracks the
+	current options specifications. the baseOptions option is no more.
+	the object-based interface should be used to replicate the old
+	behavior
+
+2011-05-25 17:22 -0400  djerius  <djerius@cfa.harvard.edu>  (628658dabd60)
+
+	* .hgtags:
+	Added tag 1.1.0 for changeset 228ccfe04396
+
+2011-05-25 17:22 -0400  djerius  <djerius@cfa.harvard.edu>  (228ccfe04396 [1.1.0])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-05-25 17:19 -0400  djerius  <djerius@cfa.harvard.edu>  (df8350044bd1)
 
 	* validate/args.lua:
 	try to minimize pain from API change in type check functions

@@ -1,3 +1,19 @@
+1.2.0 :
+
+[API CHANGE]
+
+* validate_opts: options which are now set reflect the *current*
+  values as set by opts(), not the default values.  the baseOptions
+  option is no longer supported.  Use the new object-oriented
+  interface to duplicate the old functionality
+
+[ENHANCEMENTS]
+
+* validate.args now provides an object-oriented API as well as a
+  procedural API.  This makes it easier to create isolated validation
+  schemes.
+
+
 1.1.0 :
 
 [API CHANGE]
