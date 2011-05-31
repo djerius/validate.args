@@ -1,8 +1,24 @@
 2011-05-31  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.0
+	Tag 1.2.1
 
-2011-05-31 16:52 -0400  djerius  <djerius@cfa.harvard.edu>  (3ad61d10b269 [tip])
+2011-05-31 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (d05b1c392d41 [tip])
+
+	* doc/validate.args.pod:
+	fix document structure. add missing documentation for use_current
+	option to the class constructor
+
+2011-05-31 16:55 -0400  djerius  <djerius@cfa.harvard.edu>  (17aa08e388d1)
+
+	* .hgtags:
+	Added tag 1.2.0 for changeset a63724cce159
+
+2011-05-31 16:55 -0400  djerius  <djerius@cfa.harvard.edu>  (a63724cce159 [1.2.0])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-05-31 16:52 -0400  djerius  <djerius@cfa.harvard.edu>  (3ad61d10b269)
 
 	* doc/validate.args.pod:
 	oops. forgot to remove docs for baseOptions
