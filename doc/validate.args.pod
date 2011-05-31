@@ -506,16 +506,6 @@ would result in
 
 This defaults to C<false>.
 
-=item baseOptions
-
-This option is useful only for the validation functions which take an
-options table (such as validate_opts()). If C<true>, any options which
-are not specified in the options table will be set from the global
-options table as modified by the B<opts()> function.  Normally they
-are set from the default options values.
-
-This defaults to C<false>.
-
 =back
 
 =head2 Object oriented interface
