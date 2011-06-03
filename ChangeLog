@@ -1,8 +1,24 @@
-2011-05-31  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-06-03  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.1
+	Tag 1.2.2
 
-2011-05-31 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (d05b1c392d41 [tip])
+2011-06-03 13:13 -0400  djerius  <djerius@cfa.harvard.edu>  (3f84715868c5 [tip])
+
+	* tests/positional.lua, validate/args.lua:
+	bugfix: if positional arg was named it was returned as nil if
+	opts.named=false
+
+2011-05-31 18:04 -0400  djerius  <djerius@cfa.harvard.edu>  (398818bdde09)
+
+	* .hgtags:
+	Added tag 1.2.1 for changeset 0cfbd8824f03
+
+2011-05-31 18:04 -0400  djerius  <djerius@cfa.harvard.edu>  (0cfbd8824f03 [1.2.1])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-05-31 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (d05b1c392d41)
 
 	* doc/validate.args.pod:
 	fix document structure. add missing documentation for use_current

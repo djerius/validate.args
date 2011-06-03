@@ -1,3 +1,9 @@
+1.2.2 :
+
+[BUG FIX]
+
+* named positional arguments were returned as nil if opts.named = false
+
 1.2.1 :
 
 [OTHER]
