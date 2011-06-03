@@ -132,6 +132,27 @@ function test_non_integer_entries ()
 
 end
 
+function test_pos_named_not_cvtd ()
+
+
+   local template = { {
+			 name = 'arg1',
+			 optional = false,
+			 not_nil = true,
+		      },
+		      {
+			 type = 'string',
+		      }
+		   }
+   local ok, arg1, arg2 = validate( template, 32, 'foo' )
+
+   assert_true( ok )
+   assert_equal( 32, arg1 )
+   assert_equal( 'foo', arg2 )
+
+
+end
+
 function test_cvs_pos_to_named ()
 
 

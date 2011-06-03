@@ -902,7 +902,7 @@ function Validate:validate( tpl, ... )
 
 
      nargs = nargs + 1
-     local name = spec.name or nargs
+     local name = opts.named and spec.name or nargs
 
      local argname = ''
      if spec.name then
