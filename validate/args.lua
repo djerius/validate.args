@@ -611,6 +611,108 @@ function Validate:check_table( tspec, arg )
    return true, narg
 end
 
+-- -----------------------------------------------------------------------------
+
+-- determine the default value for an unspecified arg
+
+function Validate:defaults( spec )
+
+   if spec.default then
+
+      if type(spec.default) == 'function' then
+
+	 local ok, v = spec.default()
+
+	 -- need to put a spacer in front of the possible error
+	 -- message.  v may legitimately be nil so can't use
+	 -- short cut operators
+	 if ok then
+	    return true, v
+	 else
+	    return false, ': ' .. v
+	 end
+
+      else
+
+	 return true, spec.default
+
+      end
+
+
+   elseif spec.vtable then
+      -- if this is a vtable, try and get defaults from nested
+      -- specs
+
+      local vtable = spec.vtable
+
+      if type(vtable) == 'function' then
+
+	 local ok, vtable = vtable(arg)
+	 if not ok then
+	    return false, vtable
+	 end
+
+	 if type(vtable) ~= 'table' then
+	    return false, '(validation spec).vtable: expected table from vtable function, got ' .. type(vtable)
+	 end
+
+      end
+
+      -- descend into the table and see what happens.
+      local default = {}
+
+      for k, spec in pairs ( spec.vtable ) do
+
+	 -- only look at keys which match an argument name
+	 if type(k) == 'number' or k:sub(1,1) ~= '%' then
+
+	    local ok, spec = resolve_spec( spec )
+
+	    if ok then
+	       self.state.in_default_scan = true
+	       ok, default[k] = self:check_arg( spec )
+	       self.state.in_default_scan = nil
+
+	       if not ok then
+		  return false, ': ' .. tostring(k) .. default[k]
+	       end
+
+	    end
+
+	 end
+
+      end
+
+      if next(default) then
+	 return true, default
+      else
+	 return true, nil
+      end
+
+   elseif spec.vfunc then
+
+      local ok, arg = spec.vfunc( );
+      if ok then
+	 return true, arg
+      else
+	 return true, nil
+      end
+
+   elseif spec.vmeth then
+
+      local ok, arg = spec:vmeth( );
+      if ok then
+	 return true, arg
+      else
+	 return true, nil
+      end
+
+
+   end
+
+   return true, nil
+
+end
 
 -- -----------------------------------------------------------------------------
 
@@ -628,7 +730,7 @@ function Validate:check_arg( spec, arg )
 
 
    -- validate the spec if requested
-   if  opts.check_spec  and not self.state.in_check_spec then
+   if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
       self.state.in_check_spec = true
       local ok, err = self:check_table( validate_spec, spec );
       self.state.in_check_spec = false
@@ -652,30 +754,20 @@ function Validate:check_arg( spec, arg )
 
       end
 
-      if spec.optional or spec.default ~= nil or positional then
+      local ok, default = self:defaults( spec )
 
-	 if type(spec.default) == 'function' then
+      if not ok then
+	    return false, default
 
-	    local ok, v = spec.default()
+      elseif default == nil and not spec.optional and not positional then
 
-	    -- need to put a spacer in front of the possible error
-	    -- message.  v may be legitimately be nil so can't use
-	    -- short cut operators
-	    if ok then
-	       return ok, v
-	    else
-	       return ok, ': ' .. v
-	    end
+	 return false, ': required but not specified'
 
-	 else
+      else
 
-	    return true, spec.default
-
-	 end
+	 return true, default
 
       end
-
-      return false, ': required but not specified'
 
    end
 

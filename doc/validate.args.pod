@@ -147,6 +147,9 @@ the default value upon success, an error message upon failure
 
 =back
 
+If no default value is specified for a table argument with a vtable
+constraint, the nested argument specifications in the vtable are
+scanned for defaults.
 
 =item type
 

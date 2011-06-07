@@ -21,7 +21,8 @@ tests = {
    'excludes',
    'special',
    'mutate',
-   'object'
+   'object',
+   'defaults',
 }
 
 for _, v in pairs(tests) do
