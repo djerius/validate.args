@@ -615,7 +615,7 @@ end
 
 -- determine the default value for an unspecified arg
 
-function Validate:defaults( spec )
+function Validate:defaults( spec, positional )
 
    if spec.default then
 
@@ -638,10 +638,22 @@ function Validate:defaults( spec )
 
       end
 
+   end
 
-   elseif spec.vtable then
-      -- if this is a vtable, try and get defaults from nested
-      -- specs
+   -- it's an error if no default was specified and the argument is not optional.
+   if not spec.optional then
+
+      -- note that positional arguments with a nil value and spec.not_nil == false
+      -- are acceptable
+      if positional then
+	 return true, nil
+      else
+	 return false, ': required but not specified'
+      end
+   end
+
+   -- if this is a vtable, try and get defaults from nested specs
+   if spec.vtable then
 
       local vtable = spec.vtable
 
@@ -712,6 +724,7 @@ function Validate:defaults( spec )
 
    return true, nil
 
+
 end
 
 -- -----------------------------------------------------------------------------
@@ -754,20 +767,7 @@ function Validate:check_arg( spec, arg )
 
       end
 
-      local ok, default = self:defaults( spec )
-
-      if not ok then
-	    return false, default
-
-      elseif default == nil and not spec.optional and not positional then
-
-	 return false, ': required but not specified'
-
-      else
-
-	 return true, default
-
-      end
+      return self:defaults( spec, positional )
 
    end
 

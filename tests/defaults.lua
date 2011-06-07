@@ -61,7 +61,9 @@ function test_nested_vtable( )
 			vtable = {
 			   arg1 = { default = 1 },
 			   arg2 = { default = 2 },
-			   arg3 = { vtable = { 
+			   arg3 = {
+			      optional = true,
+			      vtable = {
 				       arg1 = { default = 3.1 },
 				       arg2 = { default = 3.2 },
 				    },
