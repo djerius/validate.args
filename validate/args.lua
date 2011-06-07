@@ -617,7 +617,7 @@ end
 
 function Validate:defaults( spec, positional )
 
-   if spec.default then
+   if spec.default ~= nil then
 
       if type(spec.default) == 'function' then
 
@@ -1007,7 +1007,7 @@ function Validate:validate( tpl, ... )
      handled_pos[i] = true;
 
      -- distinguish between a nil value and a non-existent positional arg
-     if i > npos and not ( spec.optional or spec.default ) then
+     if i > npos and not ( spec.optional or spec.default ~= nil ) then
 	local errstr = string.format( '%s: missing', argname )
 	return rfunc( false, errstr )
      end

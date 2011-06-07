@@ -17,6 +17,25 @@ function test_scalar( )
 
 end
 
+function test_boolean( )
+
+   local template = { { type = 'boolean', default = true } }
+
+   local ok, foo = validate( template )
+
+   assert_true( ok, foo )
+   assert_equal( true, foo )
+
+   local template = { { type = 'boolean', default = false } }
+
+   local ok, foo = validate( template )
+
+   assert_true( ok, foo )
+   assert_equal( false, foo )
+
+
+end
+
 function test_function( )
 
    local template = { { default = function() return true, 5;  end } }
