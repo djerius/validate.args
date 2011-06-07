@@ -44,7 +44,7 @@ B<validate.args> provides both procedural and object-oriented
 interfaces.  The significant difference between the interfaces is that
 the procedural interface may be influenced by global settings while
 the object-oriented interface keeps those settings local to each
-object.  Objects may be themselves cloned, allowing for nested
+object.  Objects may themselves be cloned, allowing for nested
 hierarchies of validation specifications.  Changes to parent objects
 do not affect child objects, and vice-versa.
 
@@ -74,8 +74,8 @@ one element per argument:
   goo{ a = 3, b = 'n' }
 
 Named arguments are passed as a single table to the function (notice
-the use of the C<{}> syntactic sugar in the function invocation).  Their validation
-specifications are passed as a table:
+the C<{}> syntactic sugar in the function invocation).
+Their validation specifications are passed as a table:
 
  { arg1_name = { arg1 specification },
    arg2_name = { arg2 specification }
@@ -102,10 +102,10 @@ on the named arguments, typically using the C<vtable> constraint.
 =head2 Validation Specifications
 
 A validation specification is a set of constraints which an argument
-must meet.  In most cases the specification is encoded in a table, where each
-key-value pair represents a type of constraint and its
-parameters.   The specification may also be specified by a function; see L</Mutating
-Validation Specifications>.
+must meet.  In most cases the specification is encoded in a table,
+where each key-value pair represents a type of constraint and its
+parameters.  The specification may also be specified by a function
+(see L</Mutating Validation Specifications>).
 
 Multiple constraints may be specified for each argument. There are no
 guarantees as to the order in which the constraints are applied.
@@ -130,7 +130,7 @@ It defaults to C<false>.  All arguments are required by default.
 
 =item default
 
-This provides a value for the argument if it is not specified, as
+This provides a value for an argument whose value was not specified, as
 well as indicating that the argument is optional.  This may be a function,
 which will be called if a default value is required.  The function
 should return two values:
@@ -417,10 +417,10 @@ ensures that only one of the two following situations occurs:
 
 =head2 Validation Options
 
-There are a few options which affect the validation process.  These
-may be set for individual validations using B<validate_opts()>, or may
-be set globally for validations done via B<validate()> using
-B<opts()>.
+There are a few options which affect the validation process.  How they
+are specifed depends upon whether the procedural or object-oriented
+interfaces are used; see L</Procedural interface> and L</Object
+oriented interface> for more details.
 
 =over
 
@@ -576,9 +576,9 @@ types and options.
   vobj.opts.opt1 = val1
   vobj.opts.opt2 = val2
 
-Set the specified validation options.  These hold for this object
-only. An error will be thrown if the specified options are not
-recognized.
+Set the specified validation options (See L<Validation Options> for
+the valid options).  These hold for this object only. An error will be
+thrown if the specified options are not recognized.
 
 =item add_type
 
