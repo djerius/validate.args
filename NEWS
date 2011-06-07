@@ -1,3 +1,9 @@
+1.2.3 :
+
+[BUG FIX]
+
+* default values for vtable arguments are now properly populated
+
 1.2.2 :
 
 [BUG FIX]

@@ -1,8 +1,58 @@
-2011-06-03  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-06-07  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.2
+	Tag 1.2.3
 
-2011-06-03 13:13 -0400  djerius  <djerius@cfa.harvard.edu>  (3f84715868c5 [tip])
+2011-06-07 17:16 -0400  djerius  <djerius@cfa.harvard.edu>  (c6b4f4be6376 [tip])
+
+	* tests/defaults.lua, validate/args.lua:
+	bugs in handling boolean args with value of false (one old bug, one
+	new)
+
+2011-06-07 16:54 -0400  djerius  <djerius@cfa.harvard.edu>  (4125aa82e90b)
+
+	* tests/defaults.lua, validate/args.lua:
+	fixes to determination of defaults
+
+	* incorrectly traversed vtables for defaults when defaults == nil
+	and optional == false.
+	* incorrectly bailed with positionals with not_nil == false and value
+	== nil and defaults == nil
+
+2011-06-07 12:26 -0400  djerius  <djerius@cfa.harvard.edu>  (e9a441589645)
+
+	* tests/Makefile.am:
+	forgot to distribute new defaults test
+
+2011-06-07 12:22 -0400  djerius  <djerius@cfa.harvard.edu>  (af1efb5adcd1)
+
+	* tests/defaults.lua: new file.
+	* doc/validate.args.pod, tests/defaults.lua, tests/driver.lua,
+	validate/args.lua:
+	ensure that nested defaults for vtable arguments are properly
+	populated
+
+2011-06-07 12:20 -0400  djerius  <djerius@cfa.harvard.edu>  (fd6c9840e7bb)
+
+	* doc/validate.args.pod:
+	minor documentation fixes
+
+2011-06-07 10:57 -0400  djerius  <djerius@cfa.harvard.edu>  (d74fcf08f7d1)
+
+	* tests/named.lua:
+	ensure that true assertions output a detailed error message upon
+	failure
+
+2011-06-03 13:16 -0400  djerius  <djerius@cfa.harvard.edu>  (aad90d2bebf0)
+
+	* .hgtags:
+	Added tag 1.2.2 for changeset 5207526e3b18
+
+2011-06-03 13:16 -0400  djerius  <djerius@cfa.harvard.edu>  (5207526e3b18 [1.2.2])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-06-03 13:13 -0400  djerius  <djerius@cfa.harvard.edu>  (3f84715868c5)
 
 	* tests/positional.lua, validate/args.lua:
 	bugfix: if positional arg was named it was returned as nil if
