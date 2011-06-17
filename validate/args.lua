@@ -779,7 +779,7 @@ function Validate:defaults( name, spec, positional )
 
    elseif spec.vfunc then
 
-      local ok, arg = spec.vfunc( )
+      local ok, arg = spec.vfunc( nil, { name = name } )
       if ok then
 	 return true, arg
       else
@@ -788,7 +788,7 @@ function Validate:defaults( name, spec, positional )
 
    elseif spec.vmeth then
 
-      local ok, arg = spec.vmeth( self )
+      local ok, arg = spec.vmeth( self, nil, { name = name } )
       if ok then
 	 return true, arg
       else
@@ -890,7 +890,7 @@ function Validate:check_arg( name, spec, arg )
       -- a functional validation.  note that arg may be
       -- transformed
 
-      ok, arg = spec.vfunc( arg )
+      ok, arg = spec.vfunc( arg, { name = name } )
 
       if not ok then
 	 return false, name:msg( arg )
@@ -905,7 +905,7 @@ function Validate:check_arg( name, spec, arg )
       -- a functional validation.  note that arg may be
       -- transformed
 
-      ok, arg = spec.vmeth( self, arg )
+      ok, arg = spec.vmeth( self, arg, { name = name } )
 
       if not ok then
 	 return false, name:msg( arg )

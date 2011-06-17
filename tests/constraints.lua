@@ -8,11 +8,13 @@ local validate = require( 'validate.args' ).validate
 function test_validate_function ()
 
    local template = { {
-			 vfunc = function( val )
+			 name = 'foo',
+			 vfunc = function( val, args )
+
 				    if val then
-				       return val, val
+				       return true, val
 				    else
-				       return val, 'bad value'
+				       return false, args.name
 				    end
 				 end
 		   }}
@@ -26,7 +28,7 @@ function test_validate_function ()
    local ok, foo = validate( template, false )
 
    assert_false( ok )
-   assert_match( 'bad value', foo );
+   assert_match( 'arg#1%(foo%): arg#1%(foo%)', foo );
 
 end
 
