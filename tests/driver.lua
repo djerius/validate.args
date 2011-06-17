@@ -23,6 +23,7 @@ tests = {
    'mutate',
    'object',
    'defaults',
+   'callback',
 }
 
 for _, v in pairs(tests) do

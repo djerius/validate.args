@@ -401,6 +401,13 @@ local validate_spec = {
 			   return true, val
 			end
 	     },
+
+   callback    = { optional = true,
+	       vtable = { pre = { type = 'function', optional = true },
+			  post = { type = 'function', optional = true },
+		       }
+	    },
+
    name    = { optional = true,
 	       type = 'string' },
    enum    = { optional = true,
@@ -832,6 +839,12 @@ function Validate:check_arg( name, spec, arg )
       end
    end
 
+   if spec.callback and spec.callback.pre then
+
+      local ok, v = spec.callback.pre( self, arg, { name = name } )
+      if ok then arg = v end
+   end
+
    -- no argument or a nil argument is provided. make sure that's ok
    if arg == nil then
 
@@ -972,6 +985,13 @@ function Validate:check_arg( name, spec, arg )
 
 
    end
+
+   if spec.callback and spec.callback.post then
+
+      local ok, v = spec.callback.post( self, arg, { name = name } )
+      if ok then arg = v end
+   end
+
 
    return true, arg
 
