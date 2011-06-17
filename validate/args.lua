@@ -323,7 +323,13 @@ end
 
 function Name:msg( ... )
 
-   return self:tostring() .. ': ' .. table.concat( {...} )
+   local msgt = {}
+
+   for i,v in ipairs{ ... } do
+      msgt[i] = tostring(v)
+   end
+
+   return self:tostring() .. ': ' .. table.concat( msgt )
 
 end
 
