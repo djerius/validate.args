@@ -319,7 +319,7 @@ function Name:tostring()
 
 end
 
-
+Name.__tostring = Name.tostring
 
 function Name:msg( ... )
 
