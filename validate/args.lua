@@ -773,7 +773,7 @@ function Validate:defaults( name, spec, positional )
 
    elseif spec.vfunc then
 
-      local ok, arg = spec.vfunc( );
+      local ok, arg = spec.vfunc( )
       if ok then
 	 return true, arg
       else
@@ -782,7 +782,7 @@ function Validate:defaults( name, spec, positional )
 
    elseif spec.vmeth then
 
-      local ok, arg = spec:vmeth( );
+      local ok, arg = spec.vmeth( self )
       if ok then
 	 return true, arg
       else
