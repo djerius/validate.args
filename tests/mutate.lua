@@ -40,7 +40,7 @@ function test_table_mutation_args( )
 
 
    local ok, foo = validate( { spec }, 3 )
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( 3, foo )
 
    local ok, foo = validate( { spec } )
