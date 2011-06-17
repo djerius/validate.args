@@ -265,6 +265,75 @@ function Validate:add_type( ... )
 
 end
 
+--------------------------------------------------------------------
+-- prototype for the Name object; not exposed
+-- this is a list of names and an index indicating the
+-- largest valid element
+
+local Name = {
+   level = 0,
+   name = {},
+}
+
+function Name:new( name )
+
+   local obj = {}
+
+   -- copy data from parent, including any metatable entries
+   -- this allows any children of the new object to use the
+   -- parent as a metatable
+   for k, v in pairs( self ) do
+      obj[k] = v
+   end
+
+   -- set name and level from arguments if specified
+   -- for now assume that all elements in name are valid
+   if name then
+      obj.name = name
+      obj.level = #name
+   end
+
+   setmetatable( obj, self )
+   self.__index = self
+
+
+   return obj
+
+end
+
+function Name:add( name )
+
+   self = self:new()
+
+
+   self.level = self.level + 1
+   self.name[self.level] = tostring(name)
+
+   return self
+
+end
+
+function Name:tostring()
+
+   return table.concat( self.name, '.', 1, self.level )
+
+end
+
+
+
+function Name:msg( ... )
+
+   return self:tostring() .. ': ' .. table.concat( {...} )
+
+end
+
+function Name:fmt( ... )
+
+   return self:tostring( ) .. ': ' .. string.format( select( 1, ... ) )
+
+end
+
+
 ---------------------------------------------------------
 -- specials
 
@@ -285,10 +354,10 @@ local function check_special( special, arg )
 	 ok = ok and type(v) == 'table'
       end
 
-      return ok, ": must be list of lists"
+      return ok, "must be list of lists"
 
    else
-      return false, ": unknown validation special"
+      return false, "unknown validation special"
 
    end
 
@@ -366,7 +435,6 @@ local function resolve_spec( spec, arg )
 
 end
 
-
 -- -----------------------------------------------------------------------------
 -- Validate a table against a table specification
 --
@@ -376,7 +444,7 @@ end
 --
 -- Then check the table to ensure that there are no unwanted keys
 
-function Validate:check_table( tspec, arg )
+function Validate:check_table( name, tspec, arg )
 
    local opts = self.opts
 
@@ -395,6 +463,7 @@ function Validate:check_table( tspec, arg )
    -- iterate through specifications
    for k, spec in pairs( tspec ) do
 
+      local name = name:add( k )
       local ok, v
 
       ctspec[k] = spec
@@ -415,6 +484,8 @@ function Validate:check_table( tspec, arg )
 	    -- data being validated. which isn't available, but should be
 	    if type(arg[k]) == 'table' then
 
+	       local name = name:add( k )
+
 	       v = {}
 
 	       -- we descend into it carefully... as we don't want to parse the
@@ -424,32 +495,33 @@ function Validate:check_table( tspec, arg )
 		  local ok, v_s
 
 		  if type(k) ~= 'string' and type(k) ~= 'number' then
-		     ok = false
-		     v_s = ': invalid argument name'
+		     return false, name:msg( 'invalid argument name' )
 
 		  -- make sure we don't mistake a positional index for
 		  -- a string
 		  elseif type(k) ~= 'number' and k:sub(1,1) == '%' then
 
 		     ok, v_s = check_special( k, spec )
+		     if not ok then
+			return false, name:msg( v_s )
+		     end
 
 		  elseif type(spec) == 'function' then
 		     -- spec may be a function which returns a real
 		     -- validation, but we can't validate that here;
 		     -- wait until it's actually put in play
 
-		     ok = true
-		     v_s = spec
+		     v[k] = spec
 
 		  else
 
-		     ok, v_s = self:check_table( validate_spec, spec )
-		  end
+		     ok, v_s = self:check_table( name , validate_spec, spec )
+		     if not ok then
+			return false, v_s
+		     end
 
-		  if ok then
 		     v[k] = v_s
-		  else
-		     return false, string.format( ".vtable.%s%s", tostring(k), v_s );
+
 		  end
 
 	       end
@@ -457,8 +529,7 @@ function Validate:check_table( tspec, arg )
 	    end
 
 	 elseif arg[k] then
-	    return false, "vtable : wrong type (got " .. type(arg[k]) .. " )"
-
+	    return false, name:msg( "wrong type (got " .. type(arg[k]) .. " )" )
 	 end
 
       elseif type(k) == 'number' or k:sub(1,1) ~= '%' then
@@ -468,7 +539,7 @@ function Validate:check_table( tspec, arg )
 
 	 if ok then
 	    ctspec[k] = v
-	    ok, v = self:check_arg( ctspec[k], arg[k] )
+	    ok, v = self:check_arg( name, ctspec[k], arg[k] )
 	 end
 
       else
@@ -480,7 +551,8 @@ function Validate:check_table( tspec, arg )
       if ok then
 	 narg[k] = v
       else
-	 return false, string.format( ".%s%s", tostring(k), tostring(v) );
+	 -- v is an error message prefixed with the variable name
+	 return false, v;
       end
 
    end
@@ -510,11 +582,13 @@ function Validate:check_table( tspec, arg )
 
    if has_bad then
 
-      return false, '.' .. table.concat( bad_args, ', ' ) .. ": unexpected named argument(s)"
+      return false, name:msg( table.concat( bad_args, ', ' ), ": unexpected named argument(s)" )
    end
 
    -- now check for dependencies and exclusions
    for k, spec in pairs( ctspec ) do
+
+      local name = name:add( k )
 
       if narg[k] ~= nil and ( type(k) == 'number' or k:sub( 1, 1 ) ~= '%' ) then
 
@@ -522,9 +596,7 @@ function Validate:check_table( tspec, arg )
 	    local excludes = type(spec.excludes) == 'table' and spec.excludes or { spec.excludes }
 	    for _,v in pairs(excludes) do
 	       if narg[v] ~= nil then
-		  return false,
-		  string.format(": can't have both arguments '%s' and '%s'",
-				k, v )
+		  return false, name:fmt( "can't have both arguments '%s' and '%s'", k, v )
 	       end
 	    end
 	 end
@@ -533,9 +605,7 @@ function Validate:check_table( tspec, arg )
 	    local requires = type(spec.requires) == 'table' and spec.requires or { spec.requires }
 	    for _,v in pairs(requires) do
 	       if narg[v] == nil then
-		  return false,
-		  string.format(": can't have argument '%s' without '%s'",
-				k, v )
+		  return false, name:fmt("can't have argument '%s' without '%s'", k, v )
 	       end
 	    end
 	 end
@@ -552,7 +622,7 @@ function Validate:check_table( tspec, arg )
 	    end
 
 	    if count ~= 1 then
-	       return false, ": must specify exactly one of " .. table.concat( spec.one_of, ', ' )
+	       return false, name:msg( "must specify exactly one of ",  table.concat( spec.one_of, ', ' ) )
 	    end
 
 	 end
@@ -578,7 +648,7 @@ function Validate:check_table( tspec, arg )
 	 end
 
 	 if not ok then
-	    return false, ": must specify at least one of " .. table.concat( group, ', ' )
+	    return false, name:msg( "must specify at least one of ", table.concat( group, ', ' ) )
 	 end
 
       end
@@ -601,7 +671,7 @@ function Validate:check_table( tspec, arg )
 	 end
 
 	 if count ~= 1 then
-	    return false, ": must specify exactly one of " .. table.concat( group, ', ' )
+	    return false, name:msg( "must specify exactly one of ", table.concat( group, ', ' ) )
 	 end
 
       end
@@ -615,7 +685,7 @@ end
 
 -- determine the default value for an unspecified arg
 
-function Validate:defaults( spec, positional )
+function Validate:defaults( name, spec, positional )
 
    if spec.default ~= nil then
 
@@ -623,13 +693,10 @@ function Validate:defaults( spec, positional )
 
 	 local ok, v = spec.default()
 
-	 -- need to put a spacer in front of the possible error
-	 -- message.  v may legitimately be nil so can't use
-	 -- short cut operators
 	 if ok then
 	    return true, v
 	 else
-	    return false, ': ' .. v
+	    return false, name:msg( tostring(v) )
 	 end
 
       else
@@ -648,7 +715,7 @@ function Validate:defaults( spec, positional )
       if positional then
 	 return true, nil
       else
-	 return false, ': required but not specified'
+	 return false, name:msg( 'required but not specified' )
       end
    end
 
@@ -661,11 +728,12 @@ function Validate:defaults( spec, positional )
 
 	 local ok, vtable = vtable(arg)
 	 if not ok then
-	    return false, vtable
+	    return false, name:msg( tostring(vtable) )
 	 end
 
 	 if type(vtable) ~= 'table' then
-	    return false, '(validation spec).vtable: expected table from vtable function, got ' .. type(vtable)
+	    return false, name:msg( '(validation spec).vtable: expected table from vtable function, got ',
+				    type(vtable) )
 	 end
 
       end
@@ -675,6 +743,8 @@ function Validate:defaults( spec, positional )
 
       for k, spec in pairs ( spec.vtable ) do
 
+	 local name = name:new( k )
+
 	 -- only look at keys which match an argument name
 	 if type(k) == 'number' or k:sub(1,1) ~= '%' then
 
@@ -682,11 +752,11 @@ function Validate:defaults( spec, positional )
 
 	    if ok then
 	       self.state.in_default_scan = true
-	       ok, default[k] = self:check_arg( spec )
+	       ok, default[k] = self:check_arg( name, spec )
 	       self.state.in_default_scan = nil
 
 	       if not ok then
-		  return false, ': ' .. tostring(k) .. default[k]
+		  return false, default[k]
 	       end
 
 	    end
@@ -695,7 +765,7 @@ function Validate:defaults( spec, positional )
 
       end
 
-      if next(default) then
+      if nil ~= next(default) then
 	 return true, default
       else
 	 return true, nil
@@ -731,7 +801,7 @@ end
 
 -- Validate an arbirtrary argument against a validation specification.
 
-function Validate:check_arg( spec, arg )
+function Validate:check_arg( name, spec, arg )
 
    local ok
    local opts = self.opts
@@ -745,7 +815,7 @@ function Validate:check_arg( spec, arg )
    -- validate the spec if requested
    if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
       self.state.in_check_spec = true
-      local ok, err = self:check_table( validate_spec, spec );
+      local ok, err = self:check_table( name, validate_spec, spec );
       self.state.in_check_spec = false
       if not ok then
 	 if opts.error_on_bad_spec then
@@ -763,11 +833,11 @@ function Validate:check_arg( spec, arg )
       -- so if it's a nil value it has been deliberately set
       if positional and spec.not_nil then
 
-	 return false, ': must not be nil'
+	 return false, name:msg( 'must not be nil' )
 
       end
 
-      return self:defaults( spec, positional )
+      return self:defaults( name, spec, positional )
 
    end
 
@@ -784,7 +854,7 @@ function Validate:check_arg( spec, arg )
 
 	 local chk = self.types:validator(v)
 	 if chk == nil then
-	    return false, '(template).type: unknown type: ' .. tostring(v)
+	    return false, name:msg( '(template).type: unknown type: ', tostring(v) )
 	 end
 
 	 ok, narg = chk(arg)
@@ -795,13 +865,13 @@ function Validate:check_arg( spec, arg )
 	    arg = narg
 	    break
 	 elseif narg ~= nil then
-	    table.insert( errors, string.format( "value (%s) did not match type (%s): %s", tostring(arg), v, tostring(narg) ) )
+	    errors[#errors+1] = string.fmt( "value (%s) did not match type (%s): %s", tostring(arg), v, tostring(narg) )
 	 end
 
       end
 
       if not ok then
-	 return false, string.format( ": value (%s) is not of required type: %s", tostring( arg ), table.concat( errors, "\n" ) )
+	 return false, name:fmt( "value (%s) is not of required type: %s", tostring( arg ), table.concat( errors, "\n" ) )
       end
 
    end
@@ -817,7 +887,7 @@ function Validate:check_arg( spec, arg )
       ok, arg = spec.vfunc( arg )
 
       if not ok then
-	 return false, ': ' .. arg
+	 return false, name:msg( arg )
       end
 
    end
@@ -832,7 +902,7 @@ function Validate:check_arg( spec, arg )
       ok, arg = spec.vmeth( self, arg )
 
       if not ok then
-	 return false, ': ' .. arg
+	 return false, name:msg( arg )
       end
 
    end
@@ -846,7 +916,7 @@ function Validate:check_arg( spec, arg )
       -- the argument to be checked must also be a table
 
       if type(arg) ~= 'table' then
-	 return false, ': incorrect type; must be a table'
+	 return false, name:msg( 'incorrect type; must be a table' )
       end
 
       -- spec.vtable may be a function which returns an actual table
@@ -856,18 +926,18 @@ function Validate:check_arg( spec, arg )
 
 	 ok, vtable = vtable(arg)
 	 if not ok then
-	    return ok, vtable
+	    return false, name:msg( vtable )
 	 end
 
 	 if type(vtable) ~= 'table' then
-	    return false, '(validation spec).vtable: expected table from vtable function, got ' .. type(vtable)
+	    return false, name:msg( '(validation spec).vtable: expected table from vtable function, got ', type(vtable) )
 	 end
 
       end
 
       -- descend into the table and see what happens. note that
       -- arg may be transformed
-      ok, arg = self:check_table( vtable, arg )
+      ok, arg = self:check_table( name, vtable, arg )
 
       if not ok then
 	 return false, arg
@@ -891,8 +961,7 @@ function Validate:check_arg( spec, arg )
       end
 
       if not ok then
-	 return false, string.format(': value (%s) is not in approved list',
-				     tostring( arg ) )
+	 return false, name:fmt(': value (%s) is not in approved list', tostring( arg ) )
       end
 
 
@@ -931,8 +1000,8 @@ function Validate:validate_tbl( tpl, arg )
 
    local rfunc = self:g_rfunc()
 
-   return rfunc( self:check_arg( { type = 'table',
-				   vtable = tpl }, arg ) )
+   return rfunc( self:check_arg( name, { type = 'table',
+					 vtable = tpl }, arg ) )
 
 end
 
@@ -972,6 +1041,8 @@ function Validate:validate( tpl, ... )
   local idx = 1
   for i, spec in ipairs( tpl ) do
 
+     local name = Name:new( { string.format( "arg#%d", i ) } )
+
      -- the specification may be a function, in which case it
      -- will return the real validation specification.  have to handle
      -- it early for positional arguments as we need to know if a name
@@ -981,47 +1052,36 @@ function Validate:validate( tpl, ... )
 
      if not ok then
 
-	local errstr = string.format( 'arg#%d(validation spec): %s',
-				     i, spec )
-	return rfunc( false, errstr )
+	return rfunc( false, name:msg( '(validation spec): ', spec ) )
 
      elseif type(spec) ~= 'table' then
 
-	return rfunc( false,
-		     "arg#2(validation spec): expected table or function, got "
-			.. type(arg) )
+	return rfunc( false, name:msg( '(validation spec): expected table or function, got' ,
+				       type(arg) ) )
      end
 
-
      nargs = nargs + 1
-     local name = opts.named and spec.name or nargs
+     local keyname = opts.named and spec.name or nargs
 
      local argname = ''
      if spec.name then
-	argname = string.format( 'arg#%d(%s)', i, spec.name )
+	name = Name:new( { string.format( 'arg#%d(%s)', i, spec.name ) } )
      else
-	argname = string.format( 'arg#%d', i )
+	name = Name:new( { string.format( 'arg#%d', i ) } )
      end
-
 
      handled_pos[i] = true;
 
      -- distinguish between a nil value and a non-existent positional arg
      if i > npos and not ( spec.optional or spec.default ~= nil ) then
-	local errstr = string.format( '%s: missing', argname )
-	return rfunc( false, errstr )
+	return rfunc( false, name:msg( 'missing' ) )
      end
 
      self.state.positional = true
-     local ok, v = self:check_arg( spec, oargs[i] )
-     -- can't use table.insert here. if v is nil
-     -- table.insert(args, v) is a NOOP, the number of slots in args
-     -- isn't increased
-     if ok then
-	args[name] = v
-     else
-	local errstr = string.format( '%s%s', argname, v )
-	return rfunc( false, errstr )
+     ok, args[keyname] = self:check_arg( name, spec, oargs[i] )
+
+     if not ok then
+	return rfunc( false, args[keyname] )
      end
 
      idx = i + 1
@@ -1044,8 +1104,9 @@ function Validate:validate( tpl, ... )
 	return rfunc( false, "arg#2: expected table , got " .. type(arg) )
      end
 
-     return rfunc( self:check_arg( { type = 'table',
-				vtable = tpl }, arg ) )
+     return rfunc( self:check_arg( Name:new(), { type = 'table',
+						 vtable = tpl },
+				   arg ) )
 
   else
 
@@ -1053,16 +1114,14 @@ function Validate:validate( tpl, ... )
      -- elements in the template that we haven't handled
 
      local badkeys = {}
-     local has_bad = false
      for k in pairs (tpl) do
 	if not handled_pos[k] then
 	   table.insert( badkeys, k )
-	   has_bad = true
 	end
 
      end
 
-     if has_bad then
+     if nil ~= next(badkeys) then
 	return rfunc( false, "extra elements in validation spec: " .. table.concat( badkeys, ', ' ) )
      end
 
