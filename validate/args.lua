@@ -700,6 +700,8 @@ end
 
 function Validate:defaults( name, spec, positional )
 
+   local vfargs = { name = name, va = self }
+
    if spec.default ~= nil then
 
       if type(spec.default) == 'function' then
@@ -739,7 +741,7 @@ function Validate:defaults( name, spec, positional )
 
       if type(vtable) == 'function' then
 
-	 local ok, vtable = vtable(arg)
+	 local ok, vtable = vtable( arg, vfargs )
 	 if not ok then
 	    return false, name:msg( tostring(vtable) )
 	 end
@@ -786,7 +788,7 @@ function Validate:defaults( name, spec, positional )
 
    elseif spec.vfunc then
 
-      local ok, arg = spec.vfunc( nil, { name = name } )
+      local ok, arg = spec.vfunc( nil, vfargs )
       if ok then
 	 return true, arg
       else
@@ -816,6 +818,8 @@ end
 
 function Validate:check_arg( name, spec, arg )
 
+   local vfargs = { name = name, va = self }
+
    local ok
    local opts = self.opts
 
@@ -841,7 +845,7 @@ function Validate:check_arg( name, spec, arg )
 
    if spec.callback and spec.callback.pre then
 
-      local ok, v = spec.callback.pre( self, arg, { name = name } )
+      local ok, v = spec.callback.pre( arg, vfargs )
       if ok then arg = v end
    end
 
@@ -903,7 +907,7 @@ function Validate:check_arg( name, spec, arg )
       -- a functional validation.  note that arg may be
       -- transformed
 
-      ok, arg = spec.vfunc( arg, { name = name } )
+      ok, arg = spec.vfunc( arg, vfargs )
 
       if not ok then
 	 return false, name:msg( arg )
@@ -988,7 +992,7 @@ function Validate:check_arg( name, spec, arg )
 
    if spec.callback and spec.callback.post then
 
-      local ok, v = spec.callback.post( self, arg, { name = name } )
+      local ok, v = spec.callback.post( arg, vfargs )
       if ok then arg = v end
    end
 
