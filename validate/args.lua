@@ -716,11 +716,12 @@ function Validate:defaults( name, spec, positional )
 
    end
 
-   -- it's an error if no default was specified and the argument is not optional.
+   -- it's an error if no default was specified and the argument is
+   -- not optional.
    if not spec.optional then
 
-      -- note that positional arguments with a nil value and spec.not_nil == false
-      -- are acceptable
+      -- note that positional arguments with a nil value and
+      -- spec.not_nil == false are acceptable
       if positional then
 	 return true, nil
       else
