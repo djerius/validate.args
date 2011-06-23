@@ -382,18 +382,15 @@ local validate_spec = {
    vfunc = { optional = true,
 	     type = 'function'
 	  },
-   vmeth = { optional = true,
-	     type = 'function'
-	  },
    vtable = { optional = true,
 	      type = { 'table', 'function' },
 	   },
    default  = { optional = true },
    type     = { optional = true,
-		vmeth = function( self, val )
+		vfunc = function( val, args )
 			   local val = type(val) == 'table' and val or { val }
 			   for _, v in pairs( val ) do
-			      if not self.types:validator(v) then
+			      if not args.va.types:validator(v) then
 				 return false, 'unknown type: ' .. tostring(v)
 			      end
 			   end
@@ -795,16 +792,6 @@ function Validate:defaults( name, spec, positional )
 	 return true, nil
       end
 
-   elseif spec.vmeth then
-
-      local ok, arg = spec.vmeth( self, nil, { name = name } )
-      if ok then
-	 return true, arg
-      else
-	 return true, nil
-      end
-
-
    end
 
    return true, nil
@@ -915,20 +902,6 @@ function Validate:check_arg( name, spec, arg )
 
    end
 
-   if spec.vmeth then
-
-      local ok
-
-      -- a functional validation.  note that arg may be
-      -- transformed
-
-      ok, arg = spec.vmeth( self, arg, { name = name } )
-
-      if not ok then
-	 return false, name:msg( arg )
-      end
-
-   end
 
 
    -- was there special validation required?
