@@ -780,15 +780,6 @@ function Validate:defaults( name, spec, positional )
 	 return true, nil
       end
 
-   elseif spec.vfunc then
-
-      local ok, arg = spec.vfunc( nil, vfargs )
-      if ok then
-	 return true, arg
-      else
-	 return true, nil
-      end
-
    end
 
    return true, nil
