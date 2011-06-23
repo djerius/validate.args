@@ -700,7 +700,7 @@ function Validate:defaults( name, spec, positional )
 
       if type(spec.default) == 'function' then
 
-	 local ok, v = spec.default()
+	 local ok, v = spec.default( vfargs )
 
 	 if ok then
 	    return true, v
@@ -908,7 +908,7 @@ function Validate:check_arg( name, spec, arg )
 
       if type(vtable) == 'function' then
 
-	 ok, vtable = vtable(arg)
+	 ok, vtable = vtable(arg, vfargs)
 	 if not ok then
 	    return false, name:msg( vtable )
 	 end
