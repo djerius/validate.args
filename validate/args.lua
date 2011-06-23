@@ -735,7 +735,7 @@ function Validate:defaults( name, spec, positional )
 
       if type(vtable) == 'function' then
 
-	 local ok, vtable = vtable( arg, vfargs )
+	 ok, vtable = vtable( nil, vfargs )
 	 if not ok then
 	    return false, name:msg( tostring(vtable) )
 	 end
