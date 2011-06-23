@@ -113,6 +113,9 @@ guarantees as to the order in which the constraints are applied.
 The caller may provide constraints which modify the passed arguments;
 these must not expect a particular sequence of operation.
 
+The caller may provide callbacks which are called pre- and post-
+validation.  These may modify the argument values.
+
 The following constraint types are recognized:
 
 =over
@@ -130,10 +133,11 @@ It defaults to C<false>.  All arguments are required by default.
 
 =item default
 
-This provides a value for an argument whose value was not specified, as
-well as indicating that the argument is optional.  This may be a function,
-which will be called if a default value is required.  The function
-should return two values:
+This provides a value for an argument whose value was not specified,
+as well as indicating that the argument is optional.  This may be a
+function, which will be called if a default value is required. The
+function is passed a single argument, a table (see L</Callback
+Arguments> for its contents). The function should return two values:
 
 =over
 
@@ -251,8 +255,9 @@ See also L</Argument Groups>
 =item vfunc
 
 This specifies a function which is called to validate the argument.
-It is called with a single argument, the passed argument
-value. It must return two values:
+It is called with two arguments, the passed argument value and a table
+(see L</Callback Arguments> for its contents).  It must return two
+values:
 
 =over
 
@@ -310,8 +315,9 @@ which will return
 
 =item a function
 
-The function should take a single parameter - the passed argument
-I<value> - and must return two values:
+The function is called with two arguments: the passed argument value,
+and a table (see L</Callback Arguments> for its contents) and must
+return two values:
 
 =over
 
@@ -321,12 +327,25 @@ a boolean indicating success or failure;
 
 =item 2
 
-Upon success, a table of validation specifcations. Upon failure, an error message.
-See L</Examples> for an example of this in use.
+Upon success, a table of validation specifications. Upon failure, an
+error message.  See L</Examples> for an example of this in use.
 
 =back
 
+This function may be called with the argument value equal to C<nil> if
+no argument value was specified.
+
 =back
+
+=item precall
+
+=item postcall
+
+Functions which are called pre- and post- validation.  They are called
+with two arguments: the passed argument value, and a table (see
+L</Callback Arguments> for its contents).  If the function wishes to
+modify the argument value it should return two arguments, C<true> and
+the new value, else it should return C<false>.
 
 =item name
 
@@ -336,6 +355,28 @@ name in the returned argument table.  See L</Validation Options> for
 more information.
 
 =back
+
+=head2 Callback arguments
+
+Several of the validation specification entries take callback
+functions.  The last argument passed to these functions is a table
+containing the following named entries:
+
+=over
+
+=item va
+
+The validation object.  In the case that the procedural interface is
+being used, this will be a default object.
+
+=item name
+
+The fully qualified name of the argument stored as a
+C<validate.args.Name> object.  Use the C<tostring()> function (or
+the similarly named method) to stringify it.
+
+=back
+
 
 =head2 Mutating Validation Specifications
 
