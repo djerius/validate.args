@@ -732,6 +732,7 @@ function Validate:defaults( name, spec, positional )
    -- if this is a vtable, try and get defaults from nested specs
    if spec.vtable then
 
+      local ok
       local vtable = spec.vtable
 
       if type(vtable) == 'function' then
@@ -751,7 +752,7 @@ function Validate:defaults( name, spec, positional )
       -- descend into the table and see what happens.
       local default = {}
 
-      for k, spec in pairs ( spec.vtable ) do
+      for k, spec in pairs ( vtable ) do
 
 	 local name = name:new( k )
 
