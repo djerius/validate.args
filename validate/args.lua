@@ -694,7 +694,7 @@ end
 
 function Validate:defaults( name, spec, positional )
 
-   local vfargs = { name = name, va = self }
+   local vfargs = { name = name, va = self, spec = spec }
 
    if spec.default ~= nil then
 
@@ -795,7 +795,7 @@ end
 
 function Validate:check_arg( name, spec, arg )
 
-   local vfargs = { name = name, va = self }
+   local vfargs = { name = name, va = self, spec = spec }
 
    local ok
    local opts = self.opts

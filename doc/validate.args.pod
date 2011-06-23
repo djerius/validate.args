@@ -375,6 +375,10 @@ The fully qualified name of the argument stored as a
 C<validate.args.Name> object.  Use the C<tostring()> function (or
 the similarly named method) to stringify it.
 
+=item spec
+
+The specification table for the argument. B<Do not modify this>.
+
 =back
 
 
