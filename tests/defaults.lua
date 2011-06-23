@@ -74,6 +74,38 @@ function test_vtable( )
 
 end
 
+function test_vtable_func( )
+
+   local expect_nil = false
+
+   local template = { { optional = true,
+			vtable = function ( arg )
+				    assert_true( expect_nil and arg == nil  or true)
+				       return true, {
+					  arg1 = { default = 1 },
+					  arg2 = { default = 2 },
+				       }
+				    end
+		  } }
+
+   -- make sure that an empty table works
+   local ok, foo = validate( template, {} )
+
+   assert_true( ok, foo )
+   assert_equal( 1, foo.arg1 )
+   assert_equal( 2, foo.arg2 )
+
+   -- and an actual nil table too.
+   expect_nil = true
+   local ok, foo = validate( template )
+
+   assert_true( ok, foo )
+   assert_equal( 1, foo.arg1 )
+   assert_equal( 2, foo.arg2 )
+
+
+end
+
 function test_nested_vtable( )
 
    local template = { { optional = true,
