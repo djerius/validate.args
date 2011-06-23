@@ -399,11 +399,8 @@ local validate_spec = {
 			end
 	     },
 
-   callback    = { optional = true,
-	       vtable = { pre = { type = 'function', optional = true },
-			  post = { type = 'function', optional = true },
-		       }
-	    },
+   precall = { type = 'function', optional = true },
+   postcall = { type = 'function', optional = true },
 
    name    = { optional = true,
 	       type = 'string' },
@@ -830,9 +827,9 @@ function Validate:check_arg( name, spec, arg )
       end
    end
 
-   if spec.callback and spec.callback.pre then
+   if spec.precall then
 
-      local ok, v = spec.callback.pre( arg, vfargs )
+      local ok, v = spec.precall( arg, vfargs )
       if ok then arg = v end
    end
 
@@ -963,9 +960,9 @@ function Validate:check_arg( name, spec, arg )
 
    end
 
-   if spec.callback and spec.callback.post then
+   if spec.postcall then
 
-      local ok, v = spec.callback.post( arg, vfargs )
+      local ok, v = spec.postcall( arg, vfargs )
       if ok then arg = v end
    end
 

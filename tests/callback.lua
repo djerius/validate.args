@@ -13,11 +13,10 @@ function test_callback_pre_static ()
 
    local template = { {
 			 name = 'foo',
-			 callback = { pre = function( val, args )
-					       value = val
-					       name = tostring(args.name)
-					    end
-				}
+			 precall = function( val, args )
+					   value = val
+					   name = tostring(args.name)
+					end
 		      }
 		   }
 
@@ -35,10 +34,9 @@ function test_callback_pre_mutate ()
 
    local template = { {
 			 name = 'foo',
-			 callback = { pre = function( val, args )
-					       return true, 'helga'
-					    end
-				}
+			 precall = function( val, args )
+					   return true, 'helga'
+					end
 		      }
 		   }
 
@@ -58,11 +56,10 @@ function test_callback_post_static ()
 
    local template = { {
 			 name = 'foo',
-			 callback = { post = function( val, args )
-						value = val
-						name = tostring(args.name)
-					     end
-				}
+			 postcall = function( val, args )
+					    value = val
+					    name = tostring(args.name)
+					 end
 		      }
 		   }
 
@@ -87,11 +84,10 @@ function test_callback_post_mutate ()
    local template = { {
 			 name = 'foo',
 			 enum = { 'frank' },
-			 callback = { post = function( val, args )
-						assert_equal( 'frank', val)
-						return true, 'helga'
-					     end
-				}
+			 postcall = function( val, args )
+					    assert_equal( 'frank', val)
+					    return true, 'helga'
+					 end
 		      }
 		   }
 
