@@ -241,13 +241,32 @@ function TypeCheck:validator( vtype )
 
 end
 
+--------------------------------------------------------------------
+-- Store state in a weak key table. State for individual spec tables
+-- is keyed off of the table, so weaken the references so they can get
+-- gc'd
+
+local SpecState = {
+
+   __mode = 'k',
+
+}
+
+function SpecState:new(  )
+
+   local obj = {}
+
+   setmetatable( obj, self )
+   self.__index = self
+   return obj
+end
 
 --------------------------------------------------------------------
 -- prototype for the validation object.  this is NOT directly exposed
 
 local Validate = Base:new{
-   state = {},
-   opts = Options:new(),
+   state = SpecState:new(),
+   opts  = Options:new(),
    types = TypeCheck:new(),
 }
 
@@ -399,7 +418,7 @@ local validate_spec = {
 			end
 	     },
 
-   precall = { type = 'function', optional = true },
+   precall  = { type = 'function', optional = true },
    postcall = { type = 'function', optional = true },
 
    name    = { optional = true,
@@ -692,7 +711,7 @@ end
 
 -- determine the default value for an unspecified arg
 
-function Validate:defaults( name, spec, positional )
+function Validate:defaults( name, spec )
 
    local vfargs = { name = name, va = self, spec = spec }
 
@@ -722,7 +741,7 @@ function Validate:defaults( name, spec, positional )
 
       -- note that positional arguments with a nil value and
       -- spec.not_nil == false are acceptable
-      if positional then
+      if self.state[spec] and self.state[spec].positional then
 	 return true, nil
       else
 	 return false, name:msg( 'required but not specified' )
@@ -790,7 +809,6 @@ function Validate:defaults( name, spec, positional )
 end
 
 -- -----------------------------------------------------------------------------
-
 -- Validate an arbirtrary argument against a validation specification.
 
 function Validate:check_arg( name, spec, arg )
@@ -799,11 +817,6 @@ function Validate:check_arg( name, spec, arg )
 
    local ok
    local opts = self.opts
-
-   -- keep track if this is a positional argument; remove
-   -- from options to avoid polluting nested tables
-   local positional = self.state.positional
-   self.state.positional = nil
 
 
    -- validate the spec if requested
@@ -831,13 +844,13 @@ function Validate:check_arg( name, spec, arg )
 
       -- positional arguments have already been checked for existence,
       -- so if it's a nil value it has been deliberately set
-      if positional and spec.not_nil then
+      if self.state[spec] and self.state[spec].positional and spec.not_nil then
 
 	 return false, name:msg( 'must not be nil' )
 
       end
 
-      return self:defaults( name, spec, positional )
+      return self:defaults( name, spec )
 
    end
 
@@ -1070,7 +1083,7 @@ function Validate:validate( tpl, ... )
 	return rfunc( false, name:msg( 'missing' ) )
      end
 
-     self.state.positional = true
+     self.state[spec] = { positional = true }
      ok, args[keyname] = self:check_arg( name, spec, oargs[i] )
 
      if not ok then
@@ -1093,13 +1106,15 @@ function Validate:validate( tpl, ... )
 
      local arg = oargs[1] or {}
 
+     -- manufacture a vtable specification
+     local spec = { type = 'table', vtable = tpl }
+     self.state[spec] = { positional = false }
+
      if type(arg) ~= 'table'  then
 	return rfunc( false, "arg#2: expected table , got " .. type(arg) )
      end
 
-     return rfunc( self:check_arg( Name:new(), { type = 'table',
-						 vtable = tpl },
-				   arg ) )
+     return rfunc( self:check_arg( Name:new(), spec , arg ) )
 
   else
 
