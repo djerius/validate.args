@@ -1029,6 +1029,8 @@ end
 
 function Validate:validate_tbl( tpl, arg )
 
+   local name = Name:new( )
+
    local rfunc = self:g_rfunc()
 
    return rfunc( self:check_arg( name, { type = 'table',
