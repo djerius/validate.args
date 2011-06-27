@@ -852,19 +852,24 @@ function Validate:process_arg_spec( name, spec, arg )
 
 	 ok, narg = chk(arg)
 
-	 -- as we may be testing against more than one acceptable type, we can't just return a single error
-	 -- store the error messages returned (if any) and output them only if there were no matches
+	 -- as we may be testing against more than one acceptable
+	 -- type, we can't just return a single error store the error
+	 -- messages returned (if any) and output them only if there
+	 -- were no matches
 	 if ok then
 	    arg = narg
 	    break
 	 elseif narg ~= nil then
-	    errors[#errors+1] = string.fmt( "value (%s) did not match type (%s): %s", tostring(arg), v, tostring(narg) )
+	    errors[#errors+1] = string.format( "did not match type '%s': %s",
+					    v, tostring(narg) )
+	 else
+	    errors[#errors+1] = string.format( "did not match type '%s'", v )
 	 end
 
       end
 
       if not ok then
-	 return false, name:fmt( "value (%s) is not of required type: %s", tostring( arg ), table.concat( errors, "\n" ) )
+	 return false, name:fmt( "value (%s): %s", tostring( arg ), table.concat( errors, "\n" ) )
       end
 
    end
