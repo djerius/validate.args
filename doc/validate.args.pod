@@ -341,11 +341,34 @@ no argument value was specified.
 
 =item postcall
 
-Functions which are called pre- and post- validation.  They are called
-with two arguments: the passed argument value, and a table (see
-L</Callback Arguments> for its contents).  If the function wishes to
-modify the argument value it should return two arguments, C<true> and
-the new value, else it should return C<false>.
+Functions to be called for each argument before and after argument
+validation.  They are called with two arguments: the passed argument
+value, and a table (see L</Callback Arguments> for its contents).  If
+the function wishes to modify the argument value it should return two
+arguments, C<true> and the new value, else it should return C<false>.
+
+Please note:
+
+=over
+
+=item *
+
+If an error occurs during validation, the C<postcall> function
+will not be called.
+
+=item *
+
+Specification validation is done before the C<precall> function is
+invoked.  If a specification is invalid neither callback is invoked.
+
+=item *
+
+The functions are called at the table level for arguments which are
+vtables.
+
+
+=back
+
 
 =item name
 

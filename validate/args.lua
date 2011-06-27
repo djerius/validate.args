@@ -811,33 +811,13 @@ end
 -- -----------------------------------------------------------------------------
 -- Validate an arbirtrary argument against a validation specification.
 
-function Validate:check_arg( name, spec, arg )
+function Validate:process_arg_spec( name, spec, arg )
 
    local vfargs = { name = name, va = self, spec = spec }
 
    local ok
    local opts = self.opts
 
-
-   -- validate the spec if requested
-   if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
-      self.state.in_check_spec = true
-      local ok, err = self:check_table( name, validate_spec, spec );
-      self.state.in_check_spec = false
-      if not ok then
-	 if opts.error_on_bad_spec then
-	    error( 'validation spec error: ' .. err )
-	 else
-	    return false, '(validation spec)' .. err
-	 end
-      end
-   end
-
-   if spec.precall then
-
-      local ok, v = spec.precall( arg, vfargs )
-      if ok then arg = v end
-   end
 
    -- no argument or a nil argument is provided. make sure that's ok
    if arg == nil then
@@ -905,8 +885,6 @@ function Validate:check_arg( name, spec, arg )
 
    end
 
-
-
    -- was there special validation required?
    if spec.vtable ~= nil then
 
@@ -964,6 +942,48 @@ function Validate:check_arg( name, spec, arg )
       end
 
 
+   end
+
+   return true, arg
+
+end
+
+
+-- -----------------------------------------------------------------------------
+-- Validate an arbirtrary argument against a validation specification.
+
+function Validate:check_arg( name, spec, arg )
+
+   local vfargs = { name = name, va = self, spec = spec }
+
+   local ok
+   local opts = self.opts
+
+
+   -- validate the spec if requested
+   if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
+      self.state.in_check_spec = true
+      local ok, err = self:check_table( name, validate_spec, spec );
+      self.state.in_check_spec = false
+      if not ok then
+	 if opts.error_on_bad_spec then
+	    error( 'validation spec error: ' .. err )
+	 else
+	    return false, '(validation spec)' .. err
+	 end
+      end
+   end
+
+   if spec.precall then
+
+      local ok, v = spec.precall( arg, vfargs )
+      if ok then arg = v end
+   end
+
+   ok, arg = self:process_arg_spec( name, spec, arg )
+
+   if not ok then
+      return false, arg
    end
 
    if spec.postcall then
