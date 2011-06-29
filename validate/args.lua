@@ -289,7 +289,7 @@ end
 -- this is a list of names and an index indicating the
 -- largest valid element
 
-local Name = {
+Name = {
    level = 0,
    name = {},
 }
@@ -317,6 +317,22 @@ function Name:new( name )
 
 
    return obj
+
+end
+
+function Name:dup( )
+
+   self = self:new()
+
+   local name = {}
+
+   for i = 1, self.level do
+      name[i] = self.name[i]
+   end
+
+   self.name  = name
+
+   return self
 
 end
 
