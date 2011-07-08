@@ -1,7 +1,7 @@
 include $(top_srcdir)/snippets/create_am_macros.mk
 include $(top_srcdir)/snippets/substitute_config_variables.mk
 
-LUA_SRCS	= args.lua
+LUA_SRCS	= args.lua inplace.lua
 sublib		= validate
 
 #-------------------------------------------------------------------

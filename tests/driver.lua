@@ -24,6 +24,7 @@ tests = {
    'object',
    'defaults',
    'callback',
+   'inplace',
 }
 
 for _, v in pairs(tests) do

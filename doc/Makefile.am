@@ -7,8 +7,9 @@ include $(top_srcdir)/snippets/create_am_macros.mk
 BUILT_SOURCES           +=
 
 # extra files to add to the distribution
-EXTRA_DIST              +=		\
-			validate.args.pod
+EXTRA_DIST              +=			\
+			validate.args.pod	\
+			validate.inplace.pod
 
 # Any files make built.
 CLEANFILES              +=
@@ -29,4 +30,4 @@ include $(top_srcdir)/snippets/prog_pod.mk
 dist_manl_MANS = validate.args.l
 
 POD_SFX = .pod
-PODS = validate.args
+PODS = validate.args validate.inplace
