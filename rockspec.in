@@ -26,6 +26,7 @@ build = {
 
    modules = {
       ["validate.args"] = "validate/args.lua",
+      ["validate.inplace"] = "validate/inplace.lua",
    },
 
    copy_directories = {
