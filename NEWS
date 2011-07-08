@@ -1,3 +1,15 @@
+1.2.4 :
+
+[ENHANCEMENTS]
+
+* vfunc callback is passed as an extra argument a table with additional info
+
+* user provided functions may be called prior to and after the validation
+  process for each argument in the validation specification
+
+* new module validate.inplace; provides validation upon assignment of an
+  element in a data structure
+
 1.2.3 :
 
 [BUG FIX]

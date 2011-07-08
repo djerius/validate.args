@@ -1,8 +1,174 @@
-2011-06-07  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-07-07  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.3
+	Tag 1.2.4
 
-2011-06-07 17:16 -0400  djerius  <djerius@cfa.harvard.edu>  (c6b4f4be6376 [tip])
+2011-07-07 22:57 -0400  djerius  <djerius@cfa.harvard.edu>  (d517958f1ecb [tip])
+
+	* doc/validate.inplace.pod, tests/inplace.lua, validate/inplace.lua:
+	new file.
+	* doc/Makefile.am, doc/validate.inplace.pod, tests/Makefile.am,
+	tests/driver.lua, tests/inplace.lua, validate/Makefile.am,
+	validate/inplace.lua:
+	new module validate.inplace; performs validation during element
+	assignment to a table
+
+2011-06-29 14:39 -0400  djerius  <djerius@cfa.harvard.edu>  (28d7e9bb5aec)
+
+	* validate/args.lua:
+	expose Name class and add method to fully duplicate an object
+
+2011-06-27 17:24 -0400  djerius  <djerius@cfa.harvard.edu>  (2a437dc2add4)
+
+	* validate/args.lua:
+	forgot to define name argument passed to check_arg
+
+2011-06-27 17:22 -0400  djerius  <djerius@cfa.harvard.edu>  (0ae513bd05b0)
+
+	* validate/args.lua:
+	improve error messages for incorrect type match
+
+2011-06-27 11:42 -0400  djerius  <djerius@cfa.harvard.edu>  (ea65a87ad540)
+
+	* doc/validate.args.pod, validate/args.lua:
+	ensure that postcall is always called when an argument has passed
+	validation checks. improve docs for precall & postcall
+
+2011-06-24 18:21 -0400  djerius  <djerius@cfa.harvard.edu>  (dd79bf3c80a5)
+
+	* validate/args.lua:
+	abstract out per argument-specification state and store in validate
+	object
+
+2011-06-23 14:54 -0400  djerius  <djerius@cfa.harvard.edu>  (dd660f83ce30)
+
+	* doc/validate.args.pod, validate/args.lua:
+	add validation specification to callback parameters
+
+2011-06-23 14:09 -0400  djerius  <djerius@cfa.harvard.edu>  (bedaa19cde11)
+
+	* doc/validate.args.pod:
+	update docs
+
+2011-06-23 13:17 -0400  djerius  <djerius@cfa.harvard.edu>  (078d71414006)
+
+	* tests/defaults.lua:
+	test obtaining defaults when spec.vtable is a function
+
+2011-06-23 13:16 -0400  djerius  <djerius@cfa.harvard.edu>  (c8bdb9fcc752)
+
+	* validate/args.lua:
+	defaults were broken for spec.table() if it was a function; the
+	first part of the fix was unintentionally committed in cset
+	55dbba501073
+
+2011-06-23 13:14 -0400  djerius  <djerius@cfa.harvard.edu>  (b31df83e5714)
+
+	* validate/args.lua:
+	formatting fixes
+
+2011-06-23 13:13 -0400  djerius  <djerius@cfa.harvard.edu>  (569e4752dfb4)
+
+	* validate/args.lua:
+	add vfargs to callback argument lists in defaults()
+
+2011-06-23 13:12 -0400  djerius  <djerius@cfa.harvard.edu>  (55dbba501073)
+
+	* validate/args.lua:
+	typo; pass nil, not arg to vtable() to get default
+
+2011-06-23 13:10 -0400  djerius  <djerius@cfa.harvard.edu>  (8e5a94a972a1)
+
+	* validate/args.lua:
+	there's no point in calling vfunc() for a default value; it can't
+	provide one
+
+2011-06-23 13:09 -0400  djerius  <djerius@cfa.harvard.edu>  (00371846f673)
+
+	* tests/callback.lua, validate/args.lua:
+	change the names for pre- and post- validation callbacks (again)
+
+2011-06-23 11:17 -0400  djerius  <djerius@cfa.harvard.edu>  (175f8607c4e3)
+
+	* validate/args.lua:
+	undocumented vmeth functionality is now in vfunc; remove vmeth
+
+2011-06-23 11:14 -0400  djerius  <djerius@cfa.harvard.edu>  (bfd09b5066e8)
+
+	* tests/callback.lua, validate/args.lua:
+	add self to extra argument table in callbacks and vfunc
+
+2011-06-17 16:20 -0400  djerius  <djerius@cfa.harvard.edu>  (70090bb4d216)
+
+	* tests/callback.lua: new file.
+	* tests/Makefile.am, tests/callback.lua, tests/driver.lua,
+	validate/args.lua:
+	arbitrary pre- and post- validation callbacks may now be called
+
+2011-06-17 15:06 -0400  djerius  <djerius@cfa.harvard.edu>  (6fc35b6cba19)
+
+	* tests/constraints.lua, validate/args.lua:
+	add additional argument table to the vmeth and vfunc callback
+	argument list. pass a Name object via that table.
+
+2011-06-17 15:05 -0400  djerius  <djerius@cfa.harvard.edu>  (570c70e0c686)
+
+	* validate/args.lua:
+	add __tostring metamethod to Name objects
+
+2011-06-17 15:04 -0400  djerius  <djerius@cfa.harvard.edu>  (55f3fa00b994)
+
+	* validate/args.lua:
+	ensure that concatenated arguments to be appended to the variable
+	name are actually strings
+
+2011-06-17 12:10 -0400  djerius  <djerius@cfa.harvard.edu>  (6361f70066bf)
+
+	* validate/args.lua:
+	incorrect object passed to vmeth in default mode
+
+2011-06-17 11:37 -0400  djerius  <djerius@cfa.harvard.edu>  (e912d278bbab)
+
+	* validate/args.lua:
+	carry name with parameters when traversing spec tree
+
+	previously, as the spec tree was navigated any given function was
+	ignorant of the name of the spec's parent variable; it knew only the
+	children. While this approach obviated passing extra name
+	information along, it made it impossible to pass a fully qualified
+	name to any callbacks.
+
+	the full name is now passed along as a Name object containing an
+	ordered list of the components in a variable name as well as the
+	index of the last valid component. The name object is cloned at each
+	level; the new object gets an independent copy of the index, but
+	shares the same list of names as its parent. This is more efficient
+	than copying the list, and because the parent's index is untouched
+	removes the need to independently increment and decrement the index
+	as levels in the tree are traversed.
+
+2011-06-17 10:43 -0400  djerius  <djerius@cfa.harvard.edu>  (22e6278a84ea)
+
+	* tests/mutate.lua:
+	add error message upon test failure
+
+2011-06-15 17:05 -0400  djerius  <djerius@cfa.harvard.edu>  (14abcfc6aed5 <setmt>)
+
+	* .hgpatchinfo/setmt.dep, tests/setmt.lua: new file.
+	* .hgpatchinfo/setmt.dep, configure.ac, tests/Makefile.am,
+	tests/driver.lua, tests/setmt.lua, validate/args.lua:
+	start new patch on default
+
+2011-06-07 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (21ccc2a8f4be)
+
+	* .hgtags:
+	Added tag 1.2.3 for changeset d0e10e687452
+
+2011-06-07 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (d0e10e687452 [1.2.3])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-06-07 17:16 -0400  djerius  <djerius@cfa.harvard.edu>  (c6b4f4be6376)
 
 	* tests/defaults.lua, validate/args.lua:
 	bugs in handling boolean args with value of false (one old bug, one
