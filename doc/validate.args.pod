@@ -1,6 +1,6 @@
 =head1 NAME
 
-validate.args - validate arguments
+validate.args - validate arguments and data structures
 
 =head1 SYNOPSIS
 
@@ -36,9 +36,9 @@ validate.args - validate arguments
 
 =head1 DESCRIPTION
 
-B<validate.args> validates that a function's arguments meet certain
-specifications.  Both scalar and table arguments are validated, and
-validation of nested tables is supported.
+B<validate.args> provides a framework for validating function
+arguments and data structures.  Scalar and (nested) table values as
+well as lists of values of the same type may be validated.
 
 B<validate.args> provides both procedural and object-oriented
 interfaces.  The significant difference between the interfaces is that
@@ -48,11 +48,11 @@ object.  Objects may themselves be cloned, allowing for nested
 hierarchies of validation specifications.  Changes to parent objects
 do not affect child objects, and vice-versa.
 
+=head2 Validating Function Arguments
+
 Positional, named, and mixed positional and named arguments are
 supported.  Positional arguments may be converted to named arguments
-for uniformity of access (see L</Validation Options>).  Each argument
-has a validation specification which provides the validation
-constraints.
+for uniformity of access (see L</Validation Options>).
 
 =over
 
@@ -67,7 +67,6 @@ one element per argument:
   { { pos1 specification },
     { pos2 specification }
   }
-
 
 =item Named arguments
 
@@ -99,22 +98,37 @@ on the named arguments, typically using the C<vtable> constraint.
 
 =back
 
+=head2 Validating Data Structures
+
+Validation of data structures is very similar to validating function
+arguments.  The base structure operated upon is a table whose elements
+may be positional (indexed with integers) or named (indexed with
+anything else) or both.  The layout of the validation specifications
+are identical to those described above. Typically the B<validate_tbl> method or
+function is used.
+
+
 =head2 Validation Specifications
 
-A validation specification is a set of constraints which an argument
+A validation specification is a set of constraints which a value
 must meet.  In most cases the specification is encoded in a table,
 where each key-value pair represents a type of constraint and its
 parameters.  The specification may also be specified by a function
 (see L</Mutating Validation Specifications>).
 
-Multiple constraints may be specified for each argument. There are no
+B<Note:> The documentation below refers to validation of both function
+arguments and data structures. When the term I<element> is used it
+refers to either a function argument or to an element of a data
+structure.
+
+Multiple constraints may be specified for each element. There are no
 guarantees as to the order in which the constraints are applied.
 
-The caller may provide constraints which modify the passed arguments;
+The caller may provide constraints which modify the passed elements;
 these must not expect a particular sequence of operation.
 
 The caller may provide callbacks which are called pre- and post-
-validation.  These may modify the argument values.
+validation.  These may modify the elements.
 
 The following constraint types are recognized:
 
@@ -122,19 +136,19 @@ The following constraint types are recognized:
 
 =item optional
 
-This is a boolean attribute which, if true, indicates that the argument
-need not be present.  Positional as well as named arguments may be
+This is a boolean attribute which, if true, indicates that the element
+need not be present.  Positional as well as named elements may be
 optional; if they are not at the end of the list they may be specified
-as C<nil> in the function call, e.g.
+as C<nil> in the list of input values, e.g.
 
-  foo( nil, 3 )
+  nil, 3
 
-It defaults to C<false>.  All arguments are required by default.
+This defaults to C<false>.  All elements are required by default.
 
 =item default
 
-This provides a value for an argument whose value was not specified,
-as well as indicating that the argument is optional.  This may be a
+This provides the default value when a element was not specified,
+as well as indicating that the element is optional.  This may be a
 function, which will be called if a default value is required. The
 function is passed a single argument, a table (see L</Callback
 Arguments> for its contents). The function should return two values:
@@ -151,13 +165,12 @@ the default value upon success, an error message upon failure
 
 =back
 
-If no default value is specified for a table argument with a vtable
-constraint, the nested argument specifications in the vtable are
-scanned for defaults.
+If no default value is specified for a table element with a vtable
+constraint, the nested specifications in the vtable are scanned for defaults.
 
 =item type
 
-This specifies the expected type of argument. It may be either a single
+This specifies the expected type of the element. It may be either a single
 type or a list of types:
 
   type = 'number'
@@ -188,19 +201,19 @@ These are the built-in types as returned by the Lua B<type> function.
 
 =item 'posnum'
 
-The argument must be a number greater than zero.
+The element must be a number greater than zero.
 
 =item 'zposnum'
 
-The argument must be a number greater than or equal to zero.
+The element must be a number greater than or equal to zero.
 
 =item 'posint'
 
-The argument must be an integer greater than zero.
+The element must be an integer greater than zero.
 
 =item 'zposint'
 
-The argument must be an integer greater than or equal to zero.
+The element must be an integer greater than or equal to zero.
 
 =back
 
@@ -208,7 +221,7 @@ To add additional types see the B<add_type> function.
 
 =item enum
 
-This specifies one or more explicit values which the argument may
+This specifies one or more explicit values which the element may
 take. It may be either a single value or a list of values:
 
   enum = 33
@@ -217,45 +230,45 @@ take. It may be either a single value or a list of values:
 
 =item not_nil
 
-This is a boolean and indicates that the value must not be nil.  This
-only pertains to positional arguments.
+This is a boolean and indicates that the element must not be nil.  This
+only pertains to positional elements.
 
 =item requires
 
-This lists the names of one or more arguments which I<must> be specified
-in addition to the current argument.  The value is either a single
+This lists the names of one or more elements which I<must> be specified
+in addition to the current element.  The value is either a single
 name or a list of names:
 
   requires = 'arg3'
   requires = { 'arg3', 'arg4' }
 
-See also L</Argument Groups>
+See also L</Element Groups>
 
 =item excludes
 
-This lists the names of one or more arguments which I<may not> be specified
-in addition to the current argument.  The value is either a single
+This lists the names of one or more elements which I<may not> be specified
+in addition to the current element.  The value is either a single
 name or a list of names:
 
   excludes = 'arg3'
   excludes = { 'arg3', 'arg4' }
 
-See also L</Argument Groups>
+See also L</Element Groups>
 
 =item one_of
 
-This provides a list of names of other arguments of which exactly
-one I<must> be specified in addition to the current argument:
+This provides a list of names of other elements of which exactly
+one I<must> be specified in addition to the current element:
 
   one_of = { 'arg3', 'arg4' }
 
-See also L</Argument Groups>
+See also L</Element Groups>
 
 
 =item vfunc
 
-This specifies a function which is called to validate the argument.
-It is called with two arguments, the passed argument value and a table
+This specifies a function which is called to validate the element.
+It is called with two arguments, the passed element value and a table
 (see L</Callback Arguments> for its contents).  It must return two
 values:
 
@@ -267,7 +280,7 @@ a boolean indicating success or failure;
 
 =item 2
 
-the (possibly modified) argument value upon success, an error message upon failure
+the (possibly modified) element value upon success, an error message upon failure
 
 =back
 
@@ -283,7 +296,7 @@ For example,
 
 =item vtable
 
-This is used to validate the contents of an argument which is a table.
+This is used to validate the contents of an element which is a table.
 Its value may be either:
 
 =over
@@ -291,7 +304,7 @@ Its value may be either:
 =item a table of specifications
 
 There should be one element in the specification table for each element
-in the argument table. For example, to validate a call such as
+in the element table. For example, to validate a call such as
 
   foo( 'hello', { nv1 = 3, nv2 = 2 } )
 
@@ -315,7 +328,7 @@ which will return
 
 =item a function
 
-The function is called with two arguments: the passed argument value,
+The function is called with two arguments: the passed element value,
 and a table (see L</Callback Arguments> for its contents) and must
 return two values:
 
@@ -332,8 +345,8 @@ error message.  See L</EXAMPLES> for an example of this in use.
 
 =back
 
-This function may be called with the argument value equal to C<nil> if
-no argument value was specified.
+This function may be called with the element value equal to C<nil> if
+no element value was specified.
 
 =back
 
@@ -341,10 +354,10 @@ no argument value was specified.
 
 =item postcall
 
-Functions to be called for each argument before and after argument
-validation.  They are called with two arguments: the passed argument
+Functions to be called for each element before and after
+validation.  They are called with two arguments: the passed element
 value, and a table (see L</Callback Arguments> for its contents).  If
-the function wishes to modify the argument value it should return two
+the function wishes to modify the element value it should return two
 arguments, C<true> and the new value, else it should return C<false>.
 
 Please note:
@@ -363,7 +376,7 @@ invoked.  If a specification is invalid neither callback is invoked.
 
 =item *
 
-The functions are called at the table level for arguments which are
+The functions are called at the table level for elements which are
 vtables.
 
 
@@ -372,9 +385,9 @@ vtables.
 
 =item name
 
-A name for a positional argument.  If specified and the C<named>
-validation option is I<true>, then the argument will be assigned this
-name in the returned argument table.  See L</Validation Options> for
+A name for a positional element.  If specified and the C<named>
+validation option is I<true>, then the element will be assigned this
+name in the returned table.  See L</Validation Options> for
 more information.
 
 =item multiple
@@ -458,13 +471,13 @@ being used, this will be a default object.
 
 =item name
 
-The fully qualified name of the argument stored as a
+The fully qualified name of the element stored as a
 C<validate.args.Name> object.  Use the C<tostring()> function (or
 the similarly named method) to stringify it.
 
 =item spec
 
-The specification table for the argument. B<Do not modify this>.
+The specification table for the element. B<Do not modify this>.
 
 =back
 
@@ -474,7 +487,7 @@ The specification table for the argument. B<Do not modify this>.
 A validation specification is usually (as documented above) a table of
 constraints.  In the case where the entire validation table must be
 created on the fly the validation specification may be a I<function>.
-The function should take a single parameter - the passed argument
+The function should take a single parameter - the passed element
 I<value> - and must return two values:
 
 =over
@@ -485,11 +498,11 @@ a boolean indicating success or failure;
 
 =item 2
 
-Upon success, a table of validation specifcations. Upon failure, an error message.
+Upon success, a table of validation specifications. Upon failure, an error message.
 
 =back
 
-=head2 Groups of Arguments
+=head2 Element Groups
 
 Some operations on groups of elements are possible for named
 elements.  These are specified as special "arguments" in the
@@ -502,7 +515,7 @@ B<not> a simple list:
 
   ['%one_of'] = { 'a', 'b', 'c' }
 
-in ordeThis allows specifying multiple groups:
+This allows specifying multiple groups:
 
   ['%one_of'] = { { 'a', 'b', 'c' } , { 'd', 'e', 'f' } }
 
@@ -510,8 +523,8 @@ in ordeThis allows specifying multiple groups:
 
 =item %one_of
 
-This ensures that exactly one argument in a group is specified.  For
-example, say that the caller must provide exactly one of the arguments
+This ensures that exactly one element in a group is specified.  For
+example, say that the caller must provide exactly one of the elements
 C<arg1>, C<arg2>, or C<arg3>.  Exclusivity is obtained via
 
   arg1 = { optional = true, excludes = { 'arg2', 'arg3' } },
@@ -533,7 +546,7 @@ so the above could be rewritten as
 
 =item %oneplus_of
 
-This ensures that at least one argument in a group is specified. More
+This ensures that at least one element in a group is specified. More
 may be specified.  As a complicated example:
 
   sigma   = { optional = true, excludes = { 'sigma_x', 'sigma_y' } },
@@ -570,7 +583,7 @@ This defaults to C<false>.
 =item error_on_invalid
 
 If C<true>, the Lua B<error()> function will be called the case of
-invalid arguments instead of returning a status code and message.
+invalid elements instead of returning a status code and message.
 
 This defaults to C<false>.
 
@@ -583,15 +596,15 @@ This defaults to C<false>.
 
 =item named
 
-If this is C<true>, positional arguments are returned as a table, with
+If this is C<true>, positional elements are returned as a table, with
 their names given either by the C<name> attribute in the validation
 specification or by their cardinal index in the argument list.
 For example:
 
    ok, opts = validate_opts( { named = true },
                              { { name = a }, { }, },
-			     22, 3
-			      )
+                             22, 3
+                              )
 
 will result in
 
@@ -603,15 +616,15 @@ This defaults to C<false>.
 
 =item allow_extra
 
-If this is C<true>, then any extra arguments (either named or positional)
+If this is C<true>, then any extra elements (either named or positional)
 which are not mentioned in the validation specification are quietly
 ignored. For example:
 
   local ok, a, b, c = validate_opts( { allow_extra = true,
                                        pass_through = true,
-				      },
+                                      },
                                       { {}, {} },
-				     1, 2, 3)
+                                     1, 2, 3)
 
 would result in
 
@@ -624,14 +637,14 @@ This defaults to C<false>.
 =item pass_through
 
 If this is C<true> and C<allow_extra> is also C<true>, then any extra
-arguments (either named or positional) which are not mentioned in the
+elements (either named or positional) which are not mentioned in the
 validation specification are passed through.  For example:
 
   local ok, a, b, c = validate_opts( { allow_extra = true,
                                        pass_through = true,
-				      },
+                                      },
                                       { {}, {} },
-				     1, 2, 3)
+                                     1, 2, 3)
 
 would result in
 
@@ -722,7 +735,7 @@ thrown if the specified options are not recognized.
 Register a validation function for the named type which
 will be accepted by the B<type> validation attribute.
 
-The function will be passed the argument to validate.  It should
+The function will be passed the value of the element to validate.  It should
 return two values:
 
 =over
@@ -733,41 +746,41 @@ a boolean indicating success or failure;
 
 =item 2
 
-the (possibly modified) argument upon success, an error message upon failure
+the (possibly modified) element value upon success, an error message upon failure
 
 =back
 
 For example, the following
 
   vobj:add_type( 'mytype', function( arg )
-  	    	          if 'number' == type(arg) then
-			    return true, 3 * arg
-			  else
+                          if 'number' == type(arg) then
+                            return true, 3 * arg
+                          else
                             return false, 'not a number between 2 & 3'
-			  end
-		      end
+                          end
+                      end
           )
 
 adds a new type called C<mytype> which accepts only numbers between 2
-and 3 (exclusive) and modifies the argument by multiplying it by 3.
+and 3 (exclusive) and modifies the element value by multiplying it by 3.
 
 =item validate
 
-  vobj:validate( specs ... )
+  vobj:validate( specs, ... )
 
-Validate the passed argument list against the specifications.  It
+Validate the passed  list against the specifications.  It
 returns a list of values.  The first value is a boolean indicating
 whether or not the validation succeeded.
 
 If validation succeeded, the remainder of the list contains the
-values of the arguments (possibly modified during the validation).
+values (possibly modified during the validation).
 
 If validation failed, the second value is a string indicating what
 caused the failure.
 
 =item validate_tbl
 
-  vobj:validate_tbl( specs, tble )
+  vobj:validate_tbl( specs, table )
 
 Validate the contents of the passed table against the
 specifications. The return values are the same as for B<validate>.
@@ -784,7 +797,7 @@ specifications. The return values are the same as for B<validate>.
 
   validate( specs, ... )
 
-Validate the passed argument list against the specifications using the
+Validate the passed list against the specifications using the
 current global settings for the validation options.  See the
 documentation for the C<validate()> method for more details.
 
@@ -792,7 +805,7 @@ documentation for the C<validate()> method for more details.
 
   validate_opts( opts, specs, ... )
 
-Validate the passed argument list against the specifications using the
+Validate the passed list against the specifications using the
 current global settings for the validation options.  Temporary values
 for validations options may be specified with the C<opts> argument. The
 return values are the same as B<validate>.
@@ -816,7 +829,7 @@ Globally register a validation function for the named type which
 will be accepted by the B<type> validation attribute.  See the
 C<add_type()> method for more details on the arguments.
 
-The function will be passed the argument to validate.  It should
+The function will be passed the value of the element to validate.  It should
 return two values:
 
 =item opts( I<table of options> )
@@ -836,7 +849,7 @@ Options> for the available options.
   function foo( ... )
     local ok, args = validate( { a = { type = 'number' },
                                  b = { default  = 22,
-				       type = 'number' },
+                                       type = 'number' },
                      }, ... )
   end
 
@@ -896,8 +909,8 @@ of the distributions.  The distribution names are the keys:
 
   specs = { gaussian = { {}, sigma = { type = 'number' } },
             uniform  = { {},  },
-	    powerlaw = { {}, alpha = { type = 'number' } },
-	  }
+            powerlaw = { {}, alpha = { type = 'number' } },
+          }
 
 The specifications are used to validate the entire contents of idist,
 so the name of the distribution must be validated as well (hence the
@@ -909,11 +922,11 @@ specification based upon the value of the first positional element
 
   { idist = { vtable = function (arg)
                           local vtable = specs[arg[1]]
-			  if vtable then
-			    return true, vtable
+                          if vtable then
+                            return true, vtable
                           else
-			    return false, "unknown idist: " .. tostring(arg)
-			  end
+                            return false, "unknown idist: " .. tostring(arg)
+                          end
                        end } }
 
 
