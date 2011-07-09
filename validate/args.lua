@@ -84,7 +84,7 @@ function Base:new( attr )
    end
 
    for k, v in nmpairs( attr or {} ) do
-	 obj[k] = v
+      obj[k] = v
    end
 
    setmetatable( obj, self )
@@ -103,13 +103,13 @@ end
 -- configuration options class. doesn't allow creation of new option fields
 
 local Options = Base:new{
-      check_spec        = false,
-      error_on_bad_spec = false,
-      error_on_invalid  = false,
-      named             = false,
-      allow_extra       = false,
-      pass_through      = false,
-      debug             = false,
+   check_spec        = false,
+   error_on_bad_spec = false,
+   error_on_invalid  = false,
+   named             = false,
+   allow_extra       = false,
+   pass_through      = false,
+   debug             = false,
 }
 
 -- prevent creation of new fields
@@ -467,13 +467,12 @@ local function resolve_spec( spec, arg )
       ok, spec = spec( arg )
 
       if ok and type(spec) ~= 'table' then
-	 ok = false
-	 spec = '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
+	 return false, '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
       end
 
    end
 
-   return ok, spec
+   return true, spec
 
 end
 
@@ -539,8 +538,8 @@ function Validate:check_table( name, tspec, arg )
 		  if type(k) ~= 'string' and type(k) ~= 'number' then
 		     return false, name:msg( 'invalid argument name' )
 
-		  -- make sure we don't mistake a positional index for
-		  -- a string
+		     -- make sure we don't mistake a positional index for
+		     -- a string
 		  elseif type(k) ~= 'number' and k:sub(1,1) == '%' then
 
 		     ok, v_s = check_special( k, spec )
@@ -614,7 +613,7 @@ function Validate:check_table( name, tspec, arg )
 	       narg[k] = arg[k]
 	    end
 	 else
-	    table.insert( bad_args, k )
+	    table.insert( bad_args, name:add(k):tostring() )
 	    has_bad = true
 	 end
 
@@ -624,7 +623,7 @@ function Validate:check_table( name, tspec, arg )
 
    if has_bad then
 
-      return false, name:msg( table.concat( bad_args, ', ' ), ": unexpected named argument(s)" )
+      return false, name:msg( "unexpected elements: ", table.concat( bad_args, ', ' ) )
    end
 
    -- now check for dependencies and exclusions
@@ -877,7 +876,7 @@ function Validate:process_arg_spec( name, spec, arg )
 	    break
 	 elseif narg ~= nil then
 	    errors[#errors+1] = string.format( "did not match type '%s': %s",
-					    v, tostring(narg) )
+					       v, tostring(narg) )
 	 else
 	    errors[#errors+1] = string.format( "did not match type '%s'", v )
 	 end
@@ -947,8 +946,7 @@ function Validate:process_arg_spec( name, spec, arg )
    if spec.enum ~= nil then
 
       local ok
-      local enum = type(spec.enum) == 'table'
-                            and spec.enum or { spec.enum }
+      local enum = type(spec.enum) == 'table' and spec.enum or { spec.enum }
 
       for _, v in pairs( enum ) do
 
@@ -1022,12 +1020,12 @@ function Validate:g_rfunc(  )
 
    if self.opts.error_on_invalid then
       return function( ... )
-		 if ( select( 1, ... ) ) then
-		    return ...
-		 else
-		    error( select( 2, ... ), 4 )
-		 end
-	      end
+		if ( select( 1, ... ) ) then
+		   return ...
+		else
+		   error( select( 2, ... ), 4 )
+		end
+	     end
    elseif self.opts.debug then
       return function( ... )
 		if ( select( 1, ... ) ) then
@@ -1062,151 +1060,151 @@ function Validate:validate( tpl, ... )
 
    local rfunc = self:g_rfunc()
 
-  -- do our own simple validation
-  if type(tpl) == 'nil' or type(tpl) ~= 'table' then
-     return rfunc( false, "argument #2 (tpl): expected table, got " .. type(tpl) )
-  end
+   -- do our own simple validation
+   if type(tpl) == 'nil' or type(tpl) ~= 'table' then
+      return rfunc( false, "argument #2 (tpl): expected table, got " .. type(tpl) )
+   end
 
-  -- number of arguments
-  local npos = select('#', ... )
+   -- number of arguments
+   local npos = select('#', ... )
 
-  -- original arguments
-  local oargs = { ... }
+   -- original arguments
+   local oargs = { ... }
 
-  -- output (possibly transformed) arguments
-  local args = {}
-  local nargs = 0
+   -- output (possibly transformed) arguments
+   local args = {}
+   local nargs = 0
 
-  -- All args are essentially positional arguments.  This routine
-  -- expects the {tpl} argument to be an array of specification
-  -- tables, one per argument.
+   -- All args are essentially positional arguments.  This routine
+   -- expects the {tpl} argument to be an array of specification
+   -- tables, one per argument.
 
-  -- If there are only named arguments, the only argument is a table.
-  -- In that case the input template is simplified; it is a
-  -- specification table rather than an array of tables.
+   -- If there are only named arguments, the only argument is a table.
+   -- In that case the input template is simplified; it is a
+   -- specification table rather than an array of tables.
 
-  -- iterate over positional arguments
-  local handled_pos = {}
-  local idx = 1
-  for i, spec in ipairs( tpl ) do
+   -- iterate over positional arguments
+   local handled_pos = {}
+   local idx = 1
+   for i, spec in ipairs( tpl ) do
 
-     local name = Name:new( { string.format( "arg#%d", i ) } )
+      local name = Name:new( { string.format( "arg#%d", i ) } )
 
-     -- the specification may be a function, in which case it
-     -- will return the real validation specification.  have to handle
-     -- it early for positional arguments as we need to know if a name
-     -- was assigned to the argument.
+      -- the specification may be a function, in which case it
+      -- will return the real validation specification.  have to handle
+      -- it early for positional arguments as we need to know if a name
+      -- was assigned to the argument.
 
-     local ok, spec = resolve_spec( spec, oargs[i] )
+      local ok, spec = resolve_spec( spec, oargs[i] )
 
-     if not ok then
+      if not ok then
 
-	return rfunc( false, name:msg( '(validation spec): ', spec ) )
+	 return rfunc( false, name:msg( '(validation spec): ', spec ) )
 
-     elseif type(spec) ~= 'table' then
+      elseif type(spec) ~= 'table' then
 
-	return rfunc( false, name:msg( '(validation spec): expected table or function, got' ,
-				       type(arg) ) )
-     end
+	 return rfunc( false, name:msg( '(validation spec): expected table or function, got' ,
+					type(arg) ) )
+      end
 
-     nargs = nargs + 1
-     local keyname = opts.named and spec.name or nargs
+      nargs = nargs + 1
+      local keyname = opts.named and spec.name or nargs
 
-     local argname = ''
-     if spec.name then
-	name = Name:new( { string.format( 'arg#%d(%s)', i, spec.name ) } )
-     else
-	name = Name:new( { string.format( 'arg#%d', i ) } )
-     end
+      local argname = ''
+      if spec.name then
+	 name = Name:new( { string.format( 'arg#%d(%s)', i, spec.name ) } )
+      else
+	 name = Name:new( { string.format( 'arg#%d', i ) } )
+      end
 
-     handled_pos[i] = true;
+      handled_pos[i] = true;
 
-     -- distinguish between a nil value and a non-existent positional arg
-     if i > npos and not ( spec.optional or spec.default ~= nil ) then
-	return rfunc( false, name:msg( 'missing' ) )
-     end
+      -- distinguish between a nil value and a non-existent positional arg
+      if i > npos and not ( spec.optional or spec.default ~= nil ) then
+	 return rfunc( false, name:msg( 'missing' ) )
+      end
 
-     self.state[spec] = { positional = true }
-     ok, args[keyname] = self:check_arg( name, spec, oargs[i] )
+      self.state[spec] = { positional = true }
+      ok, args[keyname] = self:check_arg( name, spec, oargs[i] )
 
-     if not ok then
-	return rfunc( false, args[keyname] )
-     end
+      if not ok then
+	 return rfunc( false, args[keyname] )
+      end
 
-     idx = i + 1
-  end
-
-
-  -- We've reached the end of the positional arguments.  If there
-  -- were none ( idx == 1 ) then there are only named arguments
-  -- e.g. func{ args} and {tpl} is the specification table for them.
-
-  if idx == 1 then
-
-     if npos > 1 then
-	return rfunc( false, "too many positional arguments" )
-     end
-
-     local arg = oargs[1] or {}
-
-     -- manufacture a vtable specification
-     local spec = { type = 'table', vtable = tpl }
-     self.state[spec] = { positional = false }
-
-     if type(arg) ~= 'table'  then
-	return rfunc( false, "arg#2: expected table , got " .. type(arg) )
-     end
-
-     return rfunc( self:check_arg( Name:new(), spec , arg ) )
-
-  else
-
-     -- There's an error in the template if idx > 1 and there are
-     -- elements in the template that we haven't handled
-
-     local badkeys = {}
-     for k in pairs (tpl) do
-	if not handled_pos[k] then
-	   table.insert( badkeys, k )
-	end
-
-     end
-
-     if nil ~= next(badkeys) then
-	return rfunc( false, "extra elements in validation spec: " .. table.concat( badkeys, ', ' ) )
-     end
+      idx = i + 1
+   end
 
 
-     -- extra arguments
-     if npos >= idx then
+   -- We've reached the end of the positional arguments.  If there
+   -- were none ( idx == 1 ) then there are only named arguments
+   -- e.g. func{ args} and {tpl} is the specification table for them.
 
-	if not opts.allow_extra then
+   if idx == 1 then
 
-	   -- don't want them
-	   return rfunc( false, "too many positional arguments" )
+      if npos > 1 then
+	 return rfunc( false, "too many positional arguments" )
+      end
+
+      local arg = oargs[1] or {}
+
+      -- manufacture a vtable specification
+      local spec = { type = 'table', vtable = tpl }
+      self.state[spec] = { positional = false }
+
+      if type(arg) ~= 'table'  then
+	 return rfunc( false, "arg#2: expected table , got " .. type(arg) )
+      end
+
+      return rfunc( self:check_arg( Name:new(), spec , arg ) )
+
+   else
+
+      -- There's an error in the template if idx > 1 and there are
+      -- elements in the template that we haven't handled
+
+      local badkeys = {}
+      for k in pairs (tpl) do
+	 if not handled_pos[k] then
+	    table.insert( badkeys, k )
+	 end
+
+      end
+
+      if nil ~= next(badkeys) then
+	 return rfunc( false, "extra elements in validation spec: " .. table.concat( badkeys, ', ' ) )
+      end
 
 
-	elseif opts.pass_through then
+      -- extra arguments
+      if npos >= idx then
 
-	   -- want them
-	   for i = idx, npos, 1 do
-	      args[i] = oargs[i]
-	   end
+	 if not opts.allow_extra then
 
-	   nargs = npos
-
-	end
+	    -- don't want them
+	    return rfunc( false, "too many positional arguments" )
 
 
-     end
+	 elseif opts.pass_through then
 
-  end
+	    -- want them
+	    for i = idx, npos, 1 do
+	       args[i] = oargs[i]
+	    end
 
-  if opts.named then
-     return rfunc( true, args )
-  else
-     return rfunc( true, unpack(args, 1, nargs ) )
-  end
+	    nargs = npos
+
+	 end
+
+
+      end
+
+   end
+
+   if opts.named then
+      return rfunc( true, args )
+   else
+      return rfunc( true, unpack(args, 1, nargs ) )
+   end
 end
 
 -------------------------------------------------------------------------------
