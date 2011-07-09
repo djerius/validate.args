@@ -409,8 +409,9 @@ end
 -- Support for validation of input validation templates using validate.args
 -- We eat our own dog food here. Sometimes.
 
+local validate_spec = {}
 
-local validate_spec = {
+validate_spec = {
    optional = { optional = true,
 		type = 'boolean'
 	     },
@@ -433,6 +434,30 @@ local validate_spec = {
 			   return true, val
 			end
 	     },
+
+   multiple = function ( arg )
+		 local spec = { optional = true }
+		 if type(arg) == 'table' then
+		    spec.vtable = {
+		       min = { type = 'zposint', optional = true,
+			       excludes = 'n'
+			    },
+		       max = { type = 'posint',  optional = true,
+			       excludes = 'n'
+			    },
+		       n   = { type = 'posint',  optional = true,
+			       excludes = { 'min', 'max' }
+			    },
+
+		       keys   = { vtable = validate_spec,
+				  optional = true
+			       }
+		    }
+		 else
+		    spec.type = 'boolean'
+		 end
+		 return true, spec
+	      end,
 
    precall  = { type = 'function', optional = true },
    postcall = { type = 'function', optional = true },
@@ -830,6 +855,8 @@ function Validate:process_arg_spec( name, spec, arg )
 
    local vfargs = { name = name, va = self, spec = spec }
 
+   if self.state[spec] == nil then self.state[spec] = {} end
+
    local ok
    local opts = self.opts
 
@@ -839,7 +866,7 @@ function Validate:process_arg_spec( name, spec, arg )
 
       -- positional arguments have already been checked for existence,
       -- so if it's a nil value it has been deliberately set
-      if self.state[spec] and self.state[spec].positional and spec.not_nil then
+      if self.state[spec].positional and spec.not_nil then
 
 	 return false, name:msg( 'must not be nil' )
 
@@ -848,6 +875,53 @@ function Validate:process_arg_spec( name, spec, arg )
       return self:defaults( name, spec )
 
    end
+
+   if spec.multiple and not self.state[spec].in_multiple then
+
+      if type( arg ) ~= 'table' then
+	 return false, name:msg( 'must be a table' )
+      end
+
+      local ok
+      local espec = type(spec.multiple) == 'table' and spec.multiple or {}
+      local nelem = 0
+
+      for k,v in pairs( arg ) do
+
+	 self.state[spec].in_multiple = true
+	 ok, v = self:check_arg( name:add(k), spec, v )
+	 self.state[spec].in_multiple = false
+
+	 if not ok then
+	    return false, v
+	 end
+
+	 if espec.keys then
+	    ok, k = self:check_arg( name:add( k ), espec.keys, k )
+	    if not ok then
+	       return false, k .. ': bad key'
+	    end
+	 end
+
+	 arg[k] = v
+	 nelem = nelem + 1
+      end
+
+      if espec.min ~= nil and nelem < espec.min then
+	 return false, name:msg( "too few elements; expected %d, got %d", espec.min, nelem )
+      end
+
+      if espec.max ~= nil and nelem > espec.max then
+	 return false, name:msg( "too many elements; expected %d, got %d", espec.min, nelem )
+      end
+
+      if espec.n ~= nil and nelem ~= espec.n then
+	 return false, name:msg( "incorrect number of elements; expected %d, got %d", espec.n, nelem )
+      end
+      return true, arg
+
+   end
+
 
    -- the specification specifies a type for the argument; check it
    if spec.type ~= nil then

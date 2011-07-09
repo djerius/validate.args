@@ -328,7 +328,7 @@ a boolean indicating success or failure;
 =item 2
 
 Upon success, a table of validation specifications. Upon failure, an
-error message.  See L</Examples> for an example of this in use.
+error message.  See L</EXAMPLES> for an example of this in use.
 
 =back
 
@@ -377,9 +377,73 @@ validation option is I<true>, then the argument will be assigned this
 name in the returned argument table.  See L</Validation Options> for
 more information.
 
+=item multiple
+
+This indicates that the element is an array whose members must
+each meet the validation specifications.  For example, to validate
+a list of positive integers:
+
+  { type = 'posint', multiple = true }
+
+This parameter may take the following values:
+
+=over
+
+=item C<true> or C<false>
+
+If C<true>, each member of the element array is validated.
+
+=item a table of options
+
+In addition to validating the members of the input array, further
+validation is possible.  The following options are recognized:
+
+=over
+
+=item n
+
+This specifies the exact number of members in the element table.  It is optional.
+
+=item min
+
+This specifies the required minimum number of members in the element
+table.  It may not be combined with the B<n> option.  It is optional.
+
+=item max
+
+This specifies the required maximum number of members in the element
+table.  It may not be combined with the B<n> option.  It is optional.
+
+=item keys
+
+This specifies a validation specification for the I<keys> in the element table.
+For example, the following ensures that keys consist only of alphabetical characters:
+
+  multiple = {
+     keys = {
+       vfunc = function( val )
+                 if type(val) == 'string'
+		    and val:match( '^%a+$' ) then
+                   return true, val
+                 else
+                   return false,
+		          "only alpha characters allowed"
+                 end
+               end
+         }
+  }
+
+
 =back
 
-=head2 Callback arguments
+
+=back
+
+
+
+=back
+
+=head2 Callback Arguments
 
 Several of the validation specification entries take callback
 functions.  The last argument passed to these functions is a table
@@ -427,8 +491,8 @@ Upon success, a table of validation specifcations. Upon failure, an error messag
 
 =head2 Groups of Arguments
 
-Some operations on groups of arguments are possible for named
-arguments.  These are specified as special "arguments" in the
+Some operations on groups of elements are possible for named
+elements.  These are specified as special "arguments" in the
 validation specification.  In order to accomodate multiple groups,
 these "arguments" take as values a I<list of lists>,
 

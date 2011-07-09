@@ -25,6 +25,7 @@ tests = {
    'defaults',
    'callback',
    'inplace',
+   'multiple'
 }
 
 for _, v in pairs(tests) do
