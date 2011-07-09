@@ -19,6 +19,7 @@ EXTRA_DIST              +=		\
 			driver.lua	\
 			excludes.lua	\
 			inplace.lua	\
+			multiple.lua	\
 			mutate.lua	\
 			named.lua	\
 			nested.lua	\
