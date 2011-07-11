@@ -27,7 +27,7 @@ include $(top_srcdir)/snippets/prog_pod.mk
 
 # this must be an explicit list of man pages; no make variables allowed.
 # currently, only section l man pages are supported.
-dist_manl_MANS = validate.args.l
+dist_manl_MANS = validate.args.l validate.inplace.l
 
 POD_SFX = .pod
 PODS = validate.args validate.inplace
