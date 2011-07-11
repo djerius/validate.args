@@ -1,3 +1,12 @@
+1.2.5 :
+
+[ENHANCEMENTS]
+
+* new "multiple" parameter, indicating that an element is actually a table of
+  things to be validated against the same specification
+
+* "type" parameter now accepts "inlined" validation specifications.
+
 1.2.4 :
 
 [ENHANCEMENTS]

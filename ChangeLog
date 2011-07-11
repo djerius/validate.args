@@ -1,8 +1,58 @@
-2011-07-07  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-07-11  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.4
+	Tag 1.2.5
 
-2011-07-07 22:57 -0400  djerius  <djerius@cfa.harvard.edu>  (d517958f1ecb [tip])
+2011-07-11 11:42 -0400  djerius  <djerius@cfa.harvard.edu>  (093cbacad511 [tip])
+
+	* README, rockspec.in:
+	update description of module
+
+2011-07-11 11:35 -0400  djerius  <djerius@cfa.harvard.edu>  (5605b4456861)
+
+	* doc/validate.args.pod, tests/multiple.lua, tests/vtypes.lua,
+	validate/args.lua:
+	new "multiple" option, "allow_scalar". "type" parameter may now
+	accept inline validation specifications.
+
+2011-07-08 22:55 -0400  djerius  <djerius@cfa.harvard.edu>  (4c2c9d29dc57)
+
+	* tests/Makefile.am:
+	distribute test for multiple
+
+2011-07-08 22:51 -0400  djerius  <djerius@cfa.harvard.edu>  (4ffc395ccc5c)
+
+	* doc/validate.args.pod:
+	rephrase docs to be more inclusive of data structure validation
+
+2011-07-08 22:50 -0400  djerius  <djerius@cfa.harvard.edu>  (0e1b9c8a71fa)
+
+	* tests/multiple.lua: new file.
+	* doc/validate.args.pod, tests/driver.lua, tests/multiple.lua,
+	validate/args.lua:
+	add "multiple" option, which provides for elements which are tables
+	of similar things
+
+2011-07-08 22:45 -0400  djerius  <djerius@cfa.harvard.edu>  (4bf6547a0b1b)
+
+	* validate/args.lua:
+	white space, error messages, and minor code cleanup
+
+2011-07-08 00:35 -0400  djerius  <djerius@cfa.harvard.edu>  (b2ec8a5604f7)
+
+	* rockspec.in:
+	forgot to add validate.inplace to rockspec
+
+2011-07-07 23:03 -0400  djerius  <djerius@cfa.harvard.edu>  (8b47ced5e539)
+
+	* .hgtags:
+	Added tag 1.2.4 for changeset b5f28f2fd3c4
+
+2011-07-07 23:03 -0400  djerius  <djerius@cfa.harvard.edu>  (b5f28f2fd3c4 [1.2.4])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-07-07 22:57 -0400  djerius  <djerius@cfa.harvard.edu>  (d517958f1ecb)
 
 	* doc/validate.inplace.pod, tests/inplace.lua, validate/inplace.lua:
 	new file.
@@ -150,13 +200,6 @@
 
 	* tests/mutate.lua:
 	add error message upon test failure
-
-2011-06-15 17:05 -0400  djerius  <djerius@cfa.harvard.edu>  (14abcfc6aed5 <setmt>)
-
-	* .hgpatchinfo/setmt.dep, tests/setmt.lua: new file.
-	* .hgpatchinfo/setmt.dep, configure.ac, tests/Makefile.am,
-	tests/driver.lua, tests/setmt.lua, validate/args.lua:
-	start new patch on default
 
 2011-06-07 17:23 -0400  djerius  <djerius@cfa.harvard.edu>  (21ccc2a8f4be)
 
