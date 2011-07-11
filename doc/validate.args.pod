@@ -104,8 +104,8 @@ Validation of data structures is very similar to validating function
 arguments.  The base structure operated upon is a table whose elements
 may be positional (indexed with integers) or named (indexed with
 anything else) or both.  The layout of the validation specifications
-are identical to those described above. Typically the B<validate_tbl> method or
-function is used.
+are identical to those described above. Typically the B<validate_tbl>
+method or function is used.
 
 
 =head2 Validation Specifications
@@ -130,15 +130,15 @@ these must not expect a particular sequence of operation.
 The caller may provide callbacks which are called pre- and post-
 validation.  These may modify the elements.
 
-The following constraint types are recognized:
+The following specification parameters are recognized:
 
 =over
 
 =item optional
 
 This is a boolean attribute which, if true, indicates that the element
-need not be present.  Positional as well as named elements may be
-optional; if they are not at the end of the list they may be specified
+need not be present.  Positional (as well as named elements) may be
+optional; if they are not at the end of the list they must be specified
 as C<nil> in the list of input values, e.g.
 
   nil, 3
@@ -170,54 +170,10 @@ constraint, the nested specifications in the vtable are scanned for defaults.
 
 =item type
 
-This specifies the expected type of the element. It may be either a single
-type or a list of types:
+This specifies the expected type of the element. It may be either a
+single type or a list of types.  See L</Element Types> for more
+information.  This is optional.
 
-  type = 'number'
-  type = { 'number', 'boolean' }
-
-
-Types are specified as strings, with the following types available:
-
-=over
-
-=item 'nil'
-
-=item 'number'
-
-=item 'string'
-
-=item 'boolean'
-
-=item 'table'
-
-=item 'function'
-
-=item 'thread'
-
-=item 'userdata'
-
-These are the built-in types as returned by the Lua B<type> function.
-
-=item 'posnum'
-
-The element must be a number greater than zero.
-
-=item 'zposnum'
-
-The element must be a number greater than or equal to zero.
-
-=item 'posint'
-
-The element must be an integer greater than zero.
-
-=item 'zposint'
-
-The element must be an integer greater than or equal to zero.
-
-=back
-
-To add additional types see the B<add_type> function.
 
 =item enum
 
@@ -392,7 +348,7 @@ more information.
 
 =item multiple
 
-This indicates that the element is an array whose members must
+This indicates that the element is a table whose members must
 each meet the validation specifications.  For example, to validate
 a list of positive integers:
 
@@ -404,11 +360,11 @@ This parameter may take the following values:
 
 =item C<true> or C<false>
 
-If C<true>, each member of the element array is validated.
+If C<true>, each member of the element table is validated.
 
 =item a table of options
 
-In addition to validating the members of the input array, further
+In addition to validating the members of the input table, further
 validation is possible.  The following options are recognized:
 
 =over
@@ -430,6 +386,8 @@ table.  It may not be combined with the B<n> option.  It is optional.
 =item keys
 
 This specifies a validation specification for the I<keys> in the element table.
+It is optional.
+
 For example, the following ensures that keys consist only of alphabetical characters:
 
   multiple = {
@@ -447,14 +405,122 @@ For example, the following ensures that keys consist only of alphabetical charac
   }
 
 
-=back
+
+=item allow_scalar
+
+Normally, indicating a multiplicity implies that the element must be a
+table.  This ensures that there is no confusion if the members of that
+table are themselves tables For.  example, is
+
+  foo = { a = 2 }
+
+a table of multiple values (with multiplicity of 1) or is it a single value
+which happens to be a table?
+
+If the element is a scalar, there is no confusion. If this option is B<true>,
+B<validate.args> will upgrade the element to a table.
+
+This option defaults to B<false>
 
 
 =back
 
 
+=back
+
+
 
 =back
+
+=head2 Element Types
+
+B<validate.args> supports two schemes for specifying element types for the C<type> option:
+I<simple> and I<inline>.
+
+Simple types include the standard Lua types and can be augmented using
+the B<add_type> function or method.  They are specified using their name (as a string):
+
+=over
+
+=item 'nil'
+
+=item 'number'
+
+=item 'string'
+
+=item 'boolean'
+
+=item 'table'
+
+=item 'function'
+
+=item 'thread'
+
+=item 'userdata'
+
+These are the built-in types as returned by the Lua B<type> function.
+
+=item 'posnum'
+
+The element must be a number greater than zero.
+
+=item 'zposnum'
+
+The element must be a number greater than or equal to zero.
+
+=item 'posint'
+
+The element must be an integer greater than zero.
+
+=item 'zposint'
+
+The element must be an integer greater than or equal to zero.
+
+=back
+
+Inline types are specified as tables of validation  specifications.
+They are a bit more complex.
+
+=over
+
+=item 1
+
+When using inline type specifications, the specifications must be
+passed to the C<types> option as a I<list> of types, even if there is
+only one specification.
+
+=item 2
+
+Inline types must be given a name.  It should not be the same as
+the name of any simple type.
+
+=back
+
+For example,  here is the type specification for the B<multiple> option:
+
+     type = { 'boolean',
+	      ['multiple table'] = {
+		 vtable = {
+		    min = { type = 'zposint', optional = true,
+			    excludes = 'n'
+			 },
+		    max = { type = 'posint',  optional = true,
+			    excludes = 'n'
+			 },
+		    n   = { type = 'posint',  optional = true,
+			    excludes = { 'min', 'max' }
+			 },
+		    keys   = { vtable = validate_spec,
+			       optional = true
+			    },
+		    allow_scalar = { type = 'boolean', default = false },
+		 }
+	      }
+	   },
+
+It indicates that B<multiple> may either be a boolean value or a table
+which may have the elements C<min>, C<max>, c<n>, etc.
+
 
 =head2 Callback Arguments
 
@@ -930,7 +996,24 @@ specification based upon the value of the first positional element
                        end } }
 
 
+=item * Homogeneous Lists
 
+In this example, an element may be a list of numbers.
+
+  { multiple = true,
+    types = 'number'
+  }
+
+=item * Heterogeneous Lists
+
+In this example, an element may be a list of enumerated strings or
+non-negative integers.
+
+  { multiple = true,
+    types = { 'zposnum',
+              ['Food Groups'] = { enum = { 'Fruit', 'Bread', 'Snacks' } }
+	    }
+  }
 
 =back
 

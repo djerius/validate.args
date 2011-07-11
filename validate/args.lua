@@ -409,9 +409,7 @@ end
 -- Support for validation of input validation templates using validate.args
 -- We eat our own dog food here. Sometimes.
 
-local validate_spec = {}
-
-validate_spec = {
+local validate_spec = {
    optional = { optional = true,
 		type = 'boolean'
 	     },
@@ -422,42 +420,6 @@ validate_spec = {
 	      type = { 'table', 'function' },
 	   },
    default  = { optional = true },
-   type     = { optional = true,
-		vfunc = function( val, args )
-			   local val = type(val) == 'table' and val or { val }
-			   for _, v in pairs( val ) do
-			      if not args.va.types:validator(v) then
-				 return false, 'unknown type: ' .. tostring(v)
-			      end
-			   end
-
-			   return true, val
-			end
-	     },
-
-   multiple = function ( arg )
-		 local spec = { optional = true }
-		 if type(arg) == 'table' then
-		    spec.vtable = {
-		       min = { type = 'zposint', optional = true,
-			       excludes = 'n'
-			    },
-		       max = { type = 'posint',  optional = true,
-			       excludes = 'n'
-			    },
-		       n   = { type = 'posint',  optional = true,
-			       excludes = { 'min', 'max' }
-			    },
-
-		       keys   = { vtable = validate_spec,
-				  optional = true
-			       }
-		    }
-		 else
-		    spec.type = 'boolean'
-		 end
-		 return true, spec
-	      end,
 
    precall  = { type = 'function', optional = true },
    postcall = { type = 'function', optional = true },
@@ -478,6 +440,53 @@ validate_spec = {
 	      type = 'table' },
 
 }
+
+-- recursive reference to validate_spec needed here, hence not
+-- inlined above
+validate_spec.type =
+   { optional = true,
+
+     multiple = { allow_scalar = true },
+
+     type = {
+	type= {
+	   vfunc = function( val, args )
+		      if not args.va.types:validator(val) then
+			 return false, 'unknown type: ' .. tostring(val)
+		      end
+		      return true, val
+		   end,
+	},
+	validate_spec = { vtable = validate_spec }
+     },
+  }
+
+
+-- recursive reference to validate_spec needed here, hence not
+-- inlined above
+validate_spec.multiple =
+   { optional = true,
+     type = { 'boolean',
+	      ['multiple table'] = {
+		 vtable = {
+		    min = { type = 'zposint', optional = true,
+			    excludes = 'n'
+			 },
+		    max = { type = 'posint',  optional = true,
+			    excludes = 'n'
+			 },
+		    n   = { type = 'posint',  optional = true,
+			    excludes = { 'min', 'max' }
+			 },
+		    keys   = { vtable = validate_spec,
+			       optional = true
+			    },
+		    allow_scalar = { type = 'boolean', default = false },
+		 }
+	      }
+	   },
+  }
+
 
 
 -- the specification may be a function, in which case it
@@ -878,12 +887,18 @@ function Validate:process_arg_spec( name, spec, arg )
 
    if spec.multiple and not self.state[spec].in_multiple then
 
-      if type( arg ) ~= 'table' then
-	 return false, name:msg( 'must be a table' )
-      end
-
       local ok
       local espec = type(spec.multiple) == 'table' and spec.multiple or {}
+
+      if type( arg ) ~= 'table' then
+	 if espec.allow_scalar then
+	    arg = { arg }
+	 else
+	    return false, name:msg( 'must be a table' )
+	 end
+      end
+
+
       local nelem = 0
 
       for k,v in pairs( arg ) do
@@ -932,14 +947,32 @@ function Validate:process_arg_spec( name, spec, arg )
       -- if spec.type may be a table or a scalar
       local utype = type(spec.type ) == 'table' and spec.type or { spec.type }
 
-      for _, v in pairs( utype ) do
+      local posint = self.types:validator('posint')
+      for k, v in pairs( utype ) do
 
-	 local chk = self.types:validator(v)
-	 if chk == nil then
-	    return false, name:msg( '(template).type: unknown type: ', tostring(v) )
+	 local typename
+
+	 if posint(k) then
+
+	    typename = v
+
+	    local chk = self.types:validator(v)
+	    if chk == nil then
+	       return false, name:msg( '(validation spec).type: unknown type: ', tostring(v) )
+	    end
+
+	    ok, narg = chk(arg)
+
+	 elseif type(v) == 'table' then
+
+	    typename = k
+	    ok, narg = self:check_arg( name, v, arg )
+
+	 else
+
+	    return false, name:msg( '(validation spec).type.' .. tostring(k) .. ': unknown type: ', tostring(v)) 
+
 	 end
-
-	 ok, narg = chk(arg)
 
 	 -- as we may be testing against more than one acceptable
 	 -- type, we can't just return a single error store the error
@@ -950,15 +983,18 @@ function Validate:process_arg_spec( name, spec, arg )
 	    break
 	 elseif narg ~= nil then
 	    errors[#errors+1] = string.format( "did not match type '%s': %s",
-					       v, tostring(narg) )
+					       typename, tostring(narg) )
 	 else
-	    errors[#errors+1] = string.format( "did not match type '%s'", v )
+	    errors[#errors+1] = string.format( "did not match type '%s'", typename )
 	 end
 
       end
 
       if not ok then
-	 return false, name:fmt( "value (%s): %s", tostring( arg ), table.concat( errors, "\n" ) )
+	 arg = tostring(arg)
+	 return false, name:fmt( "value (%s): %s", arg,
+				 table.concat( errors, string.format( "\nvalue (%s):", arg ) )
+			      )
       end
 
    end
@@ -1034,7 +1070,6 @@ function Validate:process_arg_spec( name, spec, arg )
 	 return false, name:fmt(': value (%s) is not in approved list', tostring( arg ) )
       end
 
-
    end
 
    return true, arg
@@ -1052,12 +1087,13 @@ function Validate:check_arg( name, spec, arg )
    local ok
    local opts = self.opts
 
-
    -- validate the spec if requested
    if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
+
       self.state.in_check_spec = true
       local ok, err = self:check_table( name, validate_spec, spec );
       self.state.in_check_spec = false
+
       if not ok then
 	 if opts.error_on_bad_spec then
 	    error( 'validation spec error: ' .. err )

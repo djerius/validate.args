@@ -99,3 +99,17 @@ function test_add_type()
 
 end
 
+function test_heterogeneous()
+
+   local template = { { type = { 'posint',
+				 enum = { enum = { 'a', 'b', 'c' } }
+			      },
+		  } }
+
+   local ok, foo = va.validate( template, 1 )
+
+   assert_true( ok, foo )
+
+
+end
+

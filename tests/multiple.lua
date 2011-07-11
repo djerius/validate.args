@@ -68,7 +68,7 @@ function test_nelem_bounds ()
 		     }
 	       }
 
-   local ok, foo = validate( spec, { x = { 1, 2 }  } )
+   local ok, foo = validate( spec, { x = { 1, 6 }  } )
 
    assert_false( ok, foo )
    assert_match( 'too few', foo )
@@ -107,6 +107,34 @@ function test_exact_nelem ()
 
 end
 
+function test_allow_scalar ()
+
+   local spec = { x = { type = 'posint',
+			multiple = { n = 4 }
+		     }
+	       }
+
+   local ok, foo = validate( spec, { x =  1 } )
+
+   assert_false( ok, foo )
+   assert_match( 'must be a table', foo )
+
+   local spec = { x = { type = 'posint',
+			multiple = { allow_scalar = true, n = 4 }
+		     }
+	       }
+
+   local ok, foo = validate( spec, { x = 1 } )
+   assert_false( ok, foo )
+   assert_match( 'incorrect number', foo )
+
+   local ok, foo = validate( spec, { x = { 1, 2, 3, 4 }  } )
+
+   assert_true( ok, foo )
+
+
+end
+
 function test_keys ()
 
    local spec = { x = { type = 'posint',
@@ -131,5 +159,17 @@ function test_keys ()
 
    assert_false( ok, foo )
    assert_match( 'only alpha', foo )
+
+end
+
+function test_bad_spec()
+   local spec = { x = { type = 'posint',
+			multiple = 'snack',
+		     }
+	       }
+
+   local ok, foo = pcall( validate, spec, { x = { a = 1, b = 2 }  } )
+
+   assert_false( ok, foo )
 
 end
