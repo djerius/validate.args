@@ -3,7 +3,7 @@ validate.args
 Description
 -----------
 
-function argument validation for Lua
+Function argument and data structure validation for Lua
 
 
 

@@ -7,11 +7,10 @@ source = {
 description = {
    summary = "Function argument validation",
    detailed = [[
-	 validate.args provides validation of function arguments
-	 by type, value, and user provided validation functions.
-         it can handle named and positional arguments.
-   ]],
-
+	 validate.args is a Lua module that provides a framework for
+	 validation of arguments to Lua functions as well as complex data
+	 structures. The included validate.inplace module provides "live"
+	 validation during assignment of values to elements in tables. ]],
    license = "GPL-3",
 
 }
