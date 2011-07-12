@@ -789,7 +789,7 @@ function Validate:defaults( name, spec )
 
       -- note that positional arguments with a nil value and
       -- spec.not_nil == false are acceptable
-      if self.state[spec] and self.state[spec].positional then
+      if self.state[name] and self.state[name].positional then
 	 return true, nil
       else
 	 return false, name:msg( 'required but not specified' )
@@ -863,7 +863,7 @@ function Validate:process_arg_spec( name, spec, arg )
 
    local vfargs = { name = name, va = self, spec = spec }
 
-   if self.state[spec] == nil then self.state[spec] = {} end
+   if self.state[name] == nil then self.state[name] = {} end
 
    local ok
    local opts = self.opts
@@ -874,7 +874,7 @@ function Validate:process_arg_spec( name, spec, arg )
 
       -- positional arguments have already been checked for existence,
       -- so if it's a nil value it has been deliberately set
-      if self.state[spec].positional and spec.not_nil then
+      if self.state[name].positional and spec.not_nil then
 
 	 return false, name:msg( 'must not be nil' )
 
@@ -884,7 +884,7 @@ function Validate:process_arg_spec( name, spec, arg )
 
    end
 
-   if spec.multiple and not self.state[spec].in_multiple then
+   if spec.multiple and not self.state[name].in_multiple then
 
       local ok
       local espec = type(spec.multiple) == 'table' and spec.multiple or {}
@@ -902,16 +902,18 @@ function Validate:process_arg_spec( name, spec, arg )
 
       for k,v in pairs( arg ) do
 
-	 self.state[spec].in_multiple = true
-	 ok, v = self:check_arg( name:add(k), spec, v )
-	 self.state[spec].in_multiple = false
+	 local name = name:add(k)
+
+	 self.state[name] = { in_multiple = true }
+	 ok, v = self:check_arg( name, spec, v )
+	 self.state[name].in_multiple = false
 
 	 if not ok then
 	    return false, v
 	 end
 
 	 if espec.keys then
-	    ok, k = self:check_arg( name:add( k ), espec.keys, k )
+	    ok, k = self:check_arg( name, espec.keys, k )
 	    if not ok then
 	       return false, k .. ': bad key'
 	    end
@@ -1232,7 +1234,7 @@ function Validate:validate( tpl, ... )
 	 return rfunc( false, name:msg( 'missing' ) )
       end
 
-      self.state[spec] = { positional = true }
+      self.state[name] = { positional = true }
       ok, args[keyname] = self:check_arg( name, spec, oargs[i] )
 
       if not ok then
@@ -1257,13 +1259,14 @@ function Validate:validate( tpl, ... )
 
       -- manufacture a vtable specification
       local spec = { vtable = tpl }
-      self.state[spec] = { positional = false }
+      local name = Name:new()
+      self.state[name] = { positional = false }
 
       if type(arg) ~= 'table'  then
 	 return rfunc( false, "arg#2: expected table , got " .. type(arg) )
       end
 
-      return rfunc( self:check_arg( Name:new(), spec , arg ) )
+     return rfunc( self:check_arg( name, spec , arg ) )
 
    else
 
