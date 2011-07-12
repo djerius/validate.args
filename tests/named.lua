@@ -148,8 +148,7 @@ function test_nested_data()
 		       },
 		    }
 
-   local ok, data = validate_opts( { check_spec = false,
-				     named = true }, template,
+   local ok, data = validate_opts( { named = true }, template,
 				   2, { 3, 4 }
 				)
    assert_true( ok, data )
@@ -158,6 +157,7 @@ function test_nested_data()
    assert_equal( 4, data.f2.f4 )
 
 end
+
 function test_nested_defaults()
 
    local template = {
@@ -172,8 +172,7 @@ function test_nested_defaults()
 		       },
 		    }
 
-   local ok, data = validate_opts( { check_spec = false,
-				     named = true }, template )
+   local ok, data = validate_opts( { named = true }, template )
    assert_true( ok, data )
    assert_equal( 1, data.f1 )
    assert_equal( 2, data.f2.f3 )
