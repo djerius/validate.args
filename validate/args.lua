@@ -999,20 +999,14 @@ function Validate:process_arg_spec( name, spec, arg )
 	 if ok then
 	    arg = narg
 	    break
-	 elseif narg ~= nil then
-	    errors[#errors+1] = string.format( "did not match type '%s': %s",
-					       typename, tostring(narg) )
 	 else
-	    errors[#errors+1] = string.format( "did not match type '%s'", typename )
+	    errors[#errors+1] = string.format( "%s (%s)", typename, narg ~= nil and narg or '' )
 	 end
 
       end
 
       if not ok then
-	 arg = tostring(arg)
-	 return false, name:fmt( "value (%s): %s", arg,
-				 table.concat( errors, string.format( "\nvalue (%s):", arg ) )
-			      )
+	 return false, name:fmt( "did not match types: %s", table.concat( errors, ', ' ) )
       end
 
    end
