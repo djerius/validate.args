@@ -1,8 +1,91 @@
-2011-07-11  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-07-12  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.2.5
+	Tag 1.3.0
 
-2011-07-11 11:42 -0400  djerius  <djerius@cfa.harvard.edu>  (093cbacad511 [tip])
+2011-07-12 16:57 -0400  djerius  <djerius@cfa.harvard.edu>  (c91bf7fd793d [tip])
+
+	* doc/validate.args.pod:
+	add docs for data element named parameter; fix typo in examples
+
+2011-07-12 15:47 -0400  djerius  <djerius@cfa.harvard.edu>  (cd1874300cb4)
+
+	* validate/args.lua:
+	simplify error output when comparing against multiple types
+
+2011-07-12 15:46 -0400  djerius  <djerius@cfa.harvard.edu>  (268be80efe6f)
+
+	* tests/named.lua, validate/args.lua:
+	add data element specific "named" option
+
+2011-07-12 15:45 -0400  djerius  <djerius@cfa.harvard.edu>  (2a6221fe82ec)
+
+	* tests/named.lua:
+	for some reason validation spec checking was off for a couple of
+	tests; turn it back on
+
+2011-07-12 14:48 -0400  djerius  <djerius@cfa.harvard.edu>  (35dd0d51a379)
+
+	* validate/args.lua:
+	keep track of whether an element's spec was validated to prevent re-
+	validation
+
+	because the same code is used to validate the spec and data, when
+	performing the data scan the spec may get re-validated. keep track
+	of the state of validation to avoid this
+
+2011-07-12 13:59 -0400  djerius  <djerius@cfa.harvard.edu>  (8894e576c05a)
+
+	* tests/defaults.lua, tests/named.lua, validate/args.lua:
+	renaming positional elements (via the top level "named" option)
+	didn't work for nested positional elements
+
+2011-07-12 11:09 -0400  djerius  <djerius@cfa.harvard.edu>  (6929fc0f4e43)
+
+	* validate/args.lua:
+	use data element name object (rather than spec table) to uniquely
+	specify state
+
+	if a specification table is reused (for example during specification
+	validation the internal validate_spec table is used multiple times)
+	then state information was being mixed, as the specification table
+	was used as the unique key into the state table. Use instead the
+	data element name object, which will be unique.
+
+2011-07-12 11:00 -0400  djerius  <djerius@cfa.harvard.edu>  (731c599ac041)
+
+	* tests/vtypes.lua:
+	add lots of new tests for nested inline type specifictions
+
+2011-07-12 10:40 -0400  djerius  <djerius@cfa.harvard.edu>  (dc2121a313eb)
+
+	* validate/args.lua:
+	remove redundant type="table" in manufactured vtable specs as vtable
+	already checks for a table
+
+2011-07-12 09:19 -0400  djerius  <djerius@cfa.harvard.edu>  (7d340cf99576)
+
+	* validate/args.lua:
+	fix element name generation
+
+	* don't use name of specification element in data element name
+	* fix typo which cleared name in vtable processing
+
+2011-07-11 12:14 -0400  djerius  <djerius@cfa.harvard.edu>  (e1b9e66878e0)
+
+	* doc/Makefile.am:
+	manual pages for validate.inplace were not being generated
+
+2011-07-11 11:44 -0400  djerius  <djerius@cfa.harvard.edu>  (ecde5d7923b9)
+
+	* .hgtags:
+	Added tag 1.2.5 for changeset ecba73c3d9f1
+
+2011-07-11 11:43 -0400  djerius  <djerius@cfa.harvard.edu>  (ecba73c3d9f1 [1.2.5])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-07-11 11:42 -0400  djerius  <djerius@cfa.harvard.edu>  (093cbacad511)
 
 	* README, rockspec.in:
 	update description of module
