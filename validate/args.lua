@@ -538,7 +538,6 @@ function Validate:check_table( name, tspec, arg )
    -- iterate through specifications
    for k, spec in pairs( tspec ) do
 
-      local name = name:add( k )
       local ok, v
 
       ctspec[k] = spec
@@ -559,13 +558,13 @@ function Validate:check_table( name, tspec, arg )
 	    -- data being validated. which isn't available, but should be
 	    if type(arg[k]) == 'table' then
 
-	       local name = name:add( k )
-
 	       v = {}
 
 	       -- we descend into it carefully... as we don't want to parse the
 	       -- keys in the table as they are argument names
 	       for k, spec in pairs( arg[k] ) do
+
+		  local name = name:add(k)
 
 		  local ok, v_s
 
@@ -604,7 +603,7 @@ function Validate:check_table( name, tspec, arg )
 	    end
 
 	 elseif arg[k] then
-	    return false, name:msg( "wrong type (got " .. type(arg[k]) .. " )" )
+	    return false, name:add(k):msg( "wrong type (got " .. type(arg[k]) .. " )" )
 	 end
 
       elseif type(k) == 'number' or k:sub(1,1) ~= '%' then
@@ -614,7 +613,7 @@ function Validate:check_table( name, tspec, arg )
 
 	 if ok then
 	    ctspec[k] = v
-	    ok, v = self:check_arg( name, ctspec[k], arg[k] )
+	    ok, v = self:check_arg( name:add(k), ctspec[k], arg[k] )
 	 end
 
       else
@@ -822,7 +821,7 @@ function Validate:defaults( name, spec )
 
       for k, spec in pairs ( vtable ) do
 
-	 local name = name:new( k )
+	 local name = name:add( k )
 
 	 -- only look at keys which match an argument name
 	 if type(k) == 'number' or k:sub(1,1) ~= '%' then
