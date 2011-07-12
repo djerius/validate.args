@@ -157,3 +157,15 @@ function test_nested_overrides( )
    assert_equal( 3.4, foo.arg3.arg2 )
 
 end
+
+function test_positional()
+
+   local template = { { default = 2 },
+		      { default = 3 },
+		   }
+
+   local ok, foo1, foo2 = validate( template )
+   assert_true( ok, foo1 )
+   assert_equal( 2, foo1 )
+   assert_equal( 3, foo2 )
+end

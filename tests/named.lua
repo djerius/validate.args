@@ -133,3 +133,50 @@ function test_bad_argname()
    assert_match( "invalid argument name", foo )
 
 end
+
+function test_nested_data()
+
+   local template = {
+		       { name = 'f1', default = 1, type = 'posint' },
+		       {
+			  name = 'f2',
+			  optional = true,
+			  vtable = {
+			     { name = 'f3', default = 2 },
+			     { name = 'f4', default = 3 }
+			  },
+		       },
+		    }
+
+   local ok, data = validate_opts( { check_spec = false,
+				     named = true }, template,
+				   2, { 3, 4 }
+				)
+   assert_true( ok, data )
+   assert_equal( 2, data.f1 )
+   assert_equal( 3, data.f2.f3 )
+   assert_equal( 4, data.f2.f4 )
+
+end
+function test_nested_defaults()
+
+   local template = {
+		       { name = 'f1', default = 1 },
+		       {
+			  name = 'f2',
+			  optional = true,
+			  vtable = {
+			     { name = 'f3', default = 2 },
+			     { name = 'f4', default = 3 }
+			  },
+		       },
+		    }
+
+   local ok, data = validate_opts( { check_spec = false,
+				     named = true }, template )
+   assert_true( ok, data )
+   assert_equal( 1, data.f1 )
+   assert_equal( 2, data.f2.f3 )
+   assert_equal( 3, data.f2.f4 )
+
+end

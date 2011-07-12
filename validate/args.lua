@@ -608,7 +608,6 @@ function Validate:check_table( name, tspec, arg )
 
       elseif type(k) == 'number' or k:sub(1,1) ~= '%' then
 	 -- spec keys which start with % are special -- they're not argument names
-
 	 ok, v = resolve_spec( spec, arg[k] )
 
 	 if ok then
@@ -623,14 +622,17 @@ function Validate:check_table( name, tspec, arg )
       end
 
       if ok then
-	 narg[k] = v
+	 if self.opts.named and ctspec[k].name then
+	    narg[ctspec[k].name] = v
+	 else
+	    narg[k] = v
+	 end
       else
 	 -- v is an error message prefixed with the variable name
 	 return false, v;
       end
 
    end
-
 
    -- now check for keys in args that we haven't
    -- handled
@@ -828,13 +830,18 @@ function Validate:defaults( name, spec )
 
 	    local ok, spec = resolve_spec( spec )
 
+	    local key = k
+	    if self.opts.named and spec.name then
+	       key = spec.name
+	    end
+
 	    if ok then
 	       self.state.in_default_scan = true
-	       ok, default[k] = self:check_arg( name, spec )
+	       ok, default[key] = self:check_arg( name, spec )
 	       self.state.in_default_scan = nil
 
 	       if not ok then
-		  return false, default[k]
+		  return false, default[key]
 	       end
 
 	    end
