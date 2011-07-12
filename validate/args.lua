@@ -1092,11 +1092,17 @@ function Validate:check_arg( name, spec, arg )
 
    local vfargs = { name = name, va = self, spec = spec }
 
+   if not self.state[name] then self.state[name] = {} end
+
    local ok
    local opts = self.opts
 
    -- validate the spec if requested
-   if  opts.check_spec  and not self.state.in_check_spec and not self.state.in_default_scan then
+   if  opts.check_spec
+      and not self.state.in_check_spec
+      and not self.state.in_default_scan
+      and not self.state[name].check_spec_complete
+   then
 
       self.state.in_check_spec = true
       local ok, err = self:check_table( name, validate_spec, spec );
@@ -1109,6 +1115,8 @@ function Validate:check_arg( name, spec, arg )
 	    return false, '(validation spec)' .. err
 	 end
       end
+
+      self.state[name].check_spec_complete = true
    end
 
    if spec.precall then
