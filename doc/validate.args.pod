@@ -346,6 +346,24 @@ validation option is I<true>, then the element will be assigned this
 name in the returned table.  See L</Validation Options> for
 more information.
 
+=item named
+
+Indicated that a name should be (or not be) assigned to a positional
+element. This option overrides the validation option of the same name,
+and is useful for control over particular elements.
+
+This option can only be specified for positional elements in tables,
+not at the top level of the data structure, e.g.
+
+  spec = { { name = 'foo', named = true } }
+
+will cause an error to be thrown, while
+
+  spec = { data = { vtable = { { name = 'foo', named = true } } }}
+
+is legal.  Use the C<named> validation option to assign names to top
+level positional elements.
+
 =item multiple
 
 This indicates that the element is a table whose members must
@@ -1001,7 +1019,7 @@ specification based upon the value of the first positional element
 In this example, an element may be a list of numbers.
 
   { multiple = true,
-    types = 'number'
+    type = 'number'
   }
 
 =item * Heterogeneous Lists
@@ -1010,7 +1028,7 @@ In this example, an element may be a list of enumerated strings or
 non-negative integers.
 
   { multiple = true,
-    types = { 'zposnum',
+    type = { 'zposnum',
               ['Food Groups'] = { enum = { 'Fruit', 'Bread', 'Snacks' } }
 	    }
   }
