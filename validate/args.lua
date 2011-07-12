@@ -426,6 +426,10 @@ local validate_spec = {
 
    name    = { optional = true,
 	       type = 'string' },
+
+   named   = { optional = true,
+	       type = 'boolean' },
+
    enum    = { optional = true,
 	    },
    not_nil = { optional = true,
@@ -622,7 +626,10 @@ function Validate:check_table( name, tspec, arg )
       end
 
       if ok then
-	 if self.opts.named and ctspec[k].name then
+	 if ( self.opts.named or ctspec[k].named )
+	 and ctspec[k].named ~= false
+	 and ctspec[k].name
+      then
 	    narg[ctspec[k].name] = v
 	 else
 	    narg[k] = v
@@ -831,7 +838,10 @@ function Validate:defaults( name, spec )
 	    local ok, spec = resolve_spec( spec )
 
 	    local key = k
-	    if self.opts.named and spec.name then
+	    if ( self.opts.named or spec.named )
+	       and spec.named ~= false
+	       and spec.name
+	    then
 	       key = spec.name
 	    end
 
@@ -1233,7 +1243,18 @@ function Validate:validate( tpl, ... )
       end
 
       nargs = nargs + 1
-      local keyname = opts.named and spec.name or nargs
+      if spec.named and not opts.named then
+	 return rfunc( false,
+		       name:msg( '(validation spec): top level positional parameters may not set "named" attribute if opts.named is not set' ) )
+      end
+
+      local keyname = nargs
+      if ( opts.named or spec.named  )
+	 and spec.named ~= false
+	 and spec.name
+      then
+	 keyname = spec.name
+      end
 
       local argname = ''
       if spec.name then

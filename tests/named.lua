@@ -179,3 +179,69 @@ function test_nested_defaults()
    assert_equal( 3, data.f2.f4 )
 
 end
+
+function test_named_local_data()
+
+   local template = {
+		       { name = 'f1', default = 1, named = true },
+		       {
+			  name = 'f2',
+			  optional = true,
+			  vtable = {
+			     { name = 'f3', default = 2, named = true},
+			     { name = 'f4', default = 3 }
+			  },
+		       },
+		    }
+
+   local ok, d1, d2 = validate_opts( { check_spec = true,
+				       named = false },
+				   template,
+				   2, { 3, 4 }
+				)
+   assert_false( ok, d1 )
+   assert_match( "may not set", d1 )
+
+   template[1].named = false
+   local ok, d1, d2 = validate_opts( { check_spec = true,
+				       named = false },
+				   template,
+				   2, { 3, 4 }
+				)
+   assert_true( ok, d1 )
+   assert_equal( 2, d1 )
+   assert_equal( 3, d2.f3 )
+   assert_equal( 4, d2[2] )
+
+end
+
+function test_named_local_defaults()
+
+   local template = {
+		       { name = 'f1', default = 1, named = true },
+		       {
+			  name = 'f2',
+			  optional = true,
+			  vtable = {
+			     { name = 'f3', default = 2, named = true},
+			     { name = 'f4', default = 3 }
+			  },
+		       },
+		    }
+
+   local ok, d1, d2 = validate_opts( { check_spec = true,
+				       named = false },
+				     template )
+   assert_false( ok, d1 )
+   assert_match( "may not set", d1 )
+
+   template[1].named = false
+   local ok, d1, d2 = validate_opts( { check_spec = true,
+				       named = false },
+				   template )
+   assert_true( ok, d1 )
+   assert_equal( 1, d1 )
+   assert_equal( 2, d2.f3 )
+   assert_equal( 3, d2[2] )
+
+end
