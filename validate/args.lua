@@ -1156,8 +1156,7 @@ function Validate:validate_tbl( tpl, arg )
 
    local rfunc = self:g_rfunc()
 
-   return rfunc( self:check_arg( name, { type = 'table',
-					 vtable = tpl }, arg ) )
+   return rfunc( self:check_arg( name, {  vtable = tpl }, arg ) )
 
 end
 
@@ -1257,7 +1256,7 @@ function Validate:validate( tpl, ... )
       local arg = oargs[1] or {}
 
       -- manufacture a vtable specification
-      local spec = { type = 'table', vtable = tpl }
+      local spec = { vtable = tpl }
       self.state[spec] = { positional = false }
 
       if type(arg) ~= 'table'  then
