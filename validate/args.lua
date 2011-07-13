@@ -144,6 +144,23 @@ end
 --------------------------------------------------------------------
 -- Type validator class. Just manages a list of validators.
 
+local function posint( arg )
+
+   if type(arg) ~= 'number' then
+      return false
+   end
+
+   local _, x = math.modf( arg )
+
+   if x == 0 and arg > 0 then
+      return true, arg
+   else
+      return false
+   end
+
+end
+
+
 local TypeCheckValidators = Base:new{
 
    -- various validation functions
@@ -163,20 +180,7 @@ local TypeCheckValidators = Base:new{
 		end
 	     end,
 
-   posint = function( arg )
-	       if type(arg) ~= 'number' then
-		  return false
-	       end
-
-	       local _, x = math.modf( arg )
-
-	       if x == 0 and arg > 0 then
-		  return true, arg
-	       else
-		  return false
-	       end
-
-	    end,
+   posint = posint,
 
    zposint = function( arg )
 		if type(arg) ~= 'number' then
@@ -965,7 +969,6 @@ function Validate:process_arg_spec( name, spec, arg )
       -- if spec.type may be a table or a scalar
       local utype = type(spec.type ) == 'table' and spec.type or { spec.type }
 
-      local posint = self.types:validator('posint')
       for k, v in pairs( utype ) do
 
 	 local typename
