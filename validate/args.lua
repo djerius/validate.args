@@ -543,6 +543,10 @@ function Validate:check_table( name, tspec, arg )
    -- check for unexpected arguments
    local handled = {}
 
+   if type( arg ) ~= 'table' then
+      error( name:msg( "(validation spec): expected table, got ", type(arg) ) )
+   end
+
    -- iterate through specifications
    for k, spec in pairs( tspec ) do
 
