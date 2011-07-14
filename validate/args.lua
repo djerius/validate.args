@@ -110,6 +110,7 @@ local Options = Base:new{
    allow_extra       = false,
    pass_through      = false,
    debug             = false,
+   udata             = false,
 }
 
 -- prevent creation of new fields
@@ -125,6 +126,16 @@ function Options:set( opts )
 
    for k, v in pairs( opts or {} ) do
       self[k] = v
+   end
+
+end
+
+function Options:get( k )
+
+   if rawget( Options, k ) ~= nil then
+      return self[k]
+   else
+      error( 'unknown option: ' .. k, 2 )
    end
 
 end
@@ -283,6 +294,12 @@ function Validate:setopts( ... )
    self.opts:set( ... )
 
    return self.opts
+
+end
+
+function Validate:getopt( ... )
+
+   return self.opts:get( ... )
 
 end
 

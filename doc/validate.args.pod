@@ -738,6 +738,12 @@ would result in
 
 This defaults to C<false>.
 
+=item udata
+
+This option is used to pass arbitrary data to the callback routines.
+Use the C<getopt> method to retrieve it.
+
+
 =back
 
 =head2 Object oriented interface
@@ -793,6 +799,12 @@ C<use_current_options> to the same value.
 This creates an independent copy of the C<vobj> object, including all
 of its options and types.  This is useful for nested specialization of
 types and options.
+
+B<Warning!> Only a shallow copy of the objects' validation options is made;
+if any of the option values are tables (e.g. C<udata>) the options in the
+new object will refer to the same tables as in the original object.
+
+B<Do not rely upon this behavior.>
 
 
 =back
@@ -869,6 +881,13 @@ caused the failure.
 Validate the contents of the passed table against the
 specifications. The return values are the same as for B<validate>.
 
+
+=item getopt
+
+  vobj:getopt( opt )
+
+Returns the value of the specified option.  Throws an error if the
+option does not exist.
 
 =back
 

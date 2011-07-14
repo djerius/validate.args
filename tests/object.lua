@@ -143,3 +143,23 @@ function test_level_0 ()
    assert_equal( vobj.opts.check_spec, base_val, "parent doesn't track clone" )
 
 end
+
+
+function test_options_udata( )
+
+   local vobj = va:new()
+   local udata = {}
+
+   vobj:setopts{ udata = udata }
+
+   local ok, val = vobj:validate( { { postcall = function( arg, vfarg )
+						  vfarg.va:getopt('udata').called = true
+					       end
+				 }
+			       }, 1 )
+
+   assert_true( ok, val )
+   assert_equal( val, 1 )
+   assert_true( udata.called )
+
+end
