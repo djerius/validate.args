@@ -358,7 +358,9 @@ end
 
 function Name:tostring()
 
-   return table.concat( self.name, '.', 1, self.level )
+   local str = table.concat( self.name, '.', 1, self.level )
+
+   return str:gsub( '%.(%d+)', '[%1]' )
 
 end
 
