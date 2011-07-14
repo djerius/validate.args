@@ -360,7 +360,7 @@ function Name:tostring()
 
    local str = table.concat( self.name, '.', 1, self.level )
 
-   return str:gsub( '%.(%d+)', '[%1]' )
+   return ( str:gsub( '%.(%d+)', '[%1]' ) )
 
 end
 
