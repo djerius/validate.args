@@ -144,7 +144,23 @@ end
 --------------------------------------------------------------------
 -- Type validator class. Just manages a list of validators.
 
-local function posint( arg )
+function posnum ( arg )
+   if type(arg) == 'number' and arg > 0 then
+      return true, arg
+   else
+      return false
+   end
+end
+
+function zposnum ( arg )
+   if type(arg) == 'number' and arg >= 0 then
+      return true, arg
+   else
+      return false
+   end
+end
+
+function posint( arg )
 
    if type(arg) ~= 'number' then
       return false
@@ -160,41 +176,29 @@ local function posint( arg )
 
 end
 
+function zposint( arg )
+
+   if type(arg) ~= 'number' then
+      return false
+   end
+
+   local _, x = math.modf( arg )
+
+   if x == 0 and arg >= 0 then
+      return true, arg
+   else
+      return false
+   end
+
+end
 
 local TypeCheckValidators = Base:new{
 
    -- various validation functions
-   posnum = function( arg )
-	       if type(arg) == 'number' and arg > 0 then
-		  return true, arg
-	       else
-		  return false
-	       end
-	    end,
-
-   zposnum = function( arg )
-		if type(arg) == 'number' and arg >= 0 then
-		   return true, arg
-		else
-		   return false
-		end
-	     end,
-
+   posnum = posnum,
+   zposnum = zposnum,
    posint = posint,
-
-   zposint = function( arg )
-		if type(arg) ~= 'number' then
-		   return false
-		end
-		local _, x = math.modf( arg )
-
-		if x == 0 and arg >= 0 then
-		   return true, arg
-		else
-		   return false
-		end
-
-	     end,
+   zposint = zposint
 }
 
 -- validators for built-in types
