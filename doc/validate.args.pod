@@ -979,6 +979,21 @@ return two values:
 Globally set the values for the passed options.  See L</Validation
 Options> for the available options.
 
+=item posnum( arg )
+
+Returns true if C<arg> is a positive number.
+
+=item zposnum( arg )
+
+Returns true if C<arg> is a number greater or equal to zero.
+
+=item posint( arg )
+
+Returns true if C<arg> is a positive integer.
+
+=item zposint( arg )
+
+Returns true if C<arg> is an integer greater or equal to zero.
 
 =back
 
@@ -1076,9 +1091,7 @@ specification based upon the value of the first positional element
 
 In this example, an element may be a list of numbers.
 
-  { multiple = true,
-    type = 'number'
-  }
+  { multiple = true, type = 'number' }
 
 =item * Heterogeneous Lists
 
@@ -1087,7 +1100,8 @@ non-negative integers.
 
   { multiple = true,
     type = { 'zposnum',
-              ['Food Groups'] = { enum = { 'Fruit', 'Bread', 'Snacks' } }
+              ['Food Groups'] =
+	          { enum = { 'Fruit', 'Bread', 'Snacks' } }
 	    }
   }
 
