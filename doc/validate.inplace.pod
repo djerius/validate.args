@@ -157,8 +157,20 @@ change this data structure).
 
 =head2 Unsupported B<validate.args> features
 
+=over
+
+=item *
+
 B<validate.inplace> cannot handle specifications which use B<vtable>
 functions or mutating validation specifications.
+
+=item *
+
+C<precall> and C<postcall> functions are called only for non-table
+data elements.  This has not been extensively tested, so don't rely
+upon them.
+
+=back
 
 =head2 Performance
 
