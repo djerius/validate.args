@@ -39,6 +39,5 @@ AC_CONFIG_FILES([Makefile
 		 doc/Makefile
 		 tests/Makefile
 		 ])
-AC_CONFIG_FILES([tests/test1], [chmod +x tests/test1])
 AC_CONFIG_FILES(${ROCKSPEC_FILE_NAME}:rockspec.in)
 AC_OUTPUT
