@@ -1,5 +1,7 @@
 module( ..., package.seeall )
 
+require('deepcompare')
+
 va = require('validate.args')
 
 setup = _G.setup
@@ -70,7 +72,16 @@ function populate( success, inputs )
 
 	    if ( success ) then
 	       assert_true( ok, foo )
-	       assert_equal( v, foo, foo )
+
+	       if type(v) == 'function' then
+		  assert_function( foo )
+		  assert_true( foo == v )
+	       elseif type(v) == 'table' then
+		  assert_table( foo )
+		  assert_true( deepcompare( v, foo ) )
+	       else
+		  assert_equal( v, foo, foo )
+	       end
 	    else
 	       assert_false( ok, test_name )
 	    end
