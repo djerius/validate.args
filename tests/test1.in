@@ -1,4 +1,0 @@
-
-# add the distribution test directory to the source path
-LUA_PATH="@top_srcdir@/?.lua;@srcdir@/?.lua;$LUA_PATH"
-@LUA@ @srcdir@/driver.lua

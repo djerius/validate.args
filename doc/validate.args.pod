@@ -348,7 +348,7 @@ more information.
 
 =item named
 
-Indicated that a name should be (or not be) assigned to a positional
+Indicate that a name should be (or not be) assigned to a positional
 element. This option overrides the validation option of the same name,
 and is useful for control over particular elements.
 
@@ -565,6 +565,45 @@ The specification table for the element. B<Do not modify this>.
 
 =back
 
+=head2 Catch-all Specifications
+
+It is possible to provide default specifications for named or
+positional elements in tables.  These are passed as specifications for
+the special names C<%named> and C<%pos>.  A third special name
+C<%default> is an alternative which can be used to provide a catch-all
+for all unmatched elements.
+
+The specifications must be functions. They are passed the element name or position and
+its value.  They should return two values,
+
+=over
+
+=item 1
+
+a boolean indicating that the element name or position is acceptable
+
+=item 2
+
+if acceptable, a specification table for the element.
+
+=back
+
+For example, to catch all even numbered positional elements in a table
+after the first two:
+
+    vtable = {
+       { name = "first", type = 'string' },
+       { name = "second", type = 'table' },
+       [%pos] = function (k,v)
+       	      	   --only look at even numbered positions
+                   if k%2 == 0 then
+		     return true, { type = 'posint' }
+		   else
+		     return false
+		   end
+                end
+    }
+
 
 =head2 Mutating Validation Specifications
 
@@ -589,9 +628,9 @@ Upon success, a table of validation specifications. Upon failure, an error messa
 =head2 Element Groups
 
 Some operations on groups of elements are possible for named
-elements.  These are specified as special "arguments" in the
+elements.  These are specified as special "names" in the
 validation specification.  In order to accomodate multiple groups,
-these "arguments" take as values a I<list of lists>,
+these "names" take as values a I<list of lists>,
 
   ['%one_of'] = { { 'a', 'b', 'c' } }
 

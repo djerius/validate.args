@@ -405,24 +405,34 @@ end
 ---------------------------------------------------------
 -- specials
 
-local valid_special = { ['%oneplus_of'] = true,
-			['%one_of'] = true }
+-- must be a function
+local valid_special_func = function (arg)
+			      return type(arg) == 'function', 'must be a function'
+			   end
+
+-- must be a list of lists
+local valid_special_lol = function (arg)
+			     local ok = type(arg) == 'table'
+			     for _, v in pairs( arg ) do
+				ok = ok and type(v) == 'table'
+			     end
+
+			     return ok, "must be list of lists"
+			  end
+
+
+local valid_special = { ['%oneplus_of'] = valid_special_lol,
+			['%one_of']     = valid_special_lol,
+			['%default']    = valid_special_func,
+			['%pos']        = valid_special_func,
+			['%named']      = valid_special_func
+		     }
 
 local function check_special( special, arg )
 
    if valid_special[special] then
 
-      local ok = true
-
-      -- must be a list of lists
-      ok = type(arg) == 'table'
-
-      for _, v in pairs( arg ) do
-
-	 ok = ok and type(v) == 'table'
-      end
-
-      return ok, "must be list of lists"
+      return valid_special[special](arg )
 
    else
       return false, "unknown validation special"
@@ -643,6 +653,7 @@ function Validate:check_table( name, tspec, arg )
 
       elseif type(k) == 'number' or k:sub(1,1) ~= '%' then
 	 -- spec keys which start with % are special -- they're not argument names
+
 	 ok, v = resolve_spec( spec, arg[k] )
 
 	 if ok then
@@ -657,10 +668,15 @@ function Validate:check_table( name, tspec, arg )
       end
 
       if ok then
-	 if ( self.opts.named or ctspec[k].named )
-	 and ctspec[k].named ~= false
-	 and ctspec[k].name
-      then
+
+	 -- see if we're to rename positional arguments.  ctspec[k] may not be
+	 -- a table if we're validating specs and k is a special which takes a function
+
+	 if type( ctspec[k] ) == 'table'
+	    and ( self.opts.named or ctspec[k].named )
+	    and ctspec[k].named ~= false
+	    and ctspec[k].name
+	 then
 	    narg[ctspec[k].name] = v
 	 else
 	    narg[k] = v
@@ -672,22 +688,61 @@ function Validate:check_table( name, tspec, arg )
 
    end
 
-   -- now check for keys in args that we haven't
-   -- handled
+   -- now check for keys in args that we haven't handled
    local bad_args = {}
    local has_bad = false
 
-   for k in pairs( arg ) do
+   for k, v in pairs( arg ) do
 
       if not handled[k] then
 
-	 if opts.allow_extra then
-	    if opts.pass_through then
-	       narg[k] = arg[k]
+	 -- default spec for unhandled positional, named, any elements?
+	 local func =
+	         ctspec['%pos']   and posint(k) and ctspec['%pos']
+	     or  ctspec['%named'] and not posint(k) and ctspec['%named']
+	     or  ctspec['%default']
+
+	 if func then
+
+	    local name = name:add(k)
+
+	    local vfargs = { name = name, va = self }
+
+	    local ok, spec = func(k, v, vfargs)
+
+	    if ok then
+	       ctspec[k] = spec
+	       ok, v = self:check_arg( name, spec, v )
+
+	       if ok then
+		  if ( self.opts.named or spec.named )
+		     and spec.named ~= false
+		     and spec.name
+		  then
+		     narg[spec.name] = v
+		  else
+		     narg[k] = v
+		  end
+	       else
+		  return false, v
+	       end
+
+	       handled[k] = true
 	    end
-	 else
-	    table.insert( bad_args, name:add(k):tostring() )
-	    has_bad = true
+
+	 end
+
+	 if not handled[k] then
+
+	    if opts.allow_extra then
+	       if opts.pass_through then
+		  narg[k] = arg[k]
+	       end
+	    else
+	       table.insert( bad_args, name:add(k):tostring() )
+	       has_bad = true
+	    end
+
 	 end
 
       end
@@ -695,7 +750,6 @@ function Validate:check_table( name, tspec, arg )
    end
 
    if has_bad then
-
       return false, name:msg( "unexpected elements: ", table.concat( bad_args, ', ' ) )
    end
 

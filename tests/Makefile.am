@@ -1,7 +1,11 @@
 include $(top_srcdir)/snippets/create_am_macros.mk
 
 # Test executables to be run
-TESTS			= test1
+TESTS			= driver.lua
+TESTS_ENVIRONMENT	= \
+		LUA_PATH="@top_srcdir@/?.lua;@srcdir@/?.lua;$$LUA_PATH;;" \
+		$(LUA)
+
 
 
 #-------------------------------------------------------------------
@@ -12,9 +16,11 @@ BUILT_SOURCES           +=
 
 # extra files to add to the distribution
 EXTRA_DIST              +=		\
-			constraints.lua	\
 			callback.lua	\
+			constraints.lua	\
+			deepcompare.lua	\
 			defaults.lua	\
+			default_spec.lua	\
 			deffunc.lua	\
 			driver.lua	\
 			excludes.lua	\
@@ -22,10 +28,13 @@ EXTRA_DIST              +=		\
 			multiple.lua	\
 			mutate.lua	\
 			named.lua	\
+			name.lua	\
 			nested.lua	\
+			object.lua	\
 			positional.lua	\
 			requires.lua	\
 			special.lua	\
+			utils.lua	\
 			vtypes.lua
 
 # Any files make built

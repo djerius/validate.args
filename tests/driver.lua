@@ -1,5 +1,5 @@
 require 'lunatest'
-require 'strict'
+
 local va = require( 'validate.args' )
 
 function setup() 
@@ -25,7 +25,9 @@ tests = {
    'defaults',
    'callback',
    'inplace',
-   'multiple'
+   'multiple',
+   'default_spec',
+   'name'
 }
 
 for _, v in pairs(tests) do
