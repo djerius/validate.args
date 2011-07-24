@@ -1,3 +1,11 @@
+1.3.1:
+
+[ENHANCEMENTS]
+
+* new catch all specifications
+* user data can now be passed to callback functions
+* simple validation functions are now exposed to the caller
+
 1.3.0:
 
 [BUG FIXES]

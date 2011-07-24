@@ -1,8 +1,89 @@
-2011-07-12  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-07-24  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.3.0
+	Tag 1.3.1
 
-2011-07-12 16:57 -0400  djerius  <djerius@cfa.harvard.edu>  (c91bf7fd793d [tip])
+2011-07-24 18:08 -0400  djerius  <djerius@cfa.harvard.edu>  (0f318b461cd2 [tip])
+
+	* .hgtags:
+	Removed tag 1.3.1
+
+2011-07-23 17:47 -0400  djerius  <djerius@cfa.harvard.edu>  (50dfc10f0135)
+
+	* .hgtags:
+	Added tag 1.3.1 for changeset 4c8b841a3cc3
+
+2011-07-23 17:46 -0400  djerius  <djerius@cfa.harvard.edu>  (4c8b841a3cc3)
+
+	* doc/validate.args.pod:
+	add documentation for catch-all specifications
+
+2011-07-23 17:22 -0400  djerius  <djerius@cfa.harvard.edu>  (0fae8a926896)
+
+	* configure.ac:
+	remove dependency on deleted file
+
+2011-07-23 17:05 -0400  djerius  <djerius@cfa.harvard.edu>  (9735f8e5c995)
+
+	* tests/default_spec.lua: new file.
+	* tests/test1.in: deleted file.
+	* doc/validate.args.pod, tests/Makefile.am, tests/default_spec.lua,
+	tests/driver.lua, tests/test1.in, validate/args.lua:
+	add catch-all specifications, simplify invocation of tests
+
+2011-07-23 17:00 -0400  djerius  <djerius@cfa.harvard.edu>  (885830234c98)
+
+	* doc/validate.inplace.pod:
+	add disclaimer for pre & post callback functions
+
+2011-07-23 16:59 -0400  djerius  <djerius@cfa.harvard.edu>  (5d734e3a8cda)
+
+	* tests/deepcompare.lua: new file.
+	* tests/deepcompare.lua, tests/vtypes.lua:
+	update tests to work with new version of lunatest
+
+2011-07-14 17:34 -0400  djerius  <djerius@cfa.harvard.edu>  (e259a78869d9)
+
+	* doc/validate.args.pod, tests/object.lua, validate/args.lua:
+	add "udata" option to pass user data to callbacks; added
+	Validate::getopt and Option::get for support
+
+2011-07-14 11:45 -0400  djerius  <djerius@cfa.harvard.edu>  (983e355c2c44)
+
+	* validate/args.lua:
+	oops. gsub() returns two values; just use the first.
+
+2011-07-14 11:38 -0400  djerius  <djerius@cfa.harvard.edu>  (5c04159bcdcd)
+
+	* tests/name.lua: new file.
+	* tests/name.lua, validate/args.lua:
+	clean up stringified Names
+
+2011-07-14 11:20 -0400  djerius  <djerius@cfa.harvard.edu>  (1754ecb8423c)
+
+	* validate/args.lua:
+	expose simple type validation functions
+
+2011-07-13 15:26 -0400  djerius  <djerius@cfa.harvard.edu>  (27a997823823)
+
+	* validate/args.lua:
+	don't assume that the table in the specification is actually a table
+
+2011-07-12 21:49 -0400  djerius  <djerius@cfa.harvard.edu>  (80d680513c22)
+
+	* validate/args.lua:
+	expose posint() function directly to rest of internal code
+
+2011-07-12 17:09 -0400  djerius  <djerius@cfa.harvard.edu>  (1164e6aa2a72)
+
+	* .hgtags:
+	Added tag 1.3.0 for changeset 1de821bbd341
+
+2011-07-12 17:09 -0400  djerius  <djerius@cfa.harvard.edu>  (1de821bbd341 [1.3.0])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-07-12 16:57 -0400  djerius  <djerius@cfa.harvard.edu>  (c91bf7fd793d)
 
 	* doc/validate.args.pod:
 	add docs for data element named parameter; fix typo in examples
