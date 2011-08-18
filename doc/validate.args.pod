@@ -168,6 +168,16 @@ the default value upon success, an error message upon failure
 If no default value is specified for a table element with a vtable
 constraint, the nested specifications in the vtable are scanned for defaults.
 
+Note that if nested specifications are scanned for defaults and not all
+of those specificatons provide defaults, an error will be thrown. To
+avoid this, use C<default_is_nil>
+
+=item default_is_nil
+
+This indicates that the default value for an element is C<nil>.
+This is primarily used to indicate that nested vtable specifications
+should not be scanned for defaults.
+
 =item type
 
 This specifies the expected type of the element. It may be either a

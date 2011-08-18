@@ -468,6 +468,8 @@ local validate_spec = {
 
    default  = { optional = true },
 
+   default_to_nil = { optional = true },
+
    precall  = { type = 'function', optional = true },
    postcall = { type = 'function', optional = true },
 
@@ -943,7 +945,7 @@ function Validate:defaults( name, spec )
    end
 
    -- if this is a vtable, try and get defaults from nested specs
-   if spec.vtable then
+   if not spec.default_is_nil and spec.vtable then
 
       local ok
       local vtable = spec.vtable
