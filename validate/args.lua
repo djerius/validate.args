@@ -111,6 +111,7 @@ local Options = Base:new{
    pass_through      = false,
    debug             = false,
    udata             = false,
+   ordered           = false,
 }
 
 -- prevent creation of new fields
@@ -456,6 +457,15 @@ local validate_spec = {
    vtable = { optional = true,
 	      type = { 'table', 'function' },
 	   },
+
+   order = { optional = true,
+	     type = 'number'
+	  },
+
+   ordered = { type = 'boolean',
+	       default = false
+	    },
+
    default  = { optional = true },
 
    precall  = { type = 'function', optional = true },
@@ -551,6 +561,41 @@ local function resolve_spec( spec, arg )
 
 end
 
+local function order_spec( spec, ordered )
+
+   local order = {}
+
+   if ordered then
+
+      for k, v in pairs( spec ) do
+	 table.insert( order, { k, v.order } )
+      end
+
+
+
+      -- order table if requested
+      table.sort( order, function(t1, t2)
+			    if t1[2] == nil then return false end
+			    if t2[2] == nil then return true  end
+
+			    return t1[2] < t2[2]
+
+			 end
+	       )
+
+   else
+
+      for k in pairs( spec ) do
+	 table.insert( order, { k } )
+      end
+
+   end
+
+   return order
+
+end
+
+
 -- -----------------------------------------------------------------------------
 -- Validate a table against a table specification
 --
@@ -561,6 +606,8 @@ end
 -- Then check the table to ensure that there are no unwanted keys
 
 function Validate:check_table( name, tspec, arg )
+
+   if not self.state[name] then self.state[name] = {} end
 
    local opts = self.opts
 
@@ -580,8 +627,13 @@ function Validate:check_table( name, tspec, arg )
       error( name:msg( "(validation spec): expected table, got ", type(arg) ) )
    end
 
+   local order = order_spec( tspec, self.state[name].ordered )
+
    -- iterate through specifications
-   for k, spec in pairs( tspec ) do
+   for _,tk in ipairs( order ) do
+
+      local k = tk[1]
+      local spec = tspec[k]
 
       local ok, v
 
@@ -1138,6 +1190,9 @@ function Validate:process_arg_spec( name, spec, arg )
 
       end
 
+      -- record if this vtable should be ordered
+      self.state[name].ordered = spec.ordered
+
       -- descend into the table and see what happens. note that
       -- arg may be transformed
       ok, arg = self:check_table( name, vtable, arg )
@@ -1261,7 +1316,13 @@ function Validate:validate_tbl( tpl, arg )
 
    local rfunc = self:g_rfunc()
 
-   return rfunc( self:check_arg( name, {  vtable = tpl }, arg ) )
+   return rfunc( self:check_arg( name,
+				 {  vtable = tpl,
+				    ordered = self:getopt( 'ordered' ),
+				 },
+				 arg
+			      )
+	      )
 
 end
 
@@ -1372,7 +1433,9 @@ function Validate:validate( tpl, ... )
       local arg = oargs[1] or {}
 
       -- manufacture a vtable specification
-      local spec = { vtable = tpl }
+      local spec = { vtable = tpl,
+		     ordered = self:getopt( 'ordered' ),
+		  }
       local name = Name:new()
       self.state[name] = { positional = false }
 

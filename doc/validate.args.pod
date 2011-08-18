@@ -306,6 +306,25 @@ no element value was specified.
 
 =back
 
+=item ordered
+
+If an element is a vtable and this parameter is true, the vtable's elements will
+be processed in the order specified by elements' C<order> parameters.
+
+This is useful if elements have callback functions which must be called
+in a specific order.
+
+To specify the C<ordered> attribute for I<implicit> vtables you must
+use the C<ordered> validation option. Implicit vtables are created for
+the specification passed to B<validate_tbl> and for pure named-element
+specifications passed to B<validate>.
+
+=item order
+
+If an element is I<in> a vtable and the vtable has C<ordered> set,
+this specifies the "weight" of the item; elements with smaller weights will be
+processed before elements with larger weights.
+
 =item precall
 
 =item postcall
@@ -781,6 +800,13 @@ This defaults to C<false>.
 
 This option is used to pass arbitrary data to the callback routines.
 Use the C<getopt> method to retrieve it.
+
+
+=item ordered
+
+If this is true, implicit vtables will be processed in order specified
+by their elements' C<order> parameters.  See the documentation
+for the C<ordered> validation specification for more information.
 
 
 =back

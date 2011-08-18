@@ -2,12 +2,14 @@ require 'lunatest'
 
 local va = require( 'validate.args' )
 
+
 function setup() 
 
    va.reset()
    va.opts{ check_spec = true,
 	    error_on_bad_spec = true,
 	 }
+
 end
 
 tests = {
@@ -27,7 +29,8 @@ tests = {
    'inplace',
    'multiple',
    'default_spec',
-   'name'
+   'name',
+   'ordered'
 }
 
 for _, v in pairs(tests) do

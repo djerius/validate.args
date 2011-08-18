@@ -31,6 +31,7 @@ EXTRA_DIST              +=		\
 			name.lua	\
 			nested.lua	\
 			object.lua	\
+			ordered.lua	\
 			positional.lua	\
 			requires.lua	\
 			special.lua	\
