@@ -1,3 +1,17 @@
+1.4.0:
+
+[BUG FIX]
+
+* if a vtable element was scanned for defaults and any of the nested
+  specifications were required, an error was thrown.  the new
+  default_is_nil attribute stops the scans.
+
+[ENHANCEMENTS]
+
+* named arguments may now be processed in order (where order is
+  specified in the validation specification
+
+
 1.3.1:
 
 [ENHANCEMENTS]

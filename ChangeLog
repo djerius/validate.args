@@ -1,8 +1,36 @@
-2011-07-24  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-08-20  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.3.1
+	Tag 1.4.0
 
-2011-07-24 18:08 -0400  djerius  <djerius@cfa.harvard.edu>  (0f318b461cd2 [tip])
+2011-08-18 17:56 -0400  djerius  <djerius@cfa.harvard.edu>  (9c631d8465ff [tip])
+
+	* doc/validate.args.pod, validate/args.lua:
+	bug fix: default scan into nested specs resulted in an error if any
+	spec had no default.
+
+	if a vtable was optional but any of its elements wasn't an error was
+	thrown. there was no clean way (well, setting default = function()
+	return true, nil end) to prevent this. now, setting default_is_nil =
+	true will.
+
+2011-08-18 14:38 -0400  djerius  <djerius@cfa.harvard.edu>  (c7e08307e636)
+
+	* tests/ordered.lua: new file.
+	* doc/validate.args.pod, tests/Makefile.am, tests/driver.lua,
+	tests/ordered.lua, validate/args.lua:
+	provide ordered processing of elements in a vtable
+
+2011-07-24 18:09 -0400  djerius  <djerius@cfa.harvard.edu>  (cf79529478fc)
+
+	* .hgtags:
+	Added tag 1.3.1 for changeset f24fdd7ddd37
+
+2011-07-24 18:09 -0400  djerius  <djerius@cfa.harvard.edu>  (f24fdd7ddd37 [1.3.1])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and revision for release
+
+2011-07-24 18:08 -0400  djerius  <djerius@cfa.harvard.edu>  (0f318b461cd2)
 
 	* .hgtags:
 	Removed tag 1.3.1
