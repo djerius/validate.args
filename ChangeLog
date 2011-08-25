@@ -1,8 +1,38 @@
-2011-08-20  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-08-25  Diab Jerius  <dj@macabre.cfa.harvard.edu>
 
-	Tag 1.4.0
+	Tag 1.5.0
 
-2011-08-18 17:56 -0400  djerius  <djerius@cfa.harvard.edu>  (9c631d8465ff [tip])
+2011-08-25 17:04 -0400  djerius  <djerius@cfa.harvard.edu>  (a5f2eb7c027a [tip])
+
+	* doc/validate.args.pod, tests/object.lua, tests/positional.lua,
+	validate/args.lua:
+	nil positional parameters are now by default not allowed.
+
+	The default behavior was to allow nil positional arguments. This is
+	inconsistent with the behavior for table arguments (e.g., optional
+	defaults to false), and caused confusion.
+
+	The new default behavior is that positional arguments may not be
+	nil. A new specification, allow_nil, may be used to indicate that
+	nil values are permitted. The not_nil specification is now
+	redundant and deprecated.
+
+2011-08-25 16:31 -0400  djerius  <djerius@cfa.harvard.edu>  (204bd7dc39a9)
+
+	* tests/positional.lua:
+	don't toss possible error message in assert_true()
+
+2011-08-20 00:47 -0400  djerius  <djerius@cfa.harvard.edu>  (44893215bc4f)
+
+	* .hgtags:
+	Added tag 1.4.0 for changeset ed0bb6e049e4
+
+2011-08-20 00:46 -0400  djerius  <djerius@cfa.harvard.edu>  (ed0bb6e049e4 [1.4.0])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-08-18 17:56 -0400  djerius  <djerius@cfa.harvard.edu>  (9c631d8465ff)
 
 	* doc/validate.args.pod, validate/args.lua:
 	bug fix: default scan into nested specs resulted in an error if any

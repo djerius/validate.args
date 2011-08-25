@@ -1,3 +1,16 @@
+1.5.0:
+
+[API CHANGE]
+
+The default behavior was to allow nil positional arguments.  This is
+inconsistent with the behavior for table arguments (e.g., optional
+defaults to false), and caused confusion.
+
+The new default behavior is that positional arguments may not be
+nil.  Use the allow_nil specification to indicate that nil values are
+permitted.  The not_nil specification is now redundant and deprecated.
+
+
 1.4.0:
 
 [BUG FIX]

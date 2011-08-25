@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.57])
 
-AC_INIT([validate-args],[1.4.0],[https://bitbucket.org/djerius/validate.args/issues],[validate-args], [https://bitbucket.org/djerius/validate.args])
+AC_INIT([validate-args],[1.5.0],[https://bitbucket.org/djerius/validate.args/issues],[validate-args], [https://bitbucket.org/djerius/validate.args])
 AM_INIT_AUTOMAKE([ check-news ])
 
 AC_SUBST( ROCKSPEC_VERSION, 1 )
