@@ -19,7 +19,7 @@ function test_optional__but_specified ()
    local template = { { optional = true } }
    local ok, foo = validate( template, 'x' )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( 'x', foo )
 
 end
@@ -29,7 +29,7 @@ function test_optional__not_specified ()
    local template = { { optional = true } }
    local ok, foo = validate( template )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( nil, foo )
 
 end
@@ -40,7 +40,7 @@ function test_default__not_specified ()
    local template = { { default = 'foo' } }
    local ok, foo = validate( template )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( 'foo', foo )
 
 end
@@ -50,7 +50,7 @@ function test_optional__specified_as_nil ()
    local template = { { default = 'foo' }, { default = 'bar' } }
    local ok, foo, bar = validate( template )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( 'foo', foo, ': foo' )
    assert_equal( 'bar', bar, ': bar' )
 
@@ -61,14 +61,14 @@ function test_required__specified_as_nil ()
    local template = { { optional = false }, { optional = false } }
    local ok, foo, bar = validate( template, nil, nil )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( nil, foo, ': foo' )
    assert_equal( nil, bar, ': bar' )
 
 
    ok, foo, bar = validate( template, nil, 'x' )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( nil, foo, ': foo 2' )
    assert_equal( 'x', bar, ': bar 2' )
 
@@ -146,7 +146,7 @@ function test_pos_named_not_cvtd ()
 		   }
    local ok, arg1, arg2 = validate( template, 32, 'foo' )
 
-   assert_true( ok )
+   assert_true( ok, arg1 )
    assert_equal( 32, arg1 )
    assert_equal( 'foo', arg2 )
 
@@ -167,7 +167,7 @@ function test_cvs_pos_to_named ()
 		   }
    local ok, opts = validate_opts( { named = true }, template, 32, 'foo' )
 
-   assert_true( ok )
+   assert_true( ok, opts )
    assert_equal( 32, opts.arg2 )
    assert_equal( 'foo', opts[2] )
 
@@ -181,7 +181,7 @@ function test_extra_pos_args ()
    local ok, a, b, c = validate_opts( { allow_extra = true }, template,
 				  1, 2, 3)
 
-   assert_true( ok )
+   assert_true( ok, a )
    assert_equal( 1, a )
    assert_equal( 2, b )
    assert_equal( nil, c )
@@ -191,7 +191,7 @@ function test_extra_pos_args ()
 				     }, template,
 				  1, 2, 3)
 
-   assert_true( ok )
+   assert_true( ok, a )
    assert_equal( 1, a )
    assert_equal( 2, b )
    assert_equal( 3, c )
