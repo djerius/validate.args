@@ -194,10 +194,16 @@ take. It may be either a single value or a list of values:
   enum = { 'a', 33, 'b' }
 
 
+=item allow_nil
+
+This is a boolean and indicates that the element may be nil.  This
+only pertains to positional elements.
+
 =item not_nil
 
 This is a boolean and indicates that the element must not be nil.  This
-only pertains to positional elements.
+only pertains to positional elements. I<THIS IS DEPRECATED>.  It defaults
+to C<true>.
 
 =item requires
 
@@ -488,8 +494,6 @@ Simple types include the standard Lua types and can be augmented using
 the B<add_type> function or method.  They are specified using their name (as a string):
 
 =over
-
-=item 'nil'
 
 =item 'number'
 

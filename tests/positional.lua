@@ -58,7 +58,7 @@ end
 
 function test_required__specified_as_nil ()
 
-   local template = { { optional = false }, { optional = false } }
+   local template = { { allow_nil = true }, { allow_nil = true } }
    local ok, foo, bar = validate( template, nil, nil )
 
    assert_true( ok, foo )
@@ -76,7 +76,7 @@ end
 
 function test_multiple__required__not_specified ()
 
-   local template = { { optional = false }, { optional = false } }
+   local template = { { allow_nil = true }, { allow_nil = true } }
    local ok, err = validate( template, nil )
 
    assert_false( ok )
@@ -86,7 +86,7 @@ end
 
 function test_multiple__required__not_specified__with_name ()
 
-   local template = { { optional = false }, { name = 'arg2', optional = false } }
+   local template = { { allow_nil = true }, { name = 'arg2', allow_nil = true } }
    local ok, err = validate( template, nil )
 
    assert_false( ok )
@@ -114,7 +114,7 @@ end
 
 function test_too_many ()
 
-   local template = { { }, { } }
+   local template = { { allow_nil = true }, { allow_nil = true } }
    local ok, err = validate( template, nil, nil, nil )
 
    assert_false( ok )
@@ -124,7 +124,7 @@ end
 
 function test_non_integer_entries ()
 
-   local template = { { }, { }, frank = 3 }
+   local template = { { allow_nil = true }, { allow_nil =true }, frank = 3 }
    local ok, err = validate( template, nil, nil )
 
    assert_false( ok )

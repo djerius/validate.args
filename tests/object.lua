@@ -9,7 +9,7 @@ setup = _G.setup
 
 function test_multiple__required__not_specified ()
 
-   local template = { { optional = false }, { optional = false } }
+   local template = { { allow_nil = true }, { optional = false } }
    local ok, err = va:new():validate( template, nil )
 
    assert_false( ok )
@@ -19,7 +19,8 @@ end
 
 function test_multiple__required__not_specified__with_name ()
 
-   local template = { { optional = false }, { name = 'arg2', optional = false } }
+   local template = { { allow_nil = true }, { name = 'arg2',
+					      optional = false } }
    local ok, err = va:new():validate( template, nil )
 
    assert_false( ok )

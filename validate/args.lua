@@ -484,6 +484,11 @@ local validate_spec = {
    not_nil = { optional = true,
 	       type = 'boolean',
 	    },
+
+   allow_nil = { optional = true,
+	      type = 'boolean',
+	   },
+
    requires = { optional = true,
 		type = { 'table', 'string' } },
    excludes = { optional = true,
@@ -936,8 +941,8 @@ function Validate:defaults( name, spec )
    if not spec.optional then
 
       -- note that positional arguments with a nil value and
-      -- spec.not_nil == false are acceptable
-      if self.state[name] and self.state[name].positional then
+      -- spec.allow_nil == true are acceptable
+      if self.state[name] and self.state[name].positional and spec.allow_nil then
 	 return true, nil
       else
 	 return false, name:msg( 'required but not specified' )
@@ -1029,7 +1034,13 @@ function Validate:process_arg_spec( name, spec, arg )
    if arg == nil then
 
       -- positional arguments have already been checked for existence,
-      -- so if it's a nil value it has been deliberately set
+
+      -- backwards compatibility: pay attention to spec.not_nil flag
+      -- old behavior was that a nil positional parameter was allowed
+      -- by default.  this is bad policy.  the reverse is now the
+      -- case, nil positional values are allowed only if allow_nil
+      -- is set. but, still need to handle old specs
+
       if self.state[name].positional and spec.not_nil then
 
 	 return false, name:msg( 'must not be nil' )
@@ -1269,6 +1280,7 @@ function Validate:check_arg( name, spec, arg )
       local ok, v = spec.precall( arg, vfargs )
       if ok then arg = v end
    end
+
 
    ok, arg = self:process_arg_spec( name, spec, arg )
 
