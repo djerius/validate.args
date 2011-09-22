@@ -1,3 +1,11 @@
+1.5.1:
+
+[ENHANCEMENTS]
+
+* The validate.args functions posnum, zposnum, posint, and zposint now
+  return an error message upon error, making them more compatible
+  with Lua's assert() function.
+
 1.5.0:
 
 [API CHANGE]
