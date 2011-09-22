@@ -160,7 +160,7 @@ function posnum ( arg )
    if type(arg) == 'number' and arg > 0 then
       return true, arg
    else
-      return false
+      return false, "not a number"
    end
 end
 
@@ -168,14 +168,14 @@ function zposnum ( arg )
    if type(arg) == 'number' and arg >= 0 then
       return true, arg
    else
-      return false
+      return false, "not a non-negative number"
    end
 end
 
 function posint( arg )
 
    if type(arg) ~= 'number' then
-      return false
+      return false, "not a positive integer"
    end
 
    local _, x = math.modf( arg )
@@ -183,7 +183,7 @@ function posint( arg )
    if x == 0 and arg > 0 then
       return true, arg
    else
-      return false
+      return false, "not a positive integer"
    end
 
 end
@@ -191,7 +191,7 @@ end
 function zposint( arg )
 
    if type(arg) ~= 'number' then
-      return false
+      return false, "not a non-negative integer"
    end
 
    local _, x = math.modf( arg )
@@ -199,7 +199,7 @@ function zposint( arg )
    if x == 0 and arg >= 0 then
       return true, arg
    else
-      return false
+      return false, "not a non-negative integer"
    end
 
 end

@@ -1021,19 +1021,23 @@ Options> for the available options.
 
 =item posnum( arg )
 
-Returns true if C<arg> is a positive number.
+Test if C<arg> is a number greater than zero.
+Returns true upon success, false and and error message if not.
 
 =item zposnum( arg )
 
-Returns true if C<arg> is a number greater or equal to zero.
+Test if C<arg> is a number greater or equal to zero.
+Returns true upon success, false and and error message if not.
 
 =item posint( arg )
 
-Returns true if C<arg> is a positive integer.
+Test if C<arg> is a integer greater than zero.
+Returns true upon success, false and and error message if not.
 
 =item zposint( arg )
 
-Returns true if C<arg> is an integer greater or equal to zero.
+Test if C<arg> is an integer greater or equal to zero.
+Returns true upon success, false and and error message if not.
 
 =back
 
