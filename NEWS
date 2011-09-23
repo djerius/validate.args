@@ -1,3 +1,9 @@
+1.5.2:
+
+[ENHANCEMENTS]
+
+* add argument validation to validate.inplace:new()
+
 1.5.1:
 
 [ENHANCEMENTS]
