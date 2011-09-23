@@ -22,11 +22,12 @@
 -----
 --- validate.inplace: Validate assignments as they are made
 
-local setmetatable = setmetatable
+local assert = assert
 local error = error
 local pairs = pairs
-local select = select
 local rawget = rawget
+local select = select
+local setmetatable = setmetatable
 local type =type
 local va = require('validate.args')
 
@@ -195,7 +196,18 @@ end
 
  __index = _M
 
-function _M:new( name, spec, vobj )
+function _M:new( ... )
+
+   local ok, name, spec, vobj = va.validate( { { name = 'name',
+						 type = 'string' },
+					       { name = 'spec',
+						 type = 'table' },
+					       { name = 'vobj',
+						 type = 'table' },
+					    },
+					     ...
+					  )
+   assert( ok, name )
 
    local self = { vobj = vobj, spec = spec }
 
