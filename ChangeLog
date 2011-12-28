@@ -1,8 +1,33 @@
-2011-09-23  Diab Jerius  <dj@macabre.cfa.harvard.edu>
+2011-12-28  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
 
-	Tag 1.5.2
+	Tag 1.5.3
 
-2011-09-23 16:54 -0400  djerius  <djerius@cfa.harvard.edu>  (d6a64a52a0a3 [tip])
+2011-12-28 14:39 -0500  djerius  <djerius@cfa.harvard.edu>  (0b8b7f4fb313 [tip])
+
+	* doc/validate.args.pod, tests/callback.lua, validate/args.lua:
+	add before & after validation options, rename precoll & postcoll
+	specification options to before & after
+
+	before & after validation options provide similar functionality to
+	the eponymous specifiction options, but for the entire set of input
+	and output data.
+
+2011-10-05 09:56 -0400  djerius  <djerius@cfa.harvard.edu>  (5b4162d2e90f)
+
+	* mstbuild.cfg:
+	local build should be architecture dependent
+
+2011-09-23 16:55 -0400  djerius  <djerius@cfa.harvard.edu>  (d47156ac6d8f)
+
+	* .hgtags:
+	Added tag 1.5.2 for changeset 4d99a3eeefce
+
+2011-09-23 16:55 -0400  djerius  <djerius@cfa.harvard.edu>  (4d99a3eeefce [1.5.2])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-09-23 16:54 -0400  djerius  <djerius@cfa.harvard.edu>  (d6a64a52a0a3)
 
 	* validate/inplace.lua:
 	add argument validation to validate.inplace:new()

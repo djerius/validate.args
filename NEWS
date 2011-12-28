@@ -1,3 +1,15 @@
+1.5.3:
+
+[ENHANCEMENTS]
+
+* added new validation options, "before", and "after" to provide
+  access to the complete data before and after validation
+
+[DECPRECTAIONS]
+
+* the precoll and postcoll specification options are now named "before"
+  and "after"; the old names still work for now.
+
 1.5.2:
 
 [ENHANCEMENTS]
