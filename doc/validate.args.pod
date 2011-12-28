@@ -341,9 +341,8 @@ If an element is I<in> a vtable and the vtable has C<ordered> set,
 this specifies the "weight" of the item; elements with smaller weights will be
 processed before elements with larger weights.
 
-=item precall
-
-=item postcall
+=item before
+=item after
 
 Functions to be called for each element before and after
 validation.  They are called with two arguments: the passed element
@@ -370,6 +369,8 @@ invoked.  If a specification is invalid neither callback is invoked.
 The functions are called at the table level for elements which are
 vtables.
 
+These were previously named C<precall> and C<postcall>.  These
+names are B<DEPRECATED>
 
 =back
 
@@ -727,6 +728,21 @@ interfaces are used; see L</Procedural interface> and L</Object
 oriented interface> for more details.
 
 =over
+
+=item before
+
+This specifies a function which is called with the input data prior to
+any validation.  The data are passed as a table, which may be
+modified.  The function should return a boolean indicating success or
+failure; in the latter case it should also return an error mesage.
+
+=item after
+
+This specifies a function which is called with the completely
+validated data prior to returning to the calling routine.  The data
+are passed as a table, which may be modified.  The function should
+return a boolean indicating success or failure; in the latter case it
+should also return an error mesage.
 
 =item check_spec
 
@@ -1157,7 +1173,7 @@ Diab Jerius, E<lt>djerius@cfa.harvard.eduE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010 by the Smithsonian Astrophysical Observatory
+Copyright (C) 2010-2011 by the Smithsonian Astrophysical Observatory
 
 This software is released under the GNU General Public License.
 You may find a copy at L<http://www.fsf.org/copyleft/gpl.html>.

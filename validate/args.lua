@@ -28,6 +28,7 @@ require 'io'
 require 'table'
 require 'string'
 require 'math'
+require 'dump'
 
 -- iterate over non meta keys
 local function next_notmeta( table, index )
@@ -101,6 +102,7 @@ end
 
 --------------------------------------------------------------------
 -- configuration options class. doesn't allow creation of new option fields
+-- FIXME: option values are not validated
 
 local Options = Base:new{
    check_spec        = false,
@@ -112,6 +114,8 @@ local Options = Base:new{
    debug             = false,
    udata             = false,
    ordered           = false,
+   before            = false,
+   after             = false,
 }
 
 -- prevent creation of new fields
@@ -470,8 +474,11 @@ local validate_spec = {
 
    default_to_nil = { optional = true },
 
-   precall  = { type = 'function', optional = true },
-   postcall = { type = 'function', optional = true },
+   precall  = { type = 'function', optional = true, excludes = 'before' },
+   postcall = { type = 'function', optional = true, excludes = 'after' },
+
+   before  = { type = 'function', optional = true },
+   after   = { type = 'function', optional = true },
 
    name    = { optional = true,
 	       type = 'string' },
@@ -1275,9 +1282,11 @@ function Validate:check_arg( name, spec, arg )
       self.state[name].check_spec_complete = true
    end
 
-   if spec.precall then
+   local callback = spec.precall or spec.before
 
-      local ok, v = spec.precall( arg, vfargs )
+   if callback then
+
+      local ok, v = callback( arg, vfargs )
       if ok then arg = v end
    end
 
@@ -1288,9 +1297,10 @@ function Validate:check_arg( name, spec, arg )
       return false, arg
    end
 
-   if spec.postcall then
+   local callback = spec.postcall or spec.after
+   if callback then
 
-      local ok, v = spec.postcall( arg, vfargs )
+      local ok, v = callback( arg, vfargs )
       if ok then arg = v end
    end
 
@@ -1358,6 +1368,12 @@ function Validate:validate( tpl, ... )
 
    -- original arguments
    local oargs = { ... }
+   if opts.before then
+      local ok, errmsg = opts.before( oargs )
+      if not ok then
+	 return rfunc( false, errmsg )
+      end
+   end
 
    -- output (possibly transformed) arguments
    local args = {}
@@ -1500,6 +1516,13 @@ function Validate:validate( tpl, ... )
 
       end
 
+   end
+
+   if opts.after then
+      local ok, errmsg = opts.after( args )
+      if not ok then
+	 return rfunc( false, errmsg )
+      end
    end
 
    if opts.named then
