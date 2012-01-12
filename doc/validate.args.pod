@@ -342,6 +342,7 @@ this specifies the "weight" of the item; elements with smaller weights will be
 processed before elements with larger weights.
 
 =item before
+
 =item after
 
 Functions to be called for each element before and after
@@ -356,12 +357,12 @@ Please note:
 
 =item *
 
-If an error occurs during validation, the C<postcall> function
+If an error occurs during validation, the C<after> function
 will not be called.
 
 =item *
 
-Specification validation is done before the C<precall> function is
+Specification validation is done before the C<before> function is
 invoked.  If a specification is invalid neither callback is invoked.
 
 =item *
@@ -369,8 +370,10 @@ invoked.  If a specification is invalid neither callback is invoked.
 The functions are called at the table level for elements which are
 vtables.
 
+=item *
+
 These were previously named C<precall> and C<postcall>.  These
-names are B<DEPRECATED>
+names are B<DEPRECATED>.
 
 =back
 
