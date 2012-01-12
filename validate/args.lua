@@ -28,7 +28,6 @@ require 'io'
 require 'table'
 require 'string'
 require 'math'
-require 'dump'
 
 -- iterate over non meta keys
 local function next_notmeta( table, index )
