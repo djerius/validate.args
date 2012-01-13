@@ -1,8 +1,23 @@
-2011-12-28  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
+2012-01-13  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
 
-	Tag 1.5.3
+	Tag 1.5.4
 
-2011-12-28 14:39 -0500  djerius  <djerius@cfa.harvard.edu>  (0b8b7f4fb313 [tip])
+2012-01-12 18:19 -0500  djerius  <djerius@cfa.harvard.edu>  (20cca65ad0d7 [tip])
+
+	* validate/args.lua:
+	remove debug code which causes run time failure
+
+2011-12-28 14:42 -0500  djerius  <djerius@cfa.harvard.edu>  (6afb41a1fec4)
+
+	* .hgtags:
+	Added tag 1.5.3 for changeset 3b3e7d543b2b
+
+2011-12-28 14:42 -0500  djerius  <djerius@cfa.harvard.edu>  (3b3e7d543b2b [1.5.3])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2011-12-28 14:39 -0500  djerius  <djerius@cfa.harvard.edu>  (0b8b7f4fb313)
 
 	* doc/validate.args.pod, tests/callback.lua, validate/args.lua:
 	add before & after validation options, rename precoll & postcoll
