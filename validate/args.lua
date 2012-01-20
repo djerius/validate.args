@@ -793,6 +793,11 @@ function Validate:check_table( name, tspec, arg )
 	       end
 
 	       handled[k] = true
+
+	    elseif spec ~= nil then
+
+	       return false, name:fmt( spec )
+
 	    end
 
 	 end

@@ -610,18 +610,15 @@ the special names C<%named> and C<%pos>.  A third special name
 C<%default> is an alternative which can be used to provide a catch-all
 for all unmatched elements.
 
-The specifications must be functions. They are passed the element name or position and
-its value.  They should return two values,
+The specifications must be functions. They are passed the element name
+or position and its value.
 
-=over
+If the element is I<acceptable>, the function must return a true
+boolean value and a specification table for the element.
 
-=item 1
-
-a boolean indicating that the element name or position is acceptable
-
-=item 2
-
-if acceptable, a specification table for the element.
+If the element is I<not acceptable>, the function must return a false
+boolean value.  The function may also optionally return an error
+message (otherwise a generic error message is generated).
 
 =back
 
@@ -636,6 +633,7 @@ after the first two:
                    if k%2 == 0 then
 		     return true, { type = 'posint' }
 		   else
+		     -- ignore odd numbers
 		     return false
 		   end
                 end
