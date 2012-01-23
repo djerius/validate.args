@@ -1409,10 +1409,6 @@ function Validate:validate( tpl, ... )
 
 	 return rfunc( false, name:msg( '(validation spec): ', spec ) )
 
-      elseif type(spec) ~= 'table' then
-
-	 return rfunc( false, name:msg( '(validation spec): expected table or function, got' ,
-					type(arg) ) )
       end
 
       nargs = nargs + 1
