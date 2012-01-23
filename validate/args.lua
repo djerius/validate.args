@@ -570,7 +570,7 @@ local function resolve_spec( spec, arg )
 
    end
 
-   return true, spec
+   return ok, spec
 
 end
 
@@ -1407,7 +1407,7 @@ function Validate:validate( tpl, ... )
 
       if not ok then
 
-	 return rfunc( false, name:msg( '(validation spec): ', spec ) )
+	 return rfunc( false, spec )
 
       end
 

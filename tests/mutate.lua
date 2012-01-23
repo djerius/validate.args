@@ -3,10 +3,11 @@ module( ..., package.seeall )
 va = require( 'validate.args' )
 validate = va.validate
 validate_opts = va.validate_opts
+validate_tbl = va.validate_tbl
 
 setup = _G.setup
 
-function test_table_mutation( )
+function test_table_mutation_noargs( )
 
    local template =  {
 			 vtable = {
@@ -23,9 +24,40 @@ function test_table_mutation( )
 			    }
 			  )
 
-   assert_true( ok )
+   assert_true( ok, foo )
    assert_equal( 'a', foo.arg1 )
    assert_equal( 3, foo.arg2 )
+
+end
+
+function test_positional_mutation_false( )
+
+   local ok, foo = validate(
+				  { function ()
+				       return false, "no template"
+				    end
+				 },
+				  1
+			       )
+
+   assert_false( ok, foo )
+   assert_match( foo, "no template" )
+
+end
+
+function test_table_mutation_false( )
+
+   local ok, foo = validate_tbl(
+				  {
+				     a = function ()
+					    return false, "no template"
+					 end
+				  },
+				  { a = 2 }
+			       )
+
+   assert_false( ok, foo )
+   assert_match( foo, "no template" )
 
 end
 
