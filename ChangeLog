@@ -1,8 +1,28 @@
-2012-01-13  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
+2012-01-20  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
 
-	Tag 1.5.4
+	Tag 1.5.5
 
-2012-01-12 18:19 -0500  djerius  <djerius@cfa.harvard.edu>  (20cca65ad0d7 [tip])
+2012-01-20 15:37 -0500  djerius  <djerius@cfa.harvard.edu>  (f572d7ae905b [tip])
+
+	* doc/validate.args.pod, tests/default_spec.lua, validate/args.lua:
+	catch-all specification functions may now return an error message
+
+2012-01-13 10:07 -0500  djerius  <djerius@cfa.harvard.edu>  (9b9a82051335)
+
+	* .hgtags:
+	Added tag 1.5.4 for changeset 1d9a47857288
+
+2012-01-13 10:07 -0500  djerius  <djerius@cfa.harvard.edu>  (1d9a47857288 [1.5.4])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2012-01-12 18:21 -0500  djerius  <djerius@cfa.harvard.edu>  (5cfcf35df7b2)
+
+	* doc/validate.args.pod:
+	minor doc fixes
+
+2012-01-12 18:19 -0500  djerius  <djerius@cfa.harvard.edu>  (20cca65ad0d7)
 
 	* validate/args.lua:
 	remove debug code which causes run time failure

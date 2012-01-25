@@ -1,3 +1,14 @@
+1.5.5:
+
+[BUG FIX]
+
+* the success return value from mutating validation specification functions
+  was ignored.
+
+[ENHANCEMENT]
+
+* catch-all specification functions may now specify an error message
+
 1.5.4:
 
 [BUG FIX]
