@@ -565,7 +565,9 @@ local function resolve_spec( spec, arg )
       ok, spec = spec( arg )
 
       if ok and type(spec) ~= 'table' then
-	 return false, '(validation spec function): returned type ' .. type(spec) .. '; expected a table'
+	 return false,    '(validation spec function): returned type '
+	               .. type(spec)
+		       .. '; expected a table'
       end
 
    end
@@ -581,7 +583,11 @@ local function order_spec( spec, ordered )
    if ordered then
 
       for k, v in pairs( spec ) do
-	 table.insert( order, { k, v.order } )
+	 table.insert( order, { k,
+				(type(v) == 'table'
+			          and v.order ~=nil
+			          and v.order) or nil
+		       } )
       end
 
 
