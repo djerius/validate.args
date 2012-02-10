@@ -1,8 +1,40 @@
-2012-01-20  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
+2012-02-09  Diab Jerius  <dj@jeeves.cfa.harvard.edu>
 
-	Tag 1.5.5
+	Tag 1.5.6
 
-2012-01-20 15:37 -0500  djerius  <djerius@cfa.harvard.edu>  (f572d7ae905b [tip])
+2012-02-09 15:31 -0500  djerius  <djerius@cfa.harvard.edu>  (55bb56842558 [tip])
+
+	* doc/validate.args.pod, tests/ordered.lua, validate/args.lua:
+	fix fatal error if a vtable is ordered and it contains a mutating
+	specification
+
+2012-01-25 16:37 -0500  djerius  <djerius@cfa.harvard.edu>  (0b0d49eb3b1e)
+
+	* .hgtags:
+	Added tag 1.5.5 for changeset 43ecb0e7671a
+
+2012-01-25 16:37 -0500  djerius  <djerius@cfa.harvard.edu>  (43ecb0e7671a [1.5.5])
+
+	* ChangeLog, NEWS, configure.ac:
+	update logs and version for release
+
+2012-01-23 11:25 -0500  djerius  <djerius@cfa.harvard.edu>  (5a809d627fd0)
+
+	* tests/mutate.lua, validate/args.lua:
+	incorrectly handled a false return from mutating validation spec
+	functions
+
+	resolve_spec() returned true in the event of a false success value
+	of the mutating validation spec function. now it returns that
+	value. tests add to trap the error.
+
+2012-01-23 11:10 -0500  djerius  <djerius@cfa.harvard.edu>  (f89a566bd15f)
+
+	* validate/args.lua:
+	remove redundant validity check on resolve_spec result (resolve_spec
+	performs the same check)
+
+2012-01-20 15:37 -0500  djerius  <djerius@cfa.harvard.edu>  (f572d7ae905b)
 
 	* doc/validate.args.pod, tests/default_spec.lua, validate/args.lua:
 	catch-all specification functions may now return an error message

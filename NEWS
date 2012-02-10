@@ -1,3 +1,10 @@
+1.5.6:
+
+[BUG FIX]
+
+* fix fatal error if the vtable ordered option was set and a specification
+  was a function.
+
 1.5.5:
 
 [BUG FIX]
