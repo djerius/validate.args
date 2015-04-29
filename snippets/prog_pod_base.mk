@@ -1,18 +1,23 @@
 #============================================================================
 # prog_pod_base.mk - generate program documentation from POD input
 
-# this snippets orchestrates the creation of PostScript, HTML, and
+PROG_POD_BASE_MK =
+
+# this snippets orchestrates the creation of PDF, HTML, and
 # UNIX section l man pages from POD input.  it is generally not used
 # directly.
 
 # Prerequisites:
-#	create_am_macros.mk
+CREATE_AM_MACROS_MK +=
 
 
-# The caller must define
+# THE caller must define
 #  POD_SFX - the suffix of the pod source file
 #  PODS    - the list of documentation, basenames only
 #  POD_DIR - where the POD source is located. must end in / if not empty.
+
+POD_SFX +=
+PODS +=
 
 # Because of how automake works, the caller must set
 # 	dist_manl_MANS
@@ -29,9 +34,5 @@
 # the .in file as the source is pretty safe.
 
 include $(top_srcdir)/snippets/pod_html.mk
-
-include $(top_srcdir)/snippets/pod_man_init.mk
-include $(top_srcdir)/snippets/pod_manl.mk
-
-include $(top_srcdir)/snippets/pod_ps_init.mk
-include $(top_srcdir)/snippets/pod_psl.mk
+include $(top_srcdir)/snippets/pod_man.mk
+include $(top_srcdir)/snippets/pod_pdf.mk

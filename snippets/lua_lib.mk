@@ -1,10 +1,12 @@
 #============================================================================
 # lua_lib.mk
 
+LUA_LIB_MK =
+
 # Snippets required:
 #
 #	lib_lua.ac
-#	lua_compile.mk
+LUA_COMPILE_MK +=
 
 # Variables
 #

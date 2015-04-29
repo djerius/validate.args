@@ -21,17 +21,15 @@ test -z "$LUAC" &&
 AC_PROG_INSTALL
 
 m4_include(snippets/lib_lua.ac)
-m4_include(snippets/pod_docs.ac)
+MST_POD_GEN_DOCS
 
 # requirements for tests
+MST_PROG_LUA_MODULES([
+		       lunatest
+                      ], ,
+                     [ AC_MSG_ERROR([missing required Lua modules])]
+                     )
 
-LUA_DEPENDENCIES="lunatest"
-
-for dep in $LUA_DEPENDENCIES ; do
-    if ! lua -l $dep -e 'return' 2>/dev/null ; then
-    	AC_MSG_ERROR([Cannot find lua library/module $dep])
-    fi
-done
 
 # Checks for library functions.
 AC_CONFIG_FILES([Makefile
