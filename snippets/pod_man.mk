@@ -22,7 +22,6 @@ POD_MAN		=				\
 
 if MST_POD_GEN_DOCS_MAN
 
-
 SUFFIXES += .l .3 .5 .7
 MAINTAINERCLEANFILES	+= $(POD_MAN)
 
@@ -32,26 +31,32 @@ POD5_SFX = .5
 POD7_SFX = .7
 
 
+SUFFIXES +=					\
+	$(PODL_SFX) $(PODL_SFX)$(POD_SFX)	\
+	$(POD3_SFX)$(POD_SFX)			\
+	$(POD5_SFX) $(POD5_SFX)$(POD_SFX)	\
+	$(POD7_SFX) $(POD7_SFX)$(POD_SFX)
+
 # e.g. create foo.l from foo.pod
-%.l: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).l:
 	pod2man --name=`basename $< $(POD_SFX)` \
 		--section=l --release=' ' --center=' ' $< > $@
 
 # e.g. create foo.l from foo.l.pod
-%.l: $(POD_DIR)%$(PODL_SFX)$(POD_SFX)
+$(PODL_SFX)$(POD_SFX).l:
 	pod2man --name=`basename $< $(PODL_SFX)$(POD_SFX)` \
 		--section=l --release=' ' --center=' ' $< > $@
 
 
-%.3: $(POD_DIR)%$(POD3_SFX)$(POD_SFX)
+$(POD3_SFX)$(POD_SFX).3:
 	pod2man --name=`basename $< $(POD3_SFX)$(POD_SFX)` \
 		--section=3 --release=' ' --center=' ' $< > $@
 
-%.5: $(POD_DIR)%$(POD5_SFX)$(POD_SFX)
+$(POD5_SFX)$(POD_SFX).5:
 	pod2man --name=`basename $< $(POD5_SFX)$(POD_SFX)` \
 		--section=5 --release=' ' --center=' ' $< > $@
 
-%.7: $(POD_DIR)%$(POD7_SFX)$(POD_SFX)
+$(POD7_SFX)$(POD_SFX).7:
 	pod2man --name=`basename $< $(POD7_SFX)$(POD_SFX)` \
 		--section=7 --release=' ' --center=' ' $< > $@
 

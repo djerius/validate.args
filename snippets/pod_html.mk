@@ -51,14 +51,13 @@ CLEANFILES		+=			\
 MAINTAINERCLEANFILES	+= $(POD_HTML)
 
 htmldir			= $(datadir)/doc/$(PACKAGE)/html
+dist_html_DATA		= $(POD_HTML)
 
 if MST_POD_GEN_DOCS_HTML
 
-dist_html_DATA		= $(POD_HTML)
+SUFFIXES += .html $(POD_SFX)
 
-SUFFIXES += .html
-
-%.html: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).html:
 	pod2html --outfile=$@ --infile=$< --title=`basename $< $(POD_SFX)`
 
 
@@ -71,12 +70,10 @@ else !MST_POD_GEN_DOCS_HTML
 # but don't distribute
 
 
-%.html: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).html:
 	touch $@
 
-dist_html_DATA =
-
-dist-hook:
+dist-hook::
 	echo >&2 "Cannot create distribution as cannot create HTML documentation"
 	echo >&2 "Install pod2html (from CPAN)"
 	false

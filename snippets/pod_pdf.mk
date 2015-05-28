@@ -22,10 +22,9 @@ POD_SFX +=
 MAINTAINERCLEANFILES   += $(POD_PDF)
 
 pdfdir			= $(datadir)/doc/$(PACKAGE)
+dist_pdf_DATA		= $(POD_PDF)
 
 if MST_POD_GEN_DOCS_PDF
-
-dist_pdf_DATA		= $(POD_PDF)
 
 SUFFIXES	+= .pdf $(POD_SFX)
 
@@ -33,7 +32,7 @@ if MST_POD_GEN_DOCS_PDF_MAN_PS
 
 SUFFIXES	+= .man .ps .pdf
 
-%.man: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).man: $(POD_DIR)
 	pod2man  --release=' ' --center=' ' $< > $@
 
 .man.ps:
@@ -46,7 +45,7 @@ endif  MST_POD_GEN_DOCS_PDF_MAN_PS
 
 if HAVE_POD2PDF
 
-%.pdf: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).pdf:
 	pod2pdf --title=`basename $< $(POD_SFX)` --output-file $@ --page-size=Letter $<
 
 endif  HAVE_POD2PDF
@@ -59,13 +58,10 @@ else !MST_POD_GEN_DOCS_PDF
 # for maintainer, must create fake PDF docs or make will fail,
 # but don't distribute
 
-
-%.pdf: $(POD_DIR)%$(POD_SFX)
+$(POD_SFX).pdf:
 	touch $@
 
-dist_pdf_DATA =
-
-dist-hook:
+dist-hook::
 	echo >&2 "Cannot create distribution as cannot create PDF documentation"
 	echo >&2 "Install ps2pdf or App::pod2pdf (from CPAN)"
 	false
