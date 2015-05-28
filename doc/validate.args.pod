@@ -624,8 +624,6 @@ If the element is I<not acceptable>, the function must return a false
 boolean value.  The function may also optionally return an error
 message (otherwise a generic error message is generated).
 
-=back
-
 For example, to catch all even numbered positional elements in a table
 after the first two:
 
