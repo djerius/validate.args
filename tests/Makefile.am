@@ -1,7 +1,7 @@
 include $(top_srcdir)/snippets/create_am_macros.mk
 
 # Test executables to be run
-TESTS			= driver.lua
+TESTS			+= driver.lua
 TESTS_ENVIRONMENT	= \
 		LUA_PATH="@top_srcdir@/?.lua;@srcdir@/?.lua;$$LUA_PATH;;" \
 		$(LUA)

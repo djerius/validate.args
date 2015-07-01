@@ -1,9 +1,12 @@
 include $(top_srcdir)/snippets/create_am_macros.mk
 
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS			=		\
 			validate	\
 			doc		\
-			tests
+			tests		\
+			m4
 
 #-------------------------------------------------------------------
 #
@@ -12,7 +15,8 @@ SUBDIRS			=		\
 BUILT_SOURCES           +=
 
 # extra files to add to the distribution
-EXTRA_DIST              += \
+EXTRA_DIST              +=			\
+			bootstrap		\
 			$(ROCKSPEC_FILE_NAME)
 
 # Any files make built
