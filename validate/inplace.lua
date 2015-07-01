@@ -33,7 +33,7 @@ local va = require('validate.args')
 
 local print = print
 
-module( ... )
+local _M = {}
 
 local mt = {}
 setmetatable( mt, { _mode = 'k' } )
@@ -150,7 +150,7 @@ function _M:_populate( name, specs )
 
 end
 
-function _copy( st, specs )
+local function _copy( st, specs )
 
    local copy = {}
 
@@ -194,7 +194,7 @@ function _M:copy( )
 
 end
 
- __index = _M
+_M.__index = _M
 
 function _M:new( ... )
 
@@ -227,3 +227,5 @@ function _M:proxy( )
    return self.top.proxy
 
 end
+
+return _M
