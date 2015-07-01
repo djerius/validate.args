@@ -1,16 +1,14 @@
-module( ..., package.seeall )
-
-require 'string'
-
 local validate = require( 'validate.args' ).validate
 
+local setup = require 'setup'
 
-function test_validate_function ()
+describe( "validate function", function ()
 
-   local template = { {
+    before_each( setup )
+
+    local template = { {
 			 name = 'foo',
 			 vfunc = function( val, args )
-
 				    if val then
 				       return true, val
 				    else
@@ -19,49 +17,66 @@ function test_validate_function ()
 				 end
 		   }}
 
-   local ok, foo = validate( template, true )
+    it( "true", function ()
+	local ok, rv = validate( template, true )
+
+	assert.is_true( ok )
+	assert.are.equal( true, rv )
+
+     end)
+
+    it( "false", function ()
+        local ok, rv = validate( template, false )
+
+	assert.is_false( ok )
+	assert.are.equal( 'arg#1(foo): arg#1(foo)', rv );
+
+     end)
+
+ end)
 
 
-   assert_true( ok )
-   assert_equal( true, foo )
+describe( "enum", function ()
 
-   local ok, foo = validate( template, false )
+    before_each( setup )
 
-   assert_false( ok )
-   assert_match( 'arg#1%(foo%): arg#1%(foo%)', foo );
+    describe( "list", function ()
 
-end
+	local template = { {
+			      enum = { 'a', 3, 'c', 'd' }
+			} }
 
+	for _, v in pairs( template[1].enum ) do
 
-function test_enum_list ()
+	    it( "exists: " .. v, function ()
+                local ok, rv = validate( template, v  )
+		assert.is_true( ok )
+		assert.are.equal( v, rv)
+	     end)
 
-   local template = { {
-			 enum = { 'a', 3, 'c', 'd' }
-		   } }
+	 end
 
-   for _, v in pairs( template[1].enum ) do
+        it( "doesn't exist", function ()
+            local ok, rv = validate( template, 19 )
+	    assert.is_false( ok )
+	 end)
 
-      local ok, foo = validate( template, v  )
+     end)
 
-      assert_true( ok )
-      assert_equal( v, foo, v )
+    describe( "scalar", function ()
 
-   end
+        it( "exists", function ()
+            local ok, rv = validate( { { enum = 19 } } , 19 )
 
-   local ok, foo = validate( template, 19 )
-   assert_false( ok )
+	    assert.is_true( ok )
+	    assert.is_equal( 19, rv )
+	 end)
 
-end
+	it( "doesn't exist", function ()
+            local ok, rv = validate( { enum = 19 } , 18 )
+	    assert.is_false( ok )
+	 end)
 
-function test_enum_scalar ()
+     end)
 
-   local ok, foo = validate( { { enum = 19 } } , 19 )
-
-   assert_true( ok )
-   assert_equal( 19, foo )
-
-   local ok, foo = validate( { enum = 19 } , 18 )
-
-   assert_false( ok )
-
-end
+ end)

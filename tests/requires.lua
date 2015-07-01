@@ -1,90 +1,96 @@
-module( ..., package.seeall )
+local validate = require( 'validate.args' ).validate
 
-validate = require( 'validate.args' ).validate
+require 'asserts'
 
-setup = _G.setup
+setup = require 'setup'
 
-function test_req_scalar( )
+describe( "requires", function ()
 
-   local template = {
-      arg1 = { optional = true, requires = 'arg2' },
-      arg2 = { optional = true },
-   }
+    before_each( setup )
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+    it( "req scalar", function ()
 
-   assert_true( ok )
+        local template = {
+	   arg1 = { optional = true, requires = 'arg2' },
+	   arg2 = { optional = true },
+	}
 
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_false( ok )
-   assert_match('argument.*without' , foo )
+	local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok )
+	assert.is_true( ok )
 
-end
+	local ok, foo = validate( template, { arg1 = 1 } )
+	assert.is_false( ok )
+	assert.matches('argument.*without' , foo )
 
-function test_req_list( )
+	local ok, foo = validate( template, { arg2 = 1 } )
+	assert.is_true( ok )
 
-   local template = {
-      arg1 = { optional = true, requires = { 'arg2' } },
-      arg2 = { optional = true },
-   }
+     end)
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+    it( "req list", function ()
 
-   assert_true( ok )
+        local template = {
+	   arg1 = { optional = true, requires = { 'arg2' } },
+	   arg2 = { optional = true },
+	}
 
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_false( ok )
-   assert_match('argument.*without' , foo )
+	local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok )
+	assert.is_true( ok )
 
-end
+	local ok, foo = validate( template, { arg1 = 1 } )
+	assert.is_false( ok )
+	assert.matches('argument.*without' , foo )
 
-function test_req_both( )
+	local ok, foo = validate( template, { arg2 = 1 } )
+	assert.is_true( ok )
 
-   local template = {
-      arg1 = { optional = true, requires = 'arg2' },
-      arg2 = { optional = true, requires = 'arg1' },
-   }
+     end)
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+    it( "req both", function ()
 
-   assert_true( ok )
+        local template = {
+	   arg1 = { optional = true, requires = 'arg2' },
+	   arg2 = { optional = true, requires = 'arg1' },
+	}
 
-   local ok, foo = validate( template, { arg2 = 1 } )
+	local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
 
-   assert_false( ok )
-   assert_match('argument.*without' , foo )
+	assert.is_true( ok )
 
-   local ok, foo = validate( template, { arg1 = 1 } )
+	local ok, foo = validate( template, { arg2 = 1 } )
 
-   assert_false( ok )
-   assert_match('argument.*without' , foo )
+	assert.is_false( ok )
+	assert.matches('argument.*without' , foo )
 
-end
+	local ok, foo = validate( template, { arg1 = 1 } )
 
-function test_req_multiple( )
+	assert.is_false( ok )
+	assert.matches('argument.*without' , foo )
 
-   local template = {
-      arg1 = { optional = true },
-      arg2 = { optional = true, requires = { 'arg1', 'arg3' } },
-      arg3 = { optional = true }
-   }
+     end)
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1, arg3 = 1 } )
-   assert_true( ok )
+    it( "req multiple", function ()
 
-   local ok, foo = validate( template, { arg1 = 1, arg3 = 1 } )
-   assert_true( ok )
+        local template = {
+	   arg1 = { optional = true },
+	   arg2 = { optional = true, requires = { 'arg1', 'arg3' } },
+	   arg3 = { optional = true }
+	}
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
-   assert_false( ok )
-   assert_match('argument.*without' , foo )
+	local ok, foo = validate( template, { arg1 = 1, arg2 = 1, arg3 = 1 } )
+	assert.is_true( ok )
+
+	local ok, foo = validate( template, { arg1 = 1, arg3 = 1 } )
+	assert.is_true( ok )
+
+	local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+	assert.is_false( ok )
+	assert.matches('argument.*without' , foo )
 
 
-end
+     end)
+
+ end)
 

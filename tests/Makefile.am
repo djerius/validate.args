@@ -1,11 +1,32 @@
 include $(top_srcdir)/snippets/create_am_macros.mk
 
 # Test executables to be run
-TESTS			+= driver.lua
-TESTS_ENVIRONMENT	= \
-		LUA_PATH="@top_srcdir@/?.lua;@srcdir@/?.lua;$$LUA_PATH;;" \
-		$(LUA)
 
+if HAVE_TEST_DEPS
+TESTS                   += 			\
+			callback.lua		\
+			constraints.lua		\
+			defaults.lua		\
+			default_spec.lua	\
+			deffunc.lua		\
+			excludes.lua		\
+			inplace.lua		\
+			multiple.lua		\
+			mutate.lua		\
+			named.lua		\
+			name.lua		\
+			nested.lua		\
+			object.lua		\
+			ordered.lua		\
+			positional.lua		\
+			requires.lua		\
+			special.lua		\
+			vtypes.lua
+endif
+
+
+TEST_EXTENSIONS = .lua
+LUA_LOG_COMPILER=$(BUSTED) -o TAP -m '$(srcdir)/?.lua;$(top_srcdir)/?.lua;$$LUA_PATH;;'
 
 
 #-------------------------------------------------------------------
@@ -15,28 +36,10 @@ TESTS_ENVIRONMENT	= \
 BUILT_SOURCES           +=
 
 # extra files to add to the distribution
-EXTRA_DIST              +=		\
-			callback.lua	\
-			constraints.lua	\
-			deepcompare.lua	\
-			defaults.lua	\
-			default_spec.lua	\
-			deffunc.lua	\
-			driver.lua	\
-			excludes.lua	\
-			inplace.lua	\
-			multiple.lua	\
-			mutate.lua	\
-			named.lua	\
-			name.lua	\
-			nested.lua	\
-			object.lua	\
-			ordered.lua	\
-			positional.lua	\
-			requires.lua	\
-			special.lua	\
-			utils.lua	\
-			vtypes.lua
+EXTRA_DIST              +=			\
+			$(TESTS)		\
+			asserts.lua		\
+			setup.lua
 
 # Any files make built
 CLEANFILES              +=

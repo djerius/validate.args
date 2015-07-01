@@ -1,166 +1,186 @@
-module( ..., package.seeall )
-
 local va = require( 'validate.args' )
 
-setup = _G.setup
+require 'asserts'
+setup = require 'setup'
 
--- simple test of OO interface; most of the testing is done
--- via the procedural interface as that came first.
+describe( "object", function ()
 
-function test_multiple__required__not_specified ()
+    before_each( setup )
 
-   local template = { { allow_nil = true }, { optional = false } }
-   local ok, err = va:new():validate( template, nil )
+    -- simple test of OO interface; most of the testing is done
+    -- via the procedural interface as that came first.
 
-   assert_false( ok )
-   assert_match( 'arg#2: missing', err )
+    it( "multiple required not specified", function ()
 
-end
+       local template = { { allow_nil = true }, { optional = false } }
+       local ok, err = va:new():validate( template, nil )
 
-function test_multiple__required__not_specified__with_name ()
+       assert.is_false( ok )
+       assert.matches( 'arg#2: missing', err )
 
-   local template = { { allow_nil = true }, { name = 'arg2',
-					      optional = false } }
-   local ok, err = va:new():validate( template, nil )
+    end)
 
-   assert_false( ok )
-   assert_match( 'arg#2%(arg2%): missing', err )
+    it( "multiple required not specified with name", function ()
 
-end
+        local template = { { allow_nil = true }, { name = 'arg2',
+						   optional = false } }
+	local ok, err = va:new():validate( template, nil )
 
+	assert.is_false( ok )
+	assert.matches( 'arg#2%(arg2%): missing', err )
 
--- test options
-
-function test_bad_options ()
-
-   local obj = va:new()
-
-   assert_error( function ()
-		    obj.opts.DOES_NOT_EXIST = true
-		 end,
-		 "bad option assign" )
-
-   assert_error( function ()
-		    obj:setopts{ DOES_NOT_EXIST = true }
-		 end,
-		 "bad option set" )
-
-end
+     end)
 
 
-function test_cvs_pos_to_named ()
+    -- test options
 
-   local template = { {
-			 name = 'arg2',
-			 optional = false,
-			 not_nil = true,
-		      },
-		      {
-			 type = 'string',
+    it( "options don't exist", function ()
+
+        local obj = va:new()
+
+	assert.error_matches( function ()
+			     obj.opts.DOES_NOT_EXIST = true
+			  end,
+			 "unknown option" )
+
+	assert.error_matches( function ()
+			     obj:setopts{ DOES_NOT_EXIST = true }
+			  end,
+			 "unknown option" )
+
+     end)
+
+
+    it( "convert positional to named", function ()
+
+        local template = { {
+			      name = 'arg2',
+			      optional = false,
+			      not_nil = true,
+			   },
+			   {
+			      type = 'string',
+			   }
+			}
+	local obj = va:new()
+	obj.opts.named = true
+
+	local ok, opts = obj:validate( template, 32, 'foo' )
+
+	assert.is_true( ok )
+	assert.is.equal( 32, opts.arg2 )
+	assert.is.equal( 'foo', opts[2] )
+
+     end)
+
+    describe( "extra positional args", function ()
+
+        local template = { {}, {} }
+	local obj = va:new()
+	obj:setopts{ allow_extra = true }
+
+	it( "allow_extra = true", function ()
+	    local ok, a, b, c = obj:validate( template, 1, 2, 3)
+
+	    assert.is_true( ok )
+	    assert.is.equal( 1, a )
+	    assert.is.equal( 2, b )
+	    assert.is.equal( nil, c )
+
+	 end)
+
+
+	it( "allow_extra = true, pass_through = true ", function ()
+	    obj:setopts{ allow_extra = true,
+			 pass_through = true,
 		      }
-		   }
-   local obj = va:new()
-   obj.opts.named = true
 
-   local ok, opts = obj:validate( template, 32, 'foo' )
+	    local ok, a, b, c = obj:validate( template, 1, 2, 3)
 
-   assert_true( ok )
-   assert_equal( 32, opts.arg2 )
-   assert_equal( 'foo', opts[2] )
+	    assert.is_true( ok )
+	    assert.is.equal( 1, a )
+	    assert.is.equal( 2, b )
+	    assert.is.equal( 3, c )
+	 end)
 
-
-end
-
-function test_extra_pos_args ()
-
-   local template = { {}, {} }
-   local obj = va:new()
-   obj:setopts{ allow_extra = true }
-
-   local ok, a, b, c = obj:validate( template, 1, 2, 3)
-
-   assert_true( ok )
-   assert_equal( 1, a )
-   assert_equal( 2, b )
-   assert_equal( nil, c )
-
-   obj:setopts{ allow_extra = true,
-		pass_through = true,
-	     }
-
-   local ok, a, b, c = obj:validate( template, 1, 2, 3)
-
-   assert_true( ok )
-   assert_equal( 1, a )
-   assert_equal( 2, b )
-   assert_equal( 3, c )
-
-end
+     end)
 
 
-function test_constructor()
+    it( "constructor", function ()
 
-   va.opts{ allow_extra = true };
-   va.add_type( 'test', function () end )
-   local obj = va:new{ use_current_options = true };
+        va.opts{ allow_extra = true };
+	va.add_type( 'test', function () end )
 
-   assert_true( obj.opts.allow_extra, 'current options' )
+	local obj = va:new{ use_current_options = true };
+	assert.is_true( obj.opts.allow_extra, 'current options' )
 
-   local obj = va:new{ use_current_types = true };
+	local obj = va:new{ use_current_types = true };
+	assert.is_function( obj.types:validator('test'), 'current types' )
 
-   assert_function( obj.types:validator('test'), 'current types' )
+     end)
 
-end
+    -- test inheritance
 
--- test inheritance
+    describe( "level 0", function ()
 
-function test_level_0 ()
+        local vobj
 
-   local vobj
+        -- first make sure we know what the base value for our test
+        -- option is. currently there's no way to get this directly, so
+        -- create a new object and use it to find out what it is
 
-   -- first make sure we know what the base value for our test
-   -- option is. currently there's no way to get this directly, so
-   -- create a new object and use it to find out what it is
-   vobj = va:new()
+        vobj = va:new()
 
-   local base_val = vobj.opts.check_spec
+	local base_val = vobj.opts.check_spec
 
-   -- now change the default (not base) and make sure our object
-   -- doesn't track it.
-   va.opts{ check_spec = not base_val }
-   assert_equal( base_val, vobj.opts.check_spec, "child doesn't track default" )
+	-- now change the default (not base) and make sure our object
+	-- doesn't track it.
+	it( "child doesn't track default", function ()
+	    va.opts{ check_spec = not base_val }
+	    assert.is.equal( base_val, vobj.opts.check_spec )
+	 end)
 
-   -- now clone an object
-   local clone = vobj:new()
-   assert_equal( vobj.opts.check_spec, clone.opts.check_spec, 'clone, unchanged' )
+	local clone
 
-   -- change in value in original object should not affect the clone
-   vobj.opts.check_spec = not base_val
-   assert_not_equal( clone.opts.check_spec, vobj.opts.check_spec, "clone doesn't track parent" )
-   vobj.opts.check_spec = base_val
+	-- now clone an object
+	it( "clone, unchanged", function ()
+	    clone = vobj:new()
+	    assert.is.equal( vobj.opts.check_spec, clone.opts.check_spec )
+	 end)
 
-   -- change in value in clone should not affect the parent
-   clone.opts.check_spec = not base_val
-   assert_equal( vobj.opts.check_spec, base_val, "parent doesn't track clone" )
+	-- change in value in original object should not affect the clone
+	it( "clone doesn't track parent", function ()
+	    vobj.opts.check_spec = not base_val
+	    assert.is_not.equal( clone.opts.check_spec, vobj.opts.check_spec )
+	    vobj.opts.check_spec = base_val
+	 end)
 
-end
+	-- change in value in clone should not affect the parent
+	it( "parent doesn't track clone", function ()
+	    clone.opts.check_spec = not base_val
+	    assert.is.equal( vobj.opts.check_spec, base_val)
+	 end)
+
+     end)
 
 
-function test_options_udata( )
+    it( "options udata", function ()
 
-   local vobj = va:new()
-   local udata = {}
+        local vobj = va:new()
+	local udata = {}
 
-   vobj:setopts{ udata = udata }
+	vobj:setopts{ udata = udata }
 
-   local ok, val = vobj:validate( { { postcall = function( arg, vfarg )
-						  vfarg.va:getopt('udata').called = true
-					       end
-				 }
-			       }, 1 )
+	local ok, val = vobj:validate( { { postcall = function( arg, vfarg )
+							 vfarg.va:getopt('udata').called = true
+						      end
+					}
+				      }, 1 )
 
-   assert_true( ok, val )
-   assert_equal( val, 1 )
-   assert_true( udata.called )
+	assert.is_true( ok, val )
+	assert.is.equal( val, 1 )
+	assert.is_true( udata.called )
 
-end
+     end)
+
+ end)

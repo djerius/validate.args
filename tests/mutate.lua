@@ -1,111 +1,118 @@
-module( ..., package.seeall )
+local va = require( 'validate.args' )
+local validate = va.validate
+local validate_opts = va.validate_opts
+local validate_tbl = va.validate_tbl
 
-va = require( 'validate.args' )
-validate = va.validate
-validate_opts = va.validate_opts
-validate_tbl = va.validate_tbl
+require 'asserts'
 
-setup = _G.setup
+setup = require 'setup'
 
-function test_table_mutation_noargs( )
-
-   local template =  {
-			 vtable = {
-			    arg1 = { enum = { 'a', 'b' } },
-			    arg2 = { type = 'number' },
-			 }
-		   }
+describe( "mutate", function ()
 
 
-   local ok, foo = validate( { function () return true, template end },
-			    {
-			       arg1 = 'a',
-			       arg2 = 3
-			    }
-			  )
+    before_each( setup )
 
-   assert_true( ok, foo )
-   assert_equal( 'a', foo.arg1 )
-   assert_equal( 3, foo.arg2 )
+    it( "table mutation noargs", function ( )
 
-end
-
-function test_positional_mutation_false( )
-
-   local ok, foo = validate(
-				  { function ()
-				       return false, "no template"
-				    end
-				 },
-				  1
-			       )
-
-   assert_false( ok, foo )
-   assert_match( foo, "no template" )
-
-end
-
-function test_table_mutation_false( )
-
-   local ok, foo = validate_tbl(
-				  {
-				     a = function ()
-					    return false, "no template"
-					 end
-				  },
-				  { a = 2 }
-			       )
-
-   assert_false( ok, foo )
-   assert_match( foo, "no template" )
-
-end
-
-function test_table_mutation_args( )
-
-   local spec = function ( arg )
-		   return true, { not_nil = true,
-				  type = type(arg) == 'function'
-				               and 'string' or type(arg)
-			       }
-		end
+        local template =  {
+	   vtable = {
+	      arg1 = { enum = { 'a', 'b' } },
+	      arg2 = { type = 'number' },
+	   }
+	}
 
 
-   local ok, foo = validate( { spec }, 3 )
-   assert_true( ok, foo )
-   assert_equal( 3, foo )
+	local ok, rv = validate( { function () return true, template end },
+				{
+				   arg1 = 'a',
+				   arg2 = 3
+				}
+			     )
 
-   local ok, foo = validate( { spec } )
-   assert_false( ok )
+	assert.is_true( ok )
+	assert.are.equal( 'a', rv.arg1 )
+	assert.are.equal( 3, rv.arg2 )
 
-   local ok, foo = validate( { spec }, function () end )
-   assert_false( ok )
+     end)
 
-end
+    it( "positional mutation false", function ( )
 
-function test_nested_mutation( )
+        local ok, rv = validate(
+				{ function ()
+				     return false, "no template"
+				  end
+			       },
+				1
+			     )
 
-   local template =  {
-			 vtable = {
-			    arg1 = { enum = { 'a', 'b' } },
-			    arg2 = { type = 'number' },
-			    arg3 = function( arg) return true, {} end,
-			 }
-		   }
+	assert.is_false( ok )
+	assert.matches( rv, "no template" )
+
+     end)
+
+    it( "table mutation false", function ()
+
+        local ok, rv = validate_tbl(
+				    {
+				       a = function ()
+					      return false, "no template"
+					   end
+				    },
+				    { a = 2 }
+				 )
+
+	assert.is_false( ok )
+	assert.matches( rv, "no template" )
+
+     end)
+
+    it ( "table mutation args", function ()
+
+        local spec = function ( arg )
+			return true, { not_nil = true,
+				       type = type(arg) == 'function'
+				       and 'string' or type(arg)
+				 }
+		     end
 
 
-   local ok, foo = validate( { template } ,
-			    {
-			       arg1 = 'a',
-			       arg2 = 3,
-			       arg3 = 2
-			    }
-			  )
+	local ok, rv = validate( { spec }, 3 )
+	assert.is_true( ok )
+	assert.are.equal( 3, rv )
 
-   assert_true( ok )
-   assert_equal( 'a', foo.arg1 )
-   assert_equal( 3, foo.arg2 )
-   assert_equal( 2, foo.arg3 )
+	local ok, rv = validate( { spec } )
+	assert.is_false( ok )
 
-end
+	local ok, rv = validate( { spec }, function () end )
+	assert.is_false( ok )
+
+     end)
+
+    it( "nested mutation", function ( )
+
+        local template =  {
+	   vtable = {
+	      arg1 = { enum = { 'a', 'b' } },
+	      arg2 = { type = 'number' },
+	      arg3 = function( arg) return true, {} end,
+	   }
+	}
+
+
+	local ok, rv = validate( { template } ,
+				{
+				   arg1 = 'a',
+				   arg2 = 3,
+				   arg3 = 2
+				}
+			     )
+
+	assert.is_true( ok )
+	assert.are.equal( 'a', rv.arg1 )
+	assert.are.equal( 3, rv.arg2 )
+	assert.are.equal( 2, rv.arg3 )
+
+     end)
+
+end)
 

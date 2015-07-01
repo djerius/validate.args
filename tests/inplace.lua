@@ -1,135 +1,155 @@
-module( ..., package.seeall )
-
-require 'string'
-
 local validate = require('validate.args')
 local inplace = require( 'validate.inplace' )
 
-function test_simple ()
+require 'asserts'
+setup = require 'setup'
 
-   local spec = {
-      foo = { type = 'posint' },
-   }
+describe( "simple", function ()
 
-   local va = validate:new()
+    before_each( setup )
 
-   local obj = inplace:new( 'test', spec, va )
+    local spec = {
+       foo = { type = 'posint' },
+    }
 
-   local test = obj:proxy()
+    local va = validate:new()
+    local obj = inplace:new( 'test', spec, va )
+    local test = obj:proxy()
 
-   test.foo = 3
+    test.foo = 3
 
-   assert_equal( 3, test.foo, "assign" )
+    assert.is.equal( 3, test.foo )
 
-   copy = obj:copy()
+    copy = obj:copy()
 
-   -- make sure this is a clean table
-   assert_nil( getmetatable( copy ))
-   assert_equal( 3, rawget( copy, 'foo'), "copy" )
+    -- make sure this is a clean table
+    assert.is.equal( nil, getmetatable( copy ))
+    assert.is.equal( 3, rawget( copy, 'foo') )
 
-   -- try to do something wrong
-   local ok, error = pcall( function () test.foo = -3 end )
+    -- try to do something wrong
+    local ok, error = pcall( function () test.foo = -3 end )
 
-   assert_false( ok, "bad type" )
-   assert_match( 'test.foo:.*posint', error, error )
+    assert.is_false( ok, "bad type" )
+    assert.matches( 'test.foo:.*posint', error )
 
+ end)
 
-end
+describe( "vtable", function ()
 
-function test_vtable ()
+    before_each( setup )
 
-   local spec = {
-      foo = { type = 'posint', default = 9 },
-      goo = { vtable = {  a = { type = 'posint', default = 33 },
-			  b = { type = 'posint', default = 44 }
-		       },
-	   },
-   }
+    local spec = {
+       foo = { type = 'posint', default = 9 },
+       goo = { vtable = {  a = { type = 'posint', default = 33 },
+			   b = { type = 'posint', default = 44 }
+			},
+	    },
+    }
 
-   local va = validate:new()
+    local va = validate:new()
 
-   local obj = inplace:new( 'test', spec, va )
+    local obj = inplace:new( 'test', spec, va )
 
-   local test = obj:proxy()
+    local test = obj:proxy()
 
-   assert_equal( 9,  test.foo, "default" )
-   assert_equal( 33, test.goo.a, "default" )
-   assert_equal( 44, test.goo.b, "default" )
-
-
-   test.foo = 3
-   assert_equal( 3, test.foo, "assign" )
-
-   test.goo.a = 4
-   assert_equal( 4, test.goo.a, "assign" )
-
-   test.goo.b = 8
-   assert_equal( 8, test.goo.b, "assign" )
+    it( "default values", function ()
+	assert.is.equal( 9,  test.foo )
+	assert.is.equal( 33, test.goo.a )
+	assert.is.equal( 44, test.goo.b )
+     end)
 
 
-   -- try assigning a table
-   -- this should reset things to default
-   test.goo = { }
+    it( "assign values", function ()
+	test.foo = 3
+	assert.is.equal( 3, test.foo )
 
-   assert_equal( 33, test.goo.a, 'table reset' )
-   assert_equal( 44, test.goo.b, 'table reset' )
+	test.goo.a = 4
+	assert.is.equal( 4, test.goo.a )
 
-   -- set a ; b should get reset to default
-   test.goo = {  a = 88 }
+	test.goo.b = 8
+	assert.is.equal( 8, test.goo.b )
+     end)
 
-   assert_equal( 88, test.goo.a, 'table reset' )
-   assert_equal( 44, test.goo.b, 'table reset' )
+    -- try assigning a table
+    -- this should reset things to default
+    it ( "reset table", function ()
+	 test.goo = { }
 
-   -- try to do things wrong
-   local ok, error = pcall( function () test.goo.b = -3 end )
+	 assert.is.equal( 33, test.goo.a )
+	 assert.is.equal( 44, test.goo.b )
+      end)
 
-   assert_false( ok, "bad type" )
-   assert_match( 'test.goo.b:.*posint', error, error )
+    -- set a ; b should get reset to default
+    it ( "reset table with values", function ()
+	 test.goo = {  a = 88 }
+	 assert.is.equal( 88, test.goo.a )
+	 assert.is.equal( 44, test.goo.b )
+      end)
 
-
-   local ok, error = pcall( function () test.goo.c = -3 end )
-   assert_false( ok, "unknown element" )
-   assert_match( 'test.goo.c:.*unknown', error, error )
-
-   local ok, error = pcall( function () test.goo = -3 end )
-   assert_false( ok, "bad table" )
-   assert_match( 'test.goo:.*incorrect type', error, error )
-
-
-
-end
-
-
-function test_copy ()
+    -- try to do things wrong
+    it( "fail: negative int", function ()
+	local ok, error = pcall( function () test.goo.b = -3 end )
+	assert.is_false( ok )
+	assert.matches( 'test.goo.b:.*posint', error )
+     end)
 
 
-   local spec = {
-      foo = { type = 'posint', default = 9 },
-      goo = { vtable = {  a = { type = 'posint', default = 33 },
-			  b = { type = 'posint', default = 44 }
-		       },
-	   },
-   }
+    it( "fail: unknown attribute", function ()
+	local ok, error = pcall( function () test.goo.c = -3 end )
+	assert.is_false( ok )
+	assert.matches( 'test.goo.c:.*unknown', error )
+     end)
 
-   local va = validate:new()
+    it( "fail: wring type", function ()
+	local ok, error = pcall( function () test.goo = -3 end )
+	assert.is_false( ok )
+	assert.matches( 'test.goo:.*incorrect type', error )
+     end)
 
-   local obj = inplace:new( 'test', spec, va )
 
-   local copy = obj:copy()
+ end)
 
-   assert_nil( getmetatable(copy), "no test metatable" )
-   assert_nil( getmetatable(copy.goo), "no test.goo metatable" )
 
-   assert_equal( 9, copy.foo, "copy.foo" )
-   assert_equal( 33, copy.goo.a, "copy.goo.a" )
-   assert_equal( 44, copy.goo.b, "copy.goo.b" )
+describe( "copy", function ()
 
-   local test = obj:proxy()
-   test.goo.b = 99
-   assert_equal( 99, test.goo.b )
-   assert_equal( 44, copy.goo.b, "copy.goo.b" )
+    before_each( setup )
 
-   copy = obj:copy()
-   assert_equal( 99, copy.goo.b )
+    local spec = {
+       foo = { type = 'posint', default = 9 },
+       goo = { vtable = {  a = { type = 'posint', default = 33 },
+			   b = { type = 'posint', default = 44 }
+			},
+	    },
+    }
 
-end
+    local va = validate:new()
+
+    local obj = inplace:new( 'test', spec, va )
+
+    local copy = obj:copy()
+
+    it( "assure no metatables", function ()
+        assert.is.equal( nil, getmetatable(copy) )
+	assert.is.equal( nil, getmetatable(copy.goo) )
+     end)
+
+    it( "defaults", function ()
+        assert.is.equal( 9, copy.foo )
+	assert.is.equal( 33, copy.goo.a )
+	assert.is.equal( 44, copy.goo.b )
+     end)
+
+
+    it( "copy is independent of proxy", function ()
+	local test = obj:proxy()
+	test.goo.b = 99
+	assert.is.equal( 99, test.goo.b )
+	assert.is.equal( 44, copy.goo.b )
+
+	copy = obj:copy()
+	assert.is.equal( 99, copy.goo.b )
+     end)
+
+
+ end)
+

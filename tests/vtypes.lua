@@ -1,13 +1,6 @@
-module( ..., package.seeall )
+local va = require('validate.args')
 
-require('deepcompare')
-
-va = require('validate.args')
-
-setup = _G.setup
-
-require 'string'
-require 'table'
+setup = require 'setup'
 
 local success = {
    ['number']   = 33.2,
@@ -63,271 +56,275 @@ function populate( success, inputs )
 	 test_name = 'test_failure_' .. test_name
       end
 
-      _M[test_name] =
-	 function( )
-	    local template = { { type = t } }
+      it( test_name, function ()
 
-	    local ok, foo = va.validate_opts( { error_on_bad_spec = false},
-					      template, v )
+	  local template = { { type = t } }
 
-	    if ( success ) then
-	       assert_true( ok, foo )
+	  local ok, rv = va.validate_opts( { error_on_bad_spec = false},
+					  template, v )
 
-	       if type(v) == 'function' then
-		  assert_function( foo )
-		  assert_true( foo == v )
-	       elseif type(v) == 'table' then
-		  assert_table( foo )
-		  assert_true( deepcompare( v, foo ) )
-	       else
-		  assert_equal( v, foo, foo )
-	       end
-	    else
-	       assert_false( ok, test_name )
-	    end
-	 end
+	  if ( success ) then
+	     assert.is_true( ok )
+
+	     if type(v) == 'function' then
+		assert.is_function( rv )
+		assert.is.equal( v, rv )
+	     elseif type(v) == 'table' then
+		assert.is_table( rv )
+		assert.is_same( v, rv )
+	     else
+		assert.is.equal( v, rv )
+	     end
+	  else
+	     assert.is_false( ok )
+	  end
+       end)
    end
 
 end
 
-populate( true, success )
-populate( false, failure )
+describe( "vtypes", function ()
+
+    before_each( setup )
+
+    populate( true, success )
+
+    populate( false, failure )
 
 
-function test_add_type()
+    it( "add type", function ()
 
-   va.add_type( 'mytype', function( arg ) return arg == 'success', 'ubet' end )
+       va.add_type( 'mytype', function( arg ) return arg == 'success', 'ubet' end )
 
-   local template = { { type = 'mytype' } }
-   local ok, foo = va.validate( template, 'success' )
+       local template = { { type = 'mytype' } }
+       local ok, rv = va.validate( template, 'success' )
 
-   if ( ok ) then
-      assert_true( ok, 'validate' )
-      assert_equal( 'ubet', foo )
-   else
-      assert_false( ok, 'validate' )
-   end
+       if ( ok ) then
+	  assert.is_true( ok )
+	  assert.is.equal( 'ubet', rv )
+       else
+	  assert.is_false( ok )
+       end
 
-end
+    end)
 
-function test_heterogeneous()
+    it( "heterogeneous", function ()
 
-   local template = { { type = { 'posint',
-				 enum = { enum = { 'a', 'b', 'c' } }
-			      },
-		  } }
-
-   local ok, foo = va.validate( template, 1 )
-
-   assert_true( ok, foo )
-
-
-end
-
-function test_nested1()
-
-   local template = { { type = { 'posint',
-				 validate = {
-				    vtable = {
-				       data = {
-					  type = { 'string', 'posint' },
-				       },
-				    },
-				 },
-			      },
-		  } }
-
-   local ok, foo = va.validate( template, 1 )
-   assert_true( ok, foo )
-   assert_equal( 1, foo )
-
-   local ok, foo = va.validate( template, { data = 3 } )
-   assert_true( ok, foo )
-   assert_equal( 3, foo.data )
-
-   local ok, foo = va.validate( template, { data = 'frank' } )
-   assert_true( ok, foo )
-   assert_equal( 'frank', foo.data )
-
-
-end
-
-
-function test_nested2()
-
-   local template = { { type = { 'posint',
-				 validate = {
-				    vtable = {
-				       data = {
-					  type = {
-					     'string',
-					     'posint',
-					     table = {
-						vtable = {
-						   snack = {
-						      type = 'posint'
-						   }
-						}
-					     }
-					  },
-				       },
-				    },
-				 },
-			      },
-		  } }
-
-   local ok, foo = va.validate( template, 1 )
-   assert_true( ok, foo )
-   assert_equal( 1, foo )
-
-   local ok, foo = va.validate( template, { data = 3 } )
-   assert_true( ok, foo )
-   assert_equal( 3, foo.data )
-
-   local ok, foo = va.validate( template, { data = 'frank' } )
-   assert_true( ok, foo )
-   assert_equal( 'frank', foo.data )
-
-   local ok, foo = va.validate( template, { data = { snack = 3 } } )
-   assert_true( ok, foo )
-   assert_equal( 3, foo.data.snack )
-
-
-end
-
-function test_nested3()
-
-   local template = { { type = { 'posint',
-				 validate = {
-				    vtable = {
-				       data = {
-					  type = {
-					     'string',
-					     'posint',
-					     table = {
-						vtable = {
-						   snack = {
-						      type = { 'posint',
-							       'string'
-							    },
-						   }
-						}
-					     }
-					  },
-				       },
-				    },
-				 },
-			      },
-		  } }
-
-   local ok, foo = va.validate( template, 1 )
-   assert_true( ok, foo )
-   assert_equal( 1, foo )
-
-   local ok, foo = va.validate( template, { data = 3 } )
-   assert_true( ok, foo )
-   assert_equal( 3, foo.data )
-
-   local ok, foo = va.validate( template, { data = 'frank' } )
-   assert_true( ok, foo )
-   assert_equal( 'frank', foo.data )
-
-   local ok, foo = va.validate( template, { data = { snack = 3 } } )
-   assert_true( ok, foo )
-   assert_equal( 3, foo.data.snack )
-
-   local ok, foo = va.validate( template, { data = { snack = 'foo' } } )
-   assert_true( ok, foo )
-   assert_equal( 'foo', foo.data.snack )
-
-
-end
-
-function test_nested22()
-   local specs = {
-
-      spectrum = {
-
-	 multiple = true,
-
-	 type = {
-
-	    picket = {
-	       vtable = {
-		  type = { enum = { 'picket' } },
-		  data = {
-		     multiple = true,
-		     type = {
-			'posint',
-			energy_flux = { 
-			   vtable = { { type = 'posnum' },
-				      { type = 'zposnum' },
-				   },
-			}
-		     } 
-		  },
-	       },
-	    },
-	 },
-      },
-
-   }
-
-   local ok, foo = va.validate( specs, 
-				{ spectrum = {
-				     { type = 'picket',
-				       data = { 3,
-						{ 1, 2 },
-						{ 3, 4 },
-					     },
-				    }
+       local template = { { type = { 'posint',
+				     enum = { enum = { 'a', 'b', 'c' } }
 				  },
-			       }
-			     )
+		      } }
 
-   assert_true( ok, foo )
+       local ok, rv = va.validate( template, 1 )
 
-
-
-end
-
-function test_nested33()
-   local specs = {
-
-      spectrum = {
-
-	 type = {
-
-	    picket = {
-	       vtable = {
-		  type = { enum = { 'picket' } },
-		  data = {
-		     type = {
-			'posint',
-			energy_flux = { 
-			   vtable = { { type = 'posnum' },
-				      { type = 'zposnum' },
-				   },
-			}
-		     } 
-		  },
-	       },
-	    },
-	 },
-      },
-
-   }
-
-   local ok, foo = va.validate( specs, 
-				{ spectrum = 
-				     { type = 'picket',
-				       data = { 1, 2 },
-				    }
-			       }
-			     )
-
-   assert_true( ok, foo )
+       assert.is_true( ok )
 
 
+    end)
 
-end
+    it( "nested1", function ()
+
+       local template = { { type = { 'posint',
+				     validate = {
+					vtable = {
+					   data = {
+					      type = { 'string', 'posint' },
+					   },
+					},
+				     },
+				  },
+		      } }
+
+       local ok, rv = va.validate( template, 1 )
+       assert.is_true( ok )
+       assert.is.equal( 1, rv )
+
+       local ok, rv = va.validate( template, { data = 3 } )
+       assert.is_true( ok )
+       assert.is.equal( 3, rv.data )
+
+       local ok, rv = va.validate( template, { data = 'frank' } )
+       assert.is_true( ok )
+       assert.is.equal( 'frank', rv.data )
+
+
+    end)
+
+
+    it( "nested2", function ()
+
+       local template = { { type = { 'posint',
+				     validate = {
+					vtable = {
+					   data = {
+					      type = {
+						 'string',
+						 'posint',
+						 table = {
+						    vtable = {
+						       snack = {
+							  type = 'posint'
+						       }
+						    }
+						 }
+					      },
+					   },
+					},
+				     },
+				  },
+		      } }
+
+       local ok, rv = va.validate( template, 1 )
+       assert.is_true( ok )
+       assert.is.equal( 1, rv )
+
+       local ok, rv = va.validate( template, { data = 3 } )
+       assert.is_true( ok )
+       assert.is.equal( 3, rv.data )
+
+       local ok, rv = va.validate( template, { data = 'frank' } )
+       assert.is_true( ok )
+       assert.is.equal( 'frank', rv.data )
+
+       local ok, rv = va.validate( template, { data = { snack = 3 } } )
+       assert.is_true( ok )
+       assert.is.equal( 3, rv.data.snack )
+
+
+    end)
+
+    it( "nested3", function ()
+
+       local template = { { type = { 'posint',
+				     validate = {
+					vtable = {
+					   data = {
+					      type = {
+						 'string',
+						 'posint',
+						 table = {
+						    vtable = {
+						       snack = {
+							  type = { 'posint',
+								   'string'
+								},
+						       }
+						    }
+						 }
+					      },
+					   },
+					},
+				     },
+				  },
+		      } }
+
+       local ok, rv = va.validate( template, 1 )
+       assert.is_true( ok )
+       assert.is.equal( 1, rv )
+
+       local ok, rv = va.validate( template, { data = 3 } )
+       assert.is_true( ok )
+       assert.is.equal( 3, rv.data )
+
+       local ok, rv = va.validate( template, { data = 'frank' } )
+       assert.is_true( ok )
+       assert.is.equal( 'frank', rv.data )
+
+       local ok, rv = va.validate( template, { data = { snack = 3 } } )
+       assert.is_true( ok )
+       assert.is.equal( 3, rv.data.snack )
+
+       local ok, rv = va.validate( template, { data = { snack = 'rv' } } )
+       assert.is_true( ok )
+       assert.is.equal( 'rv', rv.data.snack )
+
+
+    end)
+
+    it( "nested22", function ()
+       local specs = {
+
+	  spectrum = {
+
+	     multiple = true,
+
+	     type = {
+
+		picket = {
+		   vtable = {
+		      type = { enum = { 'picket' } },
+		      data = {
+			 multiple = true,
+			 type = {
+			    'posint',
+			    energy_flux = {
+			       vtable = { { type = 'posnum' },
+					  { type = 'zposnum' },
+				       },
+			    }
+			 }
+		      },
+		   },
+		},
+	     },
+	  },
+
+       }
+
+       local ok, rv = va.validate( specs,
+				    { spectrum = {
+					 { type = 'picket',
+					   data = { 3,
+						    { 1, 2 },
+						    { 3, 4 },
+						 },
+					}
+				      },
+				   }
+				 )
+
+       assert.is_true( ok )
+
+
+
+    end)
+
+    it( "nested33", function ()
+       local specs = {
+
+	  spectrum = {
+
+	     type = {
+
+		picket = {
+		   vtable = {
+		      type = { enum = { 'picket' } },
+		      data = {
+			 type = {
+			    'posint',
+			    energy_flux = {
+			       vtable = { { type = 'posnum' },
+					  { type = 'zposnum' },
+				       },
+			    }
+			 }
+		      },
+		   },
+		},
+	     },
+	  },
+
+       }
+
+       local ok, rv = va.validate( specs,
+				    { spectrum =
+					 { type = 'picket',
+					   data = { 1, 2 },
+					}
+				   }
+				 )
+
+       assert.is_true( ok )
+
+    end)
+end)

@@ -1,199 +1,209 @@
-module( ..., package.seeall )
-
 local va = require( 'validate.args' )
 local validate, validate_opts = va.validate, va.validate_opts
 
-setup = _G.setup
+setup = require 'setup'
+require 'asserts'
 
-function test_template_is_a_table ()
+describe( "positional", function ()
 
-   local ok, err = validate( 'x', 'x' )
+    before_each( setup )
 
-   assert_false( ok )
-   assert_match( 'expected table', err )
+    it( "template is a table", function ()
 
-end
+        local ok, err = validate( 'x', 'x' )
 
-function test_optional__but_specified ()
+	assert.is_false( ok )
+	assert.matches( 'expected table', err )
 
-   local template = { { optional = true } }
-   local ok, foo = validate( template, 'x' )
+     end)
 
-   assert_true( ok, foo )
-   assert_equal( 'x', foo )
+    it( "optional but specified", function ()
 
-end
+        local template = { { optional = true } }
+	local ok, rv = validate( template, 'x' )
 
-function test_optional__not_specified ()
+	assert.is_true( ok )
+	assert.is.equal( 'x', rv )
 
-   local template = { { optional = true } }
-   local ok, foo = validate( template )
+     end)
 
-   assert_true( ok, foo )
-   assert_equal( nil, foo )
+    it( "optional not specified", function ()
 
-end
+        local template = { { optional = true } }
+	local ok, rv = validate( template )
 
+	assert.is_true( ok )
+	assert.is.equal( nil, rv )
 
-function test_default__not_specified ()
+     end)
 
-   local template = { { default = 'foo' } }
-   local ok, foo = validate( template )
+    it( "default not specified", function ()
 
-   assert_true( ok, foo )
-   assert_equal( 'foo', foo )
+        local template = { { default = 'foo' } }
+	local ok, rv = validate( template )
 
-end
+	assert.is_true( ok )
+	assert.is.equal( 'foo', rv )
 
-function test_optional__specified_as_nil ()
+     end)
 
-   local template = { { default = 'foo' }, { default = 'bar' } }
-   local ok, foo, bar = validate( template )
+    it( "optional specified as nil", function ()
 
-   assert_true( ok, foo )
-   assert_equal( 'foo', foo, ': foo' )
-   assert_equal( 'bar', bar, ': bar' )
+        local template = { { default = 'foo' }, { default = 'bar' } }
+	local ok, rv, bar = validate( template )
 
-end
+	assert.is_true( ok )
+	assert.is.equal( 'foo', rv )
+	assert.is.equal( 'bar', bar )
 
-function test_required__specified_as_nil ()
+     end)
 
-   local template = { { allow_nil = true }, { allow_nil = true } }
-   local ok, foo, bar = validate( template, nil, nil )
+    describe( "required specified as nil", function ()
 
-   assert_true( ok, foo )
-   assert_equal( nil, foo, ': foo' )
-   assert_equal( nil, bar, ': bar' )
+        local template = { { allow_nil = true }, { allow_nil = true } }
 
+	it( "nil, nil", function ()
+	    local ok, rv, bar = validate( template, nil, nil )
 
-   ok, foo, bar = validate( template, nil, 'x' )
+	    assert.is_true( ok )
+	    assert.is.equal( nil, rv )
+	    assert.is.equal( nil, bar )
+	 end)
 
-   assert_true( ok, foo )
-   assert_equal( nil, foo, ': foo 2' )
-   assert_equal( 'x', bar, ': bar 2' )
+	it( "nil, value", function ()
+  	    local ok, rv, bar = validate( template, nil, 'x' )
 
-end
+	    assert.is_true( ok )
+	    assert.is.equal( nil, rv )
+	    assert.is.equal( 'x', bar )
 
-function test_multiple__required__not_specified ()
+	 end)
 
-   local template = { { allow_nil = true }, { allow_nil = true } }
-   local ok, err = validate( template, nil )
+     end)
 
-   assert_false( ok )
-   assert_match( 'arg#2: missing', err )
+    it( "multiple required not specified", function ()
 
-end
+        local template = { { allow_nil = true }, { allow_nil = true } }
+	local ok, err = validate( template, nil )
 
-function test_multiple__required__not_specified__with_name ()
+	assert.is_false( ok )
+	assert.matches( 'arg#2: missing', err )
 
-   local template = { { allow_nil = true }, { name = 'arg2', allow_nil = true } }
-   local ok, err = validate( template, nil )
+     end)
 
-   assert_false( ok )
-   assert_match( 'arg#2%(arg2%): missing', err )
+    it( "multiple required not specified with name", function ()
 
-end
+        local template = { { allow_nil = true }, { name = 'arg2', allow_nil = true } }
+	local ok, err = validate( template, nil )
 
+	assert.is_false( ok )
+	assert.matches( 'arg#2%(arg2%): missing', err )
 
+     end)
 
-function test_required__not_nil__specified_as_nil ()
+    it( "required not nil specified as nil", function ()
 
-   local template = { {
-			 name = 'arg2',
-			 optional = false,
-			 not_nil = true,
-		      }
-		   }
-   local ok, err = validate( template, nil )
+        local template = { {
+			      name = 'arg2',
+			      optional = false,
+			      not_nil = true,
+			   }
+			}
+	local ok, err = validate( template, nil )
 
-   assert_false( ok )
-   assert_match( 'arg#1.*not be nil', err )
+	assert.is_false( ok )
+	assert.matches( 'arg#1.*not be nil', err )
 
-end
+     end)
 
 
-function test_too_many ()
+    it( "too many", function ()
 
-   local template = { { allow_nil = true }, { allow_nil = true } }
-   local ok, err = validate( template, nil, nil, nil )
+        local template = { { allow_nil = true }, { allow_nil = true } }
+	local ok, err = validate( template, nil, nil, nil )
 
-   assert_false( ok )
-   assert_match( 'too many.*argument', err )
+	assert.is_false( ok )
+	assert.matches( 'too many.*argument', err )
 
-end
+     end)
 
-function test_non_integer_entries ()
+    it( "non integer entries", function ()
 
-   local template = { { allow_nil = true }, { allow_nil =true }, frank = 3 }
-   local ok, err = validate( template, nil, nil )
+        local template = { { allow_nil = true }, { allow_nil =true }, frank = 3 }
+	local ok, err = validate( template, nil, nil )
 
-   assert_false( ok )
-   assert_match( 'extra elements', err )
+	assert.is_false( ok )
+	assert.matches( 'extra elements', err )
 
-end
+     end)
 
-function test_pos_named_not_cvtd ()
+    it( "pos named not cvtd", function ()
 
+        local template = { {
+			      name = 'arg1',
+			      optional = false,
+			      not_nil = true,
+			   },
+			   {
+			      type = 'string',
+			   }
+			}
+	local ok, arg1, arg2 = validate( template, 32, 'foo' )
 
-   local template = { {
-			 name = 'arg1',
-			 optional = false,
-			 not_nil = true,
-		      },
-		      {
-			 type = 'string',
-		      }
-		   }
-   local ok, arg1, arg2 = validate( template, 32, 'foo' )
+	assert.is_true( ok )
+	assert.is.equal( 32, arg1 )
+	assert.is.equal( 'foo', arg2 )
 
-   assert_true( ok, arg1 )
-   assert_equal( 32, arg1 )
-   assert_equal( 'foo', arg2 )
 
+     end)
 
-end
+    it( "convert positional to named", function ()
 
-function test_cvs_pos_to_named ()
+        local template = { {
+			      name = 'arg2',
+			      optional = false,
+			      not_nil = true,
+			   },
+			   {
+			      type = 'string',
+			   }
+			}
+	local ok, opts = validate_opts( { named = true }, template, 32, 'foo' )
 
+	assert.is_true( ok, opts )
+	assert.is.equal( 32, opts.arg2 )
+	assert.is.equal( 'foo', opts[2] )
 
-   local template = { {
-			 name = 'arg2',
-			 optional = false,
-			 not_nil = true,
-		      },
-		      {
-			 type = 'string',
-		      }
-		   }
-   local ok, opts = validate_opts( { named = true }, template, 32, 'foo' )
 
-   assert_true( ok, opts )
-   assert_equal( 32, opts.arg2 )
-   assert_equal( 'foo', opts[2] )
+     end)
 
+    describe( "extra positional args", function ()
 
-end
+        local template = { {}, {} }
 
-function test_extra_pos_args ()
+	it( "allow_extra = true", function ()
+            local ok, a, b, c = validate_opts( { allow_extra = true }, template,
+					      1, 2, 3)
 
-   local template = { {}, {} }
+	    assert.is_true( ok, a )
+	    assert.is.equal( 1, a )
+	    assert.is.equal( 2, b )
+	    assert.is.equal( nil, c )
+	 end)
 
-   local ok, a, b, c = validate_opts( { allow_extra = true }, template,
-				  1, 2, 3)
+	it( "allow_extra = true, pass_through = true ", function ()
+            local ok, a, b, c = validate_opts( { allow_extra = true,
+						 pass_through = true,
+					      }, template,
+					      1, 2, 3)
 
-   assert_true( ok, a )
-   assert_equal( 1, a )
-   assert_equal( 2, b )
-   assert_equal( nil, c )
+	    assert.is_true( ok, a )
+	    assert.is.equal( 1, a )
+	    assert.is.equal( 2, b )
+	    assert.is.equal( 3, c )
 
-   local ok, a, b, c = validate_opts( { allow_extra = true,
-					pass_through = true,
-				     }, template,
-				  1, 2, 3)
+	 end)
 
-   assert_true( ok, a )
-   assert_equal( 1, a )
-   assert_equal( 2, b )
-   assert_equal( 3, c )
+     end)
 
-end
+ end)

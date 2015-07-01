@@ -1,87 +1,130 @@
-module( ..., package.seeall )
+local validate = require( 'validate.args' ).validate
 
-validate = require( 'validate.args' ).validate
+require 'asserts'
 
-function test_exclude_scalar( )
+local setup = require 'setup'
 
-   local template = {
+describe( "scalar", function ()
+
+    before_each( setup )
+
+    local template = {
       arg1 = { optional = true, excludes = 'arg2' },
       arg2 = { optional = true },
    }
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+    it( "arg1 and arg2: fail", function ()
+        local ok, rv = validate( template, { arg1 = 1, arg2 = 1 } )
 
-   assert_false( ok )
-   assert_match('argument.*and' , foo )
+	assert.is_false( ok )
+	assert.matches( "arg[12]: can't have both arguments 'arg[12]' and 'arg[12]'", rv )
+     end)
 
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_true( ok )
+    it( "arg1: pass", function ()
+        local ok, rv = validate( template, { arg1 = 1 } )
+	assert.is_true( ok )
+	assert.is.same( { arg1 = 1 }, rv )
+     end)
 
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok )
-
-
-end
-
-function test_exclude_list( )
-
-   local template = {
-      arg1 = { optional = true, excludes = { 'arg2'  } },
-      arg2 = { optional = true },
-   }
-
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
-
-   assert_false( ok )
-   assert_match('argument.*and' , foo )
-
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_true( ok )
-
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok )
+    it( "arg2: pass", function ()
+        local ok, rv = validate( template, { arg2 = 1 } )
+	assert.is_true( ok )
+	assert.is.same( { arg2 = 1 }, rv )
+     end)
 
 
-end
+ end)
+
+describe( "list", function ()
+
+    before_each( setup )
+
+    local template = {
+       arg1 = { optional = true, excludes = { 'arg2'  } },
+       arg2 = { optional = true },
+    }
+
+    it( "arg1 and arg2: fail", function ()
+        local ok, rv = validate( template, { arg1 = 1, arg2 = 1 } )
+
+	assert.is_false( ok )
+	assert.matches( "arg[12]: can't have both arguments 'arg[12]' and 'arg[12]'", rv )
+     end)
+
+    it( "arg1: pass", function ()
+        local ok, rv = validate( template, { arg1 = 1 } )
+	assert.is_true( ok )
+	assert.is.same( { arg1 = 1 }, rv )
+     end)
+
+    it( "arg2: pass", function ()
+        local ok, rv = validate( template, { arg2 = 1 } )
+        assert.is_true( ok )
+	assert.is.same( { arg2 = 1 }, rv )
+    end)
 
 
-function test_exclude_both( )
+ end)
 
-   local template = {
-      arg1 = { optional = true, excludes = 'arg2' },
-      arg2 = { optional = true, excludes = 'arg1' },
-   }
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
+describe( "both", function ()
 
-   assert_false( ok )
-   assert_match('argument.*and' , foo )
+    before_each( setup )
 
-   local ok, foo = validate( template, { arg2 = 1 } )
+    local template = {
+       arg1 = { optional = true, excludes = 'arg2' },
+       arg2 = { optional = true, excludes = 'arg1' },
+    }
 
-   assert_true( ok )
+    it( "arg1 and arg2: fail", function ()
+        local ok, rv = validate( template, { arg1 = 1, arg2 = 1 } )
 
-   local ok, foo = validate( template, { arg1 = 1 } )
+	assert.is_false( ok )
+	assert.matches( "arg[12]: can't have both arguments 'arg[12]' and 'arg[12]'" , rv )
+     end)
 
-   assert_true( ok )
+    it( "arg1: pass", function ()
+        local ok, rv = validate( template, { arg1 = 1 } )
+	assert.is_true( ok )
+	assert.is.same( { arg1 = 1 }, rv )
+     end)
 
-end
+    it( "arg2: pass", function ()
+        local ok, rv = validate( template, { arg2 = 1 } )
+        assert.is_true( ok )
+	assert.is.same( { arg2 = 1 }, rv )
+    end)
 
-function test_exclude_multiple( )
 
-   local template = {
-      arg1 = { optional = true, excludes = { 'arg2', 'arg3' } },
-      arg2 = { optional = true, },
-      arg3 = { optional = true, },
-   }
+ end)
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
-   assert_false( ok )
-   assert_match("arguments 'arg1' and 'arg2'" , foo )
+describe( "multiple", function ( )
 
-   local ok, foo = validate( template, { arg1 = 1, arg3 = 1 } )
-   assert_false( ok )
-   assert_match("arguments 'arg1' and 'arg3'" , foo )
+    before_each( setup )
 
-end
+    local template = {
+       arg1 = { optional = true, excludes = { 'arg2', 'arg3' } },
+       arg2 = { optional = true, },
+       arg3 = { optional = true, },
+    }
+
+    it ( "arg1 && arg3: pass", function ()
+	local ok, rv = validate( template, { arg2 = 1, arg3 = 1 } )
+	assert.is_true( ok )
+	assert.is.same( { arg2 = 1, arg3 = 1 }, rv )
+     end)
+
+
+    it ( "arg1 && arg2: fail", function ()
+	local ok, rv = validate( template, { arg1 = 1, arg2 = 1 } )
+	assert.is_false( ok )
+	assert.matches( "arg[12]: can't have both arguments 'arg[12]' and 'arg[12]'", rv )
+     end)
+
+    it( "arg1 && arg3: fail", function ()
+	local ok, rv = validate( template, { arg1 = 1, arg3 = 1 } )
+	assert.is_false( ok )
+	assert.matches( "arg[13]: can't have both arguments 'arg[13]' and 'arg[13]'" , rv )
+     end)
+end)
 

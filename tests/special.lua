@@ -1,109 +1,139 @@
-module( ..., package.seeall )
+local va = require( 'validate.args' )
+local validate = va.validate
+local validate_opts = va.validate_opts
 
-va = require( 'validate.args' )
-validate = va.validate
-validate_opts = va.validate_opts
+local setup = require 'setup'
 
-setup = _G.setup
+describe( "special", function ()
 
-function test_invalid_oneplus_of( )
+    before_each(setup)
 
-   local template = { arg1 = { optional = true },
-		      arg2 = { optional = true },
-		      ['%oneplus_of'] = { 'arg1', 'arg2' },
-		   }
+    it( "invalid oneplus of", function ()
 
-
-   local ok, foo = validate_opts( { error_on_bad_spec = false },
-				 template, { arg1 = 1 } )
-   assert_false( ok, 'bad spec' )
-end
-
-function test_unknown_special( )
-
-   local template = { arg1 = { optional = true },
-		      arg2 = { optional = true },
-		      ['%say_what'] = { 'arg1', 'arg2' },
-		   }
+        local template = { arg1 = { optional = true },
+			   arg2 = { optional = true },
+			   ['%oneplus_of'] = { 'arg1', 'arg2' },
+			}
 
 
-   local ok, foo = validate_opts( { error_on_bad_spec = false},
-				 template, { arg1 = 1 } )
-   assert_false( ok, 'bad spec' )
-end
+	local ok, rv = validate_opts( { error_on_bad_spec = false },
+				      template, { arg1 = 1 } )
+	assert.is_false( ok )
+     end)
+
+    it( "unknown special", function ()
+
+        local template = { arg1 = { optional = true },
+			   arg2 = { optional = true },
+			   ['%say_what'] = { 'arg1', 'arg2' },
+			}
 
 
-function test_oneplus_of( )
-
-   local template = { arg1 = { optional = true },
-		      arg2 = { optional = true },
-		      ['%oneplus_of'] = { { 'arg1', 'arg2' } },
-		   }
+	local ok, rv = validate_opts( { error_on_bad_spec = false},
+				      template, { arg1 = 1 } )
+	assert.is_false( ok )
+     end)
 
 
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_true( ok, 'arg1 only' )
+    describe( "oneplus of", function ()
+
+        local template = { arg1 = { optional = true },
+			   arg2 = { optional = true },
+			   ['%oneplus_of'] = { { 'arg1', 'arg2' } },
+			}
 
 
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok, 'arg2 only'  )
-
-   local ok, foo = validate( template, { } )
-   assert_false( ok, 'no arguments' )
-
-end
-
-function test_one_of( )
-
-   local template = { arg1 = { optional = true },
-		      arg2 = { optional = true },
-		      ['%one_of'] = { { 'arg1', 'arg2' } },
-		   }
+	it( "arg1 only", function ()
+	    local ok, rv = validate( template, { arg1 = 1 } )
+	    assert.is_true( ok )
+	 end)
 
 
-   local ok, foo = validate( template, { arg1 = 1 } )
-   assert_true( ok, 'arg1 only' )
+	it( "arg2 only", function ()
+	    local ok, rv = validate( template, { arg2 = 1 } )
+	    assert.is_true( ok )
+	 end)
+
+	it( "no arguments", function ()
+	    local ok, rv = validate( template, { } )
+	    assert.is_false( ok )
+	 end)
+
+     end)
+
+    describe( "one of", function ()
+
+        local template = { arg1 = { optional = true },
+			   arg2 = { optional = true },
+			   ['%one_of'] = { { 'arg1', 'arg2' } },
+			}
+
+        it( "arg1 only", function ()
+	    local ok, rv = validate( template, { arg1 = 1 } )
+	    assert.is_true( ok )
+	 end)
+
+	it( "arg2 only", function ()
+	    local ok, rv = validate( template, { arg2 = 1 } )
+	    assert.is_true( ok )
+	 end)
+
+	it( "no arguments", function ()
+	    local ok, rv = validate( template, { } )
+	    assert.is_false( ok )
+	 end)
+
+	it( "both arguments", function ()
+	    local ok, rv = validate( template, { arg1 = 1, arg2 = 1 } )
+	    assert.is_false( ok )
+	 end)
+
+     end)
+
+    describe( "sigma", function ()
+
+        local template = {
+	   sigma = { optional = true, excludes = { 'sigma_x', 'sigma_y' } },
+	   sigma_x = { optional = true, requires = { 'sigma_y' } },
+	   sigma_y = { optional = true, requires = { 'sigma_x' } },
+	   ['%oneplus_of'] = { { 'sigma_x', 'sigma_y', 'sigma' } },
+	}
+
+	it( "sigma", function ()
+	    local ok, rv = validate( template, { sigma = 1 } )
+	    assert.is_true( ok )
+	 end)
 
 
-   local ok, foo = validate( template, { arg2 = 1 } )
-   assert_true( ok, 'arg2 only'  )
+	it( "x & y", function ()
+	    local ok, rv = validate( template, { sigma_x = 1, sigma_y = 1 } )
+	    assert.is_true( ok )
+	 end)
 
-   local ok, foo = validate( template, { } )
-   assert_false( ok, 'no arguments' )
+	it( "x & sigma", function ()
+	    local ok, rv = validate( template, { sigma_x = 1, sigma = 1 } )
+	    assert.is_false( ok )
+	 end)
 
-   local ok, foo = validate( template, { arg1 = 1, arg2 = 1 } )
-   assert_false( ok, 'both arguments' )
+	it( "y & sigma", function ()
+	    local ok, rv = validate( template, { sigma_y = 1, sigma = 1 } )
+	    assert.is_false( ok )
+	 end)
 
-end
+	it( "y", function ()
+	    local ok, rv = validate( template, { sigma_y = 1 } )
+	    assert.is_false( ok )
+	 end)
 
-function test_sigma( )
+	it( "x", function ()
+	    local ok, rv = validate( template, { sigma_x = 1 } )
+	    assert.is_false( ok )
+	 end)
 
-   local template = { 
-      sigma = { optional = true, excludes = { 'sigma_x', 'sigma_y' } },
-      sigma_x = { optional = true, requires = { 'sigma_y' } },
-      sigma_y = { optional = true, requires = { 'sigma_x' } },
-      ['%oneplus_of'] = { { 'sigma_x', 'sigma_y', 'sigma' } },
-   }
+	it( "none", function ()
+	    local ok, rv = validate( template, { } )
+	    assert.is_false( ok )
+	 end)
 
-   local ok, foo = validate( template, { sigma = 1 } )
-   assert_true( ok, 'sigma' )
-
-   local ok, foo = validate( template, { sigma_x = 1, sigma_y = 1 } )
-   assert_true( ok, 'x & y' )
-
-   local ok, foo = validate( template, { sigma_x = 1, sigma = 1 } )
-   assert_false( ok, 'x & sigma' )
-
-   local ok, foo = validate( template, { sigma_y = 1, sigma = 1 } )
-   assert_false( ok, 'y & sigma' )
-
-   local ok, foo = validate( template, { sigma_y = 1 } )
-   assert_false( ok, 'y' )
-
-   local ok, foo = validate( template, { sigma_x = 1 } )
-   assert_false( ok, 'x' )
-
-   local ok, foo = validate( template, { } )
-   assert_false( ok, 'none' )
-
-end
+     end)
+ end)

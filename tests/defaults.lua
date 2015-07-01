@@ -1,171 +1,194 @@
-module( ..., package.seeall )
+local va = require( 'validate.args' )
+local validate = va.validate
+local validate_opts = va.validate_opts
 
-va = require( 'validate.args' )
-validate = va.validate
-validate_opts = va.validate_opts
+local setup = require 'setup'
 
-setup = _G.setup
+describe( "types", function ()
 
-function test_scalar( )
+    before_each( setup )
 
-   local template = { { default = 3 } }
+    it( "scalar", function ( )
 
-   local ok, foo = validate( template )
+	local template = { { default = 3 } }
 
-   assert_true( ok, foo )
-   assert_equal( 3, foo )
+	local ok, rv = validate( template )
 
-end
+	assert.is_true( ok )
+	assert.are.equal( 3, rv )
+     end)
 
-function test_boolean( )
+    describe( "boolean", function ( )
 
-   local template = { { type = 'boolean', default = true } }
+        it( "true", function ()
+	    local template = { { type = 'boolean', default = true } }
+	    local ok, rv = validate( template )
 
-   local ok, foo = validate( template )
+	    assert.is_true( ok )
+	    assert.are.equal( true, rv )
+	 end)
 
-   assert_true( ok, foo )
-   assert_equal( true, foo )
+	it( "false", function ()
 
-   local template = { { type = 'boolean', default = false } }
+	    local template = { { type = 'boolean', default = false } }
+	    local ok, rv = validate( template )
 
-   local ok, foo = validate( template )
+	    assert.is_true( ok )
+	    assert.are.equal( false, rv )
+	 end)
 
-   assert_true( ok, foo )
-   assert_equal( false, foo )
+     end)
 
+    it( "function", function( )
 
-end
+        local template = { { default = function() return true, 5;  end } }
+	local ok, rv = validate( template )
 
-function test_function( )
+	assert.is_true( ok )
+	assert.are.equal( 5, rv )
 
-   local template = { { default = function() return true, 5;  end } }
+     end)
 
-   local ok, foo = validate( template )
+ end)
 
-   assert_true( ok, foo )
-   assert_equal( 5, foo )
+describe( "interface", function ()
 
-end
+   before_each( setup )
 
+   it( "positional", function ()
 
-function test_vtable( )
+       local template = { { default = 2 },
+			  { default = 3 },
+		       }
 
-   local template = { { optional = true,
-			vtable = {
-			   arg1 = { default = 1 },
-			   arg2 = { default = 2 },
-			}
-		  } }
+       local ok, rv1, rv2 = validate( template )
+       assert.is_true( ok )
+       assert.are.equal( 2, rv1 )
+       assert.are.equal( 3, rv2 )
 
-   -- make sure that an empty table works
-   local ok, foo = validate( template, {} )
-
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
-
-   -- and an actual nil table too.
-   local ok, foo = validate( template )
-
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
+    end)
 
 
-end
+    describe( "vtable", function ()
 
-function test_vtable_func( )
+	describe( "table", function ( )
 
-   local expect_nil = false
+	    local template = { { optional = true,
+				vtable = {
+				   arg1 = { default = 1 },
+				   arg2 = { default = 2 },
+				}
+			  } }
 
-   local template = { { optional = true,
-			vtable = function ( arg )
-				    assert_true( expect_nil and arg == nil  or true)
-				       return true, {
-					  arg1 = { default = 1 },
-					  arg2 = { default = 2 },
-				       }
-				    end
-		  } }
+	    -- make sure that an empty table works
+	    it( "empty", function ()
+		local ok, rv = validate( template, {} )
 
-   -- make sure that an empty table works
-   local ok, foo = validate( template, {} )
+		assert.is_true( ok )
+		assert.are.same( { arg1 = 1, arg2 = 2 }, rv )
+	     end)
 
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
+	   -- and an actual nil table too.
+	    it( "nil", function ()
+		local ok, rv = validate( template )
 
-   -- and an actual nil table too.
-   expect_nil = true
-   local ok, foo = validate( template )
+		assert.is_true( ok )
+		assert.are.same( { arg1 = 1, arg2 = 2 }, rv )
 
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
+	     end)
+	 end)
 
 
-end
+	describe( "function", function ()
 
-function test_nested_vtable( )
+	    local expect_nil = false
+	    local template = { { optional = true,
+				 vtable = function ( arg )
+					     assert.is_true( expect_nil and arg == nil  or true)
+						return true, {
+						   arg1 = { default = 1 },
+						   arg2 = { default = 2 },
+						}
+					     end
+			   } }
 
-   local template = { { optional = true,
-			vtable = {
-			   arg1 = { default = 1 },
-			   arg2 = { default = 2 },
-			   arg3 = {
-			      optional = true,
-			      vtable = {
-				       arg1 = { default = 3.1 },
-				       arg2 = { default = 3.2 },
-				    },
+	    -- make sure that an empty table works
+	    it( "empty", function ()
+		local ok, rv = validate( template, {} )
+
+		assert.is_true( ok )
+		assert.are.same( { arg1 = 1, arg2 = 2 }, rv )
+	     end)
+
+	    -- and an actual nil table too.
+	    it( "nil", function ()
+		expect_nil = true
+		local ok, rv = validate( template )
+
+		assert.is_true( ok )
+		assert.are.same( { arg1 = 1, arg2 = 2 }, rv )
+	     end)
+
+	 end)
+
+	it( "nested vtable", function ()
+
+	    local template = { { optional = true,
+				 vtable = {
+				    arg1 = { default = 1 },
+				    arg2 = { default = 2 },
+				    arg3 = {
+				       optional = true,
+				       vtable = {
+						arg1 = { default = 3.1 },
+						arg2 = { default = 3.2 },
+					     },
+					  }
 				 }
-			}
-		  } }
+			   } }
 
-   local ok, foo = validate( template )
+	    local ok, rv = validate( template )
 
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
-   assert_equal( 3.1, foo.arg3.arg1 )
-   assert_equal( 3.2, foo.arg3.arg2 )
+	    assert.is_true( ok )
+	    assert.are.same( { arg1 = 1,
+			       arg2 = 2,
+			       arg3 = { arg1 = 3.1,
+					arg2 = 3.2 }
+			    }, rv )
 
-end
+	 end)
 
-function test_nested_overrides( )
+	it( "nested overrides", function ()
 
-   local template = { { optional = true,
-			vtable = {
-			   arg1 = { default = 1 },
-			   arg2 = { default = 2 },
-			   arg3 = { vtable = { 
-				       arg1 = { default = 3.1 },
-				       arg2 = { default = 3.2 },
-				    },
-				    default = { arg1 = 3.3,
-						arg2 = 3.4 },
+	    local template = { { optional = true,
+				 vtable = {
+				    arg1 = { default = 1 },
+				    arg2 = { default = 2 },
+				    arg3 = { vtable = {
+						arg1 = { default = 3.1 },
+						arg2 = { default = 3.2 },
+					     },
+					     default = { arg1 = 3.3,
+							 arg2 = 3.4 },
+					  }
 				 }
-			}
-		  } }
+			   } }
 
-   local ok, foo = validate( template )
+	    local ok, rv = validate( template )
 
-   assert_true( ok, foo )
-   assert_equal( 1, foo.arg1 )
-   assert_equal( 2, foo.arg2 )
-   assert_equal( 3.3, foo.arg3.arg1 )
-   assert_equal( 3.4, foo.arg3.arg2 )
+	    assert.is_true( ok )
+	    assert.are.same( { arg1 = 1,
+			       arg2 = 2,
+			       arg3 = { arg1 = 3.3,
+					arg2 = 3.4 }
+			    }, rv )
+	 end)
+     end)
 
-end
+ end)
 
-function test_positional()
 
-   local template = { { default = 2 },
-		      { default = 3 },
-		   }
 
-   local ok, foo1, foo2 = validate( template )
-   assert_true( ok, foo1 )
-   assert_equal( 2, foo1 )
-   assert_equal( 3, foo2 )
-end
+
+
+
