@@ -1,175 +1,193 @@
+1.5.7:
+
+  [ENHANCEMENTS]
+
+    * First cut at Lua 5.2+ compatibility
+    * switch testing framework from lunatest to busted
+    * standalone dev infrastructure
+
 1.5.6:
 
-[BUG FIX]
+  [BUG FIX]
 
-* fix fatal error if the vtable ordered option was set and a specification
-  was a function.
+    * fix fatal error if the vtable ordered option was set and a
+      specification was a function.
 
 1.5.5:
 
-[BUG FIX]
+  [BUG FIX]
 
-* the success return value from mutating validation specification functions
-  was ignored.
+    * the success return value from mutating validation specification
+      functions was ignored.
 
-[ENHANCEMENT]
+  [ENHANCEMENT]
 
-* catch-all specification functions may now specify an error message
+    * catch-all specification functions may now specify an error
+      message
 
 1.5.4:
 
-[BUG FIX]
+  [BUG FIX]
 
-* remove debug code left in source which caused failure
+    * remove debug code left in source which caused failure
 
 1.5.3:
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* added new validation options, "before", and "after" to provide
-  access to the complete data before and after validation
+    * added new validation options, "before", and "after" to provide
+      access to the complete data before and after validation
 
-[DEPRECATIONS]
+  [DEPRECATIONS]
 
-* the precoll and postcoll specification options are now named "before"
-  and "after"; the old names still work for now.
+    * the precoll and postcoll specification options are now named
+      "before" and "after"; the old names still work for now.
 
 1.5.2:
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* add argument validation to validate.inplace:new()
+    * add argument validation to validate.inplace:new()
 
 1.5.1:
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* The validate.args functions posnum, zposnum, posint, and zposint now
-  return an error message upon error, making them more compatible
-  with Lua's assert() function.
+    * The validate.args functions posnum, zposnum, posint, and zposint
+      now return an error message upon error, making them more
+      compatible with Lua's assert() function.
 
 1.5.0:
 
-[API CHANGE]
+  [API CHANGE]
 
-The default behavior was to allow nil positional arguments.  This is
-inconsistent with the behavior for table arguments (e.g., optional
-defaults to false), and caused confusion.
+    The default behavior was to allow nil positional arguments.  This
+    is inconsistent with the behavior for table arguments (e.g.,
+    optional defaults to false), and caused confusion.
 
-The new default behavior is that positional arguments may not be
-nil.  Use the allow_nil specification to indicate that nil values are
-permitted.  The not_nil specification is now redundant and deprecated.
+    The new default behavior is that positional arguments may not be
+    nil.  Use the allow_nil specification to indicate that nil values
+    are permitted.  The not_nil specification is now redundant and
+    deprecated.
 
 
 1.4.0:
 
-[BUG FIX]
+  [BUG FIX]
 
-* if a vtable element was scanned for defaults and any of the nested
-  specifications were required, an error was thrown.  the new
-  default_is_nil attribute stops the scans.
+    * if a vtable element was scanned for defaults and any of the
+      nested specifications were required, an error was thrown.  the
+      new default_is_nil attribute stops the scans.
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* named arguments may now be processed in order (where order is
-  specified in the validation specification
+    * named arguments may now be processed in order (where order is
+      specified in the validation specification
 
 
 1.3.1:
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* new catch all specifications
-* user data can now be passed to callback functions
-* simple validation functions are now exposed to the caller
+    * new catch all specifications
+
+    * user data can now be passed to callback functions
+
+    * simple validation functions are now exposed to the caller
 
 1.3.0:
 
-[BUG FIXES]
+  [BUG FIXES]
 
-* lots of bugs in inlined types fixed
-* renaming of positional elements in nested tables didn't work
-* stop duplicate validation of validation specs
+    * lots of bugs in inlined types fixed
 
-[ENHANCEMENTS]
+    * renaming of positional elements in nested tables didn't work
 
-* new specification option: named, allows per element renaming of
-  positional data elements
+    * stop duplicate validation of validation specs
+
+  [ENHANCEMENTS]
+
+    * new specification option: named, allows per element renaming of
+      positional data elements
 
 1.2.5 :
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* new "multiple" parameter, indicating that an element is actually a table of
-  things to be validated against the same specification
+    * new "multiple" parameter, indicating that an element is actually
+      a table of things to be validated against the same specification
 
-* "type" parameter now accepts "inlined" validation specifications.
+    * "type" parameter now accepts "inlined" validation
+      specifications.
 
 1.2.4 :
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* vfunc callback is passed as an extra argument a table with additional info
+    * vfunc callback is passed as an extra argument a table with
+      additional info
 
-* user provided functions may be called prior to and after the validation
-  process for each argument in the validation specification
+    * user provided functions may be called prior to and after the
+      validation process for each argument in the validation
+      specification
 
-* new module validate.inplace; provides validation upon assignment of an
-  element in a data structure
+    * new module validate.inplace; provides validation upon assignment
+      of an element in a data structure
 
 1.2.3 :
 
-[BUG FIX]
+  [BUG FIX]
 
-* default values for vtable arguments are now properly populated
+    * default values for vtable arguments are now properly populated
 
 1.2.2 :
 
-[BUG FIX]
+  [BUG FIX]
 
-* named positional arguments were returned as nil if opts.named = false
+    * named positional arguments were returned as nil if opts.named =
+      false
 
 1.2.1 :
 
-[OTHER]
+  [OTHER]
 
-* minor documentation fixes
+    * minor documentation fixes
 
 1.2.0 :
 
-[API CHANGE]
+  [API CHANGE]
 
-* validate_opts: options which are now set reflect the *current*
-  values as set by opts(), not the default values.  the baseOptions
-  option is no longer supported.  Use the new object-oriented
-  interface to duplicate the old functionality
+    * validate_opts: options which are now set reflect the *current*
+      values as set by opts(), not the default values.  the
+      baseOptions option is no longer supported.  Use the new
+      object-oriented interface to duplicate the old functionality
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* validate.args now provides an object-oriented API as well as a
-  procedural API.  This makes it easier to create isolated validation
-  schemes.
+    * validate.args now provides an object-oriented API as well as a
+      procedural API.  This makes it easier to create isolated
+      validation schemes.
 
 
 1.1.0 :
 
-[API CHANGE]
+  [API CHANGE]
 
-* type check functions may now return an error message upon
-  failure. older code which simply returns the passed argument
-  as the second return value will see that argument output in the
-  error message.  See the updated docs for more information.
+    * type check functions may now return an error message upon
+      failure. older code which simply returns the passed argument as
+      the second return value will see that argument output in the
+      error message.  See the updated docs for more information.
 
 1.0.1 :
 
-[ENHANCEMENTS]
+  [ENHANCEMENTS]
 
-* default value may now be a function which returns the value
+    * default value may now be a function which returns the value
 
-[OTHER]
+  [OTHER]
 
-* documentation improvements
+    * documentation improvements
 
 1.0.0 :
 
-* initial public release
+    * initial public release
