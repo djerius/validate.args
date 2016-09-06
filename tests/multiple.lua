@@ -71,7 +71,7 @@ describe( "multiple", function ()
 
 	local ok, rv = validate( spec, { x = { 1, 6 }  } )
 	assert.is_false( ok )
-	assert.matches( 'too few', rv )
+	assert.matches( 'too few.+expected 3.+got 2', rv )
 
 	local ok, rv = validate( spec, { x = { 1, 2, 3 }  } )
 	assert.is_true( ok )
@@ -85,7 +85,7 @@ describe( "multiple", function ()
 	local ok, rv = validate( spec, { x = { 1, 2, 3, 4, 5, 6 }  } )
 
 	assert.is_false( ok )
-	assert.matches( 'too many', rv )
+	assert.matches( 'too many.+expected 5.+got 6', rv )
 
      end)
 
@@ -98,7 +98,7 @@ describe( "multiple", function ()
 
 	local ok, rv = validate( spec, { x = { 1, 2 }  } )
 	assert.is_false( ok )
-	assert.matches( 'incorrect number', rv )
+	assert.matches( 'incorrect.+expected 4.+got 2', rv )
 
 	local ok, rv = validate( spec, { x = { 1, 2, 3, 4 }  } )
 	assert.is_true( ok )
@@ -124,7 +124,7 @@ describe( "multiple", function ()
 
 	local ok, rv = validate( spec, { x = 1 } )
 	assert.is_false( ok )
-	assert.matches( 'incorrect number', rv )
+	assert.matches( 'incorrect.+expected 4.+got 1', rv )
 
 	local ok, rv = validate( spec, { x = { 1, 2, 3, 4 }  } )
 

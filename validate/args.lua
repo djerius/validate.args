@@ -1109,15 +1109,15 @@ function Validate:process_arg_spec( name, spec, arg )
       end
 
       if espec.min ~= nil and nelem < espec.min then
-	 return false, name:msg( "too few elements; expected %d, got %d", espec.min, nelem )
+	 return false, name:fmt( "too few elements: expected %d, got %d", espec.min, nelem )
       end
 
       if espec.max ~= nil and nelem > espec.max then
-	 return false, name:msg( "too many elements; expected %d, got %d", espec.min, nelem )
+	 return false, name:fmt( "too many elements: expected %d, got %d", espec.max, nelem )
       end
 
       if espec.n ~= nil and nelem ~= espec.n then
-	 return false, name:msg( "incorrect number of elements; expected %d, got %d", espec.n, nelem )
+	 return false, name:fmt( "incorrect number of elements: expected %d, got %d", espec.n, nelem )
       end
       return true, arg
 
