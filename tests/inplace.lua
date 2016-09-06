@@ -1,7 +1,6 @@
 local validate = require('validate.args')
 local inplace = require( 'validate.inplace' )
 
-require 'asserts'
 setup = require 'setup'
 
 describe( "simple", function ()

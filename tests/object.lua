@@ -1,6 +1,5 @@
 local va = require( 'validate.args' )
 
-require 'asserts'
 setup = require 'setup'
 
 describe( "object", function ()

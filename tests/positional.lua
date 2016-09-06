@@ -1,9 +1,6 @@
 local va = require( 'validate.args' )
 local validate, validate_opts = va.validate, va.validate_opts
 
-setup = require 'setup'
-require 'asserts'
-
 describe( "positional", function ()
 
     before_each( setup )

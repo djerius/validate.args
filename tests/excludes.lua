@@ -1,7 +1,5 @@
 local validate = require( 'validate.args' ).validate
 
-require 'asserts'
-
 local setup = require 'setup'
 
 describe( "scalar", function ()

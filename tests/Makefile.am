@@ -38,7 +38,6 @@ BUILT_SOURCES           +=
 # extra files to add to the distribution
 EXTRA_DIST              +=			\
 			$(TESTS)		\
-			asserts.lua		\
 			setup.lua
 
 # Any files make built

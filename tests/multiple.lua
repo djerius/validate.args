@@ -4,8 +4,6 @@ local validate_opts = va.validate_opts
 
 setup = require 'setup'
 
-require 'asserts'
-
 describe( "multiple", function ()
 
     before_each( setup )

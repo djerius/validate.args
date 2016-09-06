@@ -3,8 +3,6 @@ local validate = va.validate
 local validate_opts = va.validate_opts
 local validate_tbl = va.validate_tbl
 
-require 'asserts'
-
 setup = require 'setup'
 
 describe( "mutate", function ()

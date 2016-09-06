@@ -2,7 +2,6 @@ local va = require( 'validate.args' )
 local validate = va.validate
 local validate_opts = va.validate_opts
 
-require 'asserts'
 setup = require 'setup'
 
 describe( "named", function ()

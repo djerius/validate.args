@@ -1,7 +1,5 @@
 local validate = require( 'validate.args' ).validate
 
-require 'asserts'
-
 setup = require 'setup'
 
 describe( "requires", function ()
