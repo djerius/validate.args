@@ -1,3 +1,14 @@
+1.5.8:
+
+  [BUG FIX]
+
+    * error messages for "multiple" specifications withlimits on the
+      number of elements were output incorrectly
+
+  [BUILD]
+
+    * luassert >= 1.7.7 now required (provides string matching assertions)
+
 1.5.7:
 
   [ENHANCEMENTS]
