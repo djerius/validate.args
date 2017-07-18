@@ -1,18 +1,18 @@
-#============================================================================
-# pod_man.mk
+##============================================================================
+## pod_man.mk
 
 POD_MAN_MK =
 
-# Snippets required:
+## Snippets required:
 CREATE_AM_MACROS_MK +=
 
-# Variables required:
-#
-# see pod_man_init.mk
-#
-#  POD?SFX
-#    may be empty.  explicit suffix for .? files. used in conjunction
-#    with POD_SFX
+## Variables required:
+##
+## see pod_man_init.mk
+##
+##  POD?SFX
+##    may be empty.  explicit suffix for .? files. used in conjunction
+##    with POD_SFX
 
 POD_MAN		=				\
 		$(dist_manl_MANS)		\
@@ -22,7 +22,6 @@ POD_MAN		=				\
 
 if MST_POD_GEN_DOCS_MAN
 
-SUFFIXES += .l .3 .5 .7
 MAINTAINERCLEANFILES	+= $(POD_MAN)
 
 PODL_SFX = .l
@@ -33,20 +32,19 @@ POD7_SFX = .7
 
 SUFFIXES +=					\
 	$(PODL_SFX) $(PODL_SFX)$(POD_SFX)	\
-	$(POD3_SFX)$(POD_SFX)			\
+	$(POD3_SFX) $(POD3_SFX)$(POD_SFX)	\
 	$(POD5_SFX) $(POD5_SFX)$(POD_SFX)	\
 	$(POD7_SFX) $(POD7_SFX)$(POD_SFX)
 
-# e.g. create foo.l from foo.pod
+## e.g. create foo.l from foo.pod
 $(POD_SFX).l:
 	pod2man --name=`basename $< $(POD_SFX)` \
 		--section=l --release=' ' --center=' ' $< > $@
 
-# e.g. create foo.l from foo.l.pod
+## e.g. create foo.l from foo.l.pod
 $(PODL_SFX)$(POD_SFX).l:
 	pod2man --name=`basename $< $(PODL_SFX)$(POD_SFX)` \
 		--section=l --release=' ' --center=' ' $< > $@
-
 
 $(POD3_SFX)$(POD_SFX).3:
 	pod2man --name=`basename $< $(POD3_SFX)$(POD_SFX)` \

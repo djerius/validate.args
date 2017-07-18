@@ -1,5 +1,7 @@
 ##							-*- Autoconf -*-
 
+# serial 1
+
 # MST_TESTDEP_SETUP
 #------------------
 # Perform setup steps for dependencies needed to run tests

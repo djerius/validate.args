@@ -1,28 +1,28 @@
-#============================================================================
-# pod_pdf.mk
+##============================================================================
+## pod_pdf.mk
 
 POD_PDF_MK =
 
-# Prerequistes:
+## Prerequistes:
 CREATE_AM_MACROS_MK +=
+DOC_DIRS_MK +=
 
-#----------------------------------------
-# caller must define these
-#
-# A simple list of POD files to process.  Just the basename's, no suffix.
-# No Make Magic
+##----------------------------------------
+## caller must define these
+##
+## A simple list of POD files to process.  Just the basename's, no suffix.
+## No Make Magic
 PODS +=
 
-# A simple list of the generated PDF files.  No Make Magic!
+## A simple list of the generated PDF files.  No Make Magic!
 POD_PDF +=
 
-# the suffix of the files containing POD
+## the suffix of the files containing POD
 POD_SFX +=
 
-MAINTAINERCLEANFILES   += $(POD_PDF)
+MAINTAINERCLEANFILES	+= $(POD_PDF)
 
-pdfdir			= $(datadir)/doc/$(PACKAGE)
-dist_pdf_DATA		= $(POD_PDF)
+dist_pdf_DATA		+= $(POD_PDF)
 
 if MST_POD_GEN_DOCS_PDF
 
@@ -52,11 +52,11 @@ endif  HAVE_POD2PDF
 
 else !MST_POD_GEN_DOCS_PDF
 
-# can't create documentation.  for end user, the distributed
-# documentation will get installed.
+## can't create documentation.  for end user, the distributed
+## documentation will get installed.
 
-# for maintainer, must create fake PDF docs or make will fail,
-# but don't distribute
+## for maintainer, must create fake PDF docs or make will fail,
+## but don't distribute
 
 $(POD_SFX).pdf:
 	touch $@

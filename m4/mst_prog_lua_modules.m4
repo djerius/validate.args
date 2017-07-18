@@ -1,3 +1,5 @@
+# serial 1
+
 AC_DEFUN([MST_PROG_LUA_MODULES],[dnl
 
 m4_define([mst_lua_modules])
