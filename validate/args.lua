@@ -1633,5 +1633,9 @@ function _M.opts( ... )
 end
 
 _M.Name = Name
+_M.zposnum = zposnum
+_M.posnum = posnum
+_M.posint = posint
+_M.zposint = zposint
 
 return _M

@@ -4,6 +4,7 @@ include $(top_srcdir)/snippets/create_am_macros.mk
 
 if HAVE_TEST_DEPS
 TESTS                   += 			\
+			api.lua			\
 			callback.lua		\
 			constraints.lua		\
 			defaults.lua		\
