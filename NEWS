@@ -1,4 +1,15 @@
-1.5.8:
+1.5.9: 2017-07-18T12:07:55-0400
+
+  [BUG FIX]
+
+    * posnum, zposnum, posint, and zposint were not exported into the
+      validate.args namespace
+
+  [BUILD]
+
+    * now uses non-recursive make files
+
+1.5.8:	2016-09-06T15:36:00-04:00
 
   [BUG FIX]
 
@@ -9,7 +20,7 @@
 
     * luassert >= 1.7.7 now required (provides string matching assertions)
 
-1.5.7:
+1.5.7:	2015-07-01T10:54:17-04:00
 
   [ENHANCEMENTS]
 
@@ -17,14 +28,14 @@
     * switch testing framework from lunatest to busted
     * standalone dev infrastructure
 
-1.5.6:
+1.5.6:	2012-02-10T11:40:24-05:00
 
   [BUG FIX]
 
     * fix fatal error if the vtable ordered option was set and a
       specification was a function.
 
-1.5.5:
+1.5.5:	2012-01-25T16:37:29-05:00
 
   [BUG FIX]
 
@@ -36,13 +47,13 @@
     * catch-all specification functions may now specify an error
       message
 
-1.5.4:
+1.5.4:	2012-01-13T10:07:19-05:00
 
   [BUG FIX]
 
     * remove debug code left in source which caused failure
 
-1.5.3:
+1.5.3:	2011-12-28T14:42:11-05:00
 
   [ENHANCEMENTS]
 
@@ -54,13 +65,13 @@
     * the precoll and postcoll specification options are now named
       "before" and "after"; the old names still work for now.
 
-1.5.2:
+1.5.2:	2011-09-23T16:55:07-04:00
 
   [ENHANCEMENTS]
 
     * add argument validation to validate.inplace:new()
 
-1.5.1:
+1.5.1:	2011-09-22T17:56:55-04:00
 
   [ENHANCEMENTS]
 
@@ -68,7 +79,7 @@
       now return an error message upon error, making them more
       compatible with Lua's assert() function.
 
-1.5.0:
+1.5.0:	2011-08-25T17:05:35-04:00
 
   [API CHANGE]
 
@@ -82,7 +93,7 @@
     deprecated.
 
 
-1.4.0:
+1.4.0:	2011-08-20T00:46:59-04:00
 
   [BUG FIX]
 
@@ -96,7 +107,7 @@
       specified in the validation specification
 
 
-1.3.1:
+1.3.1:	2011-07-24T18:09:20-04:00
 
   [ENHANCEMENTS]
 
@@ -106,7 +117,7 @@
 
     * simple validation functions are now exposed to the caller
 
-1.3.0:
+1.3.0:	2011-07-12T17:09:29-04:00
 
   [BUG FIXES]
 
@@ -121,7 +132,7 @@
     * new specification option: named, allows per element renaming of
       positional data elements
 
-1.2.5 :
+1.2.5 :	2011-07-11T11:43:54-04:00
 
   [ENHANCEMENTS]
 
@@ -131,7 +142,7 @@
     * "type" parameter now accepts "inlined" validation
       specifications.
 
-1.2.4 :
+1.2.4 :	2011-07-07T23:03:50-04:00
 
   [ENHANCEMENTS]
 
@@ -145,26 +156,26 @@
     * new module validate.inplace; provides validation upon assignment
       of an element in a data structure
 
-1.2.3 :
+1.2.3 :	2011-06-07T17:23:03-04:00
 
   [BUG FIX]
 
     * default values for vtable arguments are now properly populated
 
-1.2.2 :
+1.2.2 :	2011-06-03T13:16:24-04:00
 
   [BUG FIX]
 
     * named positional arguments were returned as nil if opts.named =
       false
 
-1.2.1 :
+1.2.1 :	2011-05-31T18:04:23-04:00
 
   [OTHER]
 
     * minor documentation fixes
 
-1.2.0 :
+1.2.0 :	2011-05-31T16:55:03-04:00
 
   [API CHANGE]
 
@@ -180,7 +191,7 @@
       validation schemes.
 
 
-1.1.0 :
+1.1.0 :	2011-05-25T17:22:44-04:00
 
   [API CHANGE]
 
@@ -189,7 +200,7 @@
       the second return value will see that argument output in the
       error message.  See the updated docs for more information.
 
-1.0.1 :
+1.0.1 :	2011-05-13T12:11:16-04:00
 
   [ENHANCEMENTS]
 
@@ -199,6 +210,8 @@
 
     * documentation improvements
 
-1.0.0 :
+1.0.0 :	2010-10-15T10:53:28-04:00
 
     * initial public release
+
+
